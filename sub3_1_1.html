@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jinyong`s Tasting Note</title>
+</head>
+<style>
+    * {
+        box-sizing: border-box;
+    }
+    body {
+        font-family: Arial;
+        padding: 10px;
+        background: #f1f1f1;
+        color: #271116;
+    }
+    .header {
+        padding: 30px;
+        text-align: center;
+        background: white;
+    }
+    .header h1 {
+        font-size: 50px;
+    }
+    .topnav {
+        overflow: hidden;
+        background-color: #340e17;
+    }
+    .topnav a {
+        float: left;
+        display: block;
+        color: #f2f2f2;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        width: 120px;
+    }
+    .topnav a:hover {
+        background-color: #ddd;
+        color: #43131f;
+    }
+    #thispage {
+        background-color: white;
+        color: #43131f;
+    }
+    .subnav {
+        overflow: hidden;
+        background-color: #f1f1f1;
+    }
+    .subnav a {
+        float: left;
+        display: block;
+        color: #43131f;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        width: 120px;
+    }
+    .subnav a:hover {
+        background-color: #ddd;
+        color: #43131f;
+    }
+    #thissub {
+        background-color: #ddd;
+        color: #43131f;
+    }
+    .card {
+        background-color: white;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+    }
+    .card strong {
+        font-size: 15px;
+        color: #333;
+    }
+    .card p {
+        font-size: 14px;
+        color: #555;
+        margin: 8px 0 0;
+    }
+    .cardhn {
+        flex: 1 1 50%;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+    .cardhn img {
+        max-width: 100%;
+        height: auto;
+    }
+    .wineis {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .row:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+    .leftcolumn {
+        float: left;
+        width: 50%;
+    }
+    .rightcolumn {
+        float: left;
+        width: 50%;
+        padding-left: 20px;
+    }
+    .footer {
+        padding: 20px;
+        text-align: center;
+        background: #ddd;
+        margin-top: 20px;
+    }
+    @media screen and (max-width: 1000px) {
+        .leftcolumn, .rightcolumn {
+        width: 100%;
+        padding: 0;
+        }
+    }
+    @media screen and (max-width: 800px) {
+        .wineis {
+        flex-direction: column;
+        }
+        .cardhn {
+        width: 100%;
+        flex: 1 1 100%;
+        }
+    }
+</style>
+<body>
+    
+    <div class="header">
+        <h1>JY_CAVE</h1>
+        <p>/wine_guide</p>
+    </div>
+
+    <div class="topnav">
+        <a href="sub1_1.html">와인가이드</a>
+        <a href="sub2.html">나의 취향</a>
+        <a href="sub3_1_1.html"id="thispage">나의 평점</a>
+        <a href="sub4_1_1.html">와인 지도</a>
+        <a href="sub5_1.html">시음 방법</a>
+        <a href="index.html" style="float:right">홈으로</a>
+    </div>
+
+    <div class="subnav">
+        <a href="sub3_1_1.html" id="thissub">레드</a>
+        <a href="sub3_2_1.html">화이트</a>
+        <a href="sub3_3_1.html">로제오렌지</a>
+        <a href="sub3_4_1.html">스파클링</a>
+        <a href="sub3_5_1.html">주정강화</a>
+        <a href="sub3_1_2.html" style="float:right">3점 이상</a>
+    </div>
+
+    <div class="row">
+        <div class="leftcolumn">
+            <div class="card">
+            <h2>Ribera Reserva Cabernet Sauvignon</h2>
+                <div class="wineis">
+                    <div class="cardhn"><img src="ribera reserva cabernet sauvignon.jpeg" height="200px"></div>
+                    <div class="cardhn">
+                        <p><strong>구매가:</strong> 8,000원↓</p>
+                        <p><strong>평점:</strong> ★☆☆☆☆ (1.5/5)</p>
+                        <p><strong>외관:</strong> 맑기: 맑음, 강도: 약함, 색상: 루비색  </p>
+                        <p><strong>향(nose):</strong> 상태: 이상없음, 강도: 중하, 아로마: 레드베리류, 알코올 향이 남, 살짝 훈연향(오크칩 느낌)</p>
+                        <p><strong>맛(palate):</strong> 당도: 드라이, 산도: 중간, 탄닌: 약함, 알코올: 중상, 바디감: 중, 풍미 강도: 약함, 풍미 특징: nose랑 동일.</p>
+                        <p><strong>총평:</strong> 각 1점 기준 균형(Balancing): 0.3 │ 여운(Length): 0.1 │ 강도(Intensity): 0.2 │ 복합미(Complexity): 0.0 총 0.6/4<br>
+                                        칼칼한 알코올 느낌이 있어서 차라리 디켄팅으로 향 날리고 마시는게 나을듯함. 가격대에 맞는 와인  </p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+            <h2>castelvecchio barbaresco</h2>
+                <div class="wineis">
+                    <div class="cardhn"><img src="castelvecchio barbaresco.jpeg" height="200px"></div>
+                    <div class="cardhn">
+                        <p><strong>구매가:</strong> 60,000원</p>
+                        <p><strong>평점:</strong> ★★★☆☆ (3.5/5)</p>
+                        <p><strong>외관:</strong> 맑기: 맑음, 강도: 중하, 색상: 황갈색 </p>
+                        <p><strong>향(nose):</strong> 상태: 이상없음, 강도: 중, 아로마: 레드베리류, 초록후추향</p>
+                        <p><strong>맛(palate):</strong> 당도: 드라이, 산도: 중상, 탄닌: 중하(입천장, 혀에 남음), 알코올: 중상(알코올 느낌은 안남), 바디감: 중, 풍미 강도: 중하, 풍미 특징: nose랑 동일.</p>
+                        <p><strong>총평:</strong> 각 1점 기준 균형(Balancing): 0.7 │ 여운(Length): 0.5 │ 강도(Intensity): 0.6 │ 복합미(Complexity): 0.7 2.5/4<br> 
+                                        디켄팅 30분~1시간 추천. 안하고 바로 마시면 산미와 타닌이 튄다. 생크림 케이크와 의외로 잘어울린다. </p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+            <h2>Aluado Alicante Bouschet</h2>
+                <div class="wineis">
+                    <div class="cardhn"><img src="Aluado Alicante Bouschet.jpeg" height="200px"></div>
+                    <div class="cardhn">
+                        <p><strong>구매가:</strong> 20,000원↓</p>
+                        <p><strong>평점:</strong> ★★☆☆☆ (2.2/5)</p>
+                        <p><strong>외관:</strong> 맑기: 맑음, 강도: 중간, 색상: 루비색  </p>
+                        <p><strong>향(nose):</strong> 상태: 이상없음, 강도: 중상, 아로마: 레드베리류(블루베리 체리), 담배향</p>
+                        <p><strong>맛(palate):</strong> 당도: 드라이(잔당감 있음), 산도: 중간, 탄닌: 약함, 알코올: 하, 바디감: 중, 풍미 강도: 중, 풍미 특징: nose랑 동일.</p>
+                        <p><strong>총평:</strong> 각 1점 기준 균형(Balancing): 0.4 │ 여운(Length): 0.3 │ 강도(Intensity): 0.6 │ 복합미(Complexity): 0.2 총 1.5/4<br>
+                                        잔당감이 있어서 와인 처음 마셔보기 시작할때 마시기 좋음.  </p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+            <h2>Ribera Reserva Cabernet Sauvignon</h2>
+                <div class="wineis">
+                    <div class="cardhn"><img src="ribera reserva cabernet sauvignon.jpeg" height="200px"></div>
+                    <div class="cardhn">
+                        <p><strong>구매가:</strong> 8,000원↓</p>
+                        <p><strong>평점:</strong> ★☆☆☆☆ (1.5/5)</p>
+                        <p><strong>외관:</strong> 맑기: 맑음, 강도: 약함, 색상: 루비색색  </p>
+                        <p><strong>향(nose):</strong> 상태: 이상없음, 강도: 중하, 아로마: 레드베리류, 알코올 향이 남, 살짝 훈연향(오크칩 느낌)</p>
+                        <p><strong>맛(palate):</strong> 당도: 드라이, 산도: 중간, 탄닌: 약함, 알코올: 중상, 바디감: 중, 풍미 강도: 약함, 풍미 특징: nose랑 동일.</p>
+                        <p><strong>총평:</strong> 각 1점 기준 균형(Balancing): 0.3 │ 여운(Length): 0.1 │ 강도(Intensity): 0.2 │ 복합미(Complexity): 0.0 총 0.6/4<br>
+                                        칼칼한 알코올 느낌이 있어서 차라리 디켄팅으로 향 날리고 마시는게 나을듯함. 가격대에 맞는 와인  </p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+            <h2>Ribera Reserva Cabernet Sauvignon</h2>
+                <div class="wineis">
+                    <div class="cardhn"><img src="ribera reserva cabernet sauvignon.jpeg" height="200px"></div>
+                    <div class="cardhn">
+                        <p><strong>구매가:</strong> 8,000원↓</p>
+                        <p><strong>평점:</strong> ★☆☆☆☆ (1.5/5)</p>
+                        <p><strong>외관:</strong> 맑기: 맑음, 강도: 약함, 색상: 루비색색  </p>
+                        <p><strong>향(nose):</strong> 상태: 이상없음, 강도: 중하, 아로마: 레드베리류, 알코올 향이 남, 살짝 훈연향(오크칩 느낌)</p>
+                        <p><strong>맛(palate):</strong> 당도: 드라이, 산도: 중간, 탄닌: 약함, 알코올: 중상, 바디감: 중, 풍미 강도: 약함, 풍미 특징: nose랑 동일.</p>
+                        <p><strong>총평:</strong> 각 1점 기준 균형(Balancing): 0.3 │ 여운(Length): 0.1 │ 강도(Intensity): 0.2 │ 복합미(Complexity): 0.0 총 0.6/4<br>
+                                        칼칼한 알코올 느낌이 있어서 차라리 디켄팅으로 향 날리고 마시는게 나을듯함. 가격대에 맞는 와인  </p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+            <h2>Ribera Reserva Cabernet Sauvignon</h2>
+                <div class="wineis">
+                    <div class="cardhn"><img src="ribera reserva cabernet sauvignon.jpeg" height="200px"></div>
+                    <div class="cardhn">
+                        <p><strong>구매가:</strong> 8,000원↓</p>
+                        <p><strong>평점:</strong> ★☆☆☆☆ (1.5/5)</p>
+                        <p><strong>외관:</strong> 맑기: 맑음, 강도: 약함, 색상: 루비색색  </p>
+                        <p><strong>향(nose):</strong> 상태: 이상없음, 강도: 중하, 아로마: 레드베리류, 알코올 향이 남, 살짝 훈연향(오크칩 느낌)</p>
+                        <p><strong>맛(palate):</strong> 당도: 드라이, 산도: 중간, 탄닌: 약함, 알코올: 중상, 바디감: 중, 풍미 강도: 약함, 풍미 특징: nose랑 동일.</p>
+                        <p><strong>총평:</strong> 각 1점 기준 균형(Balancing): 0.3 │ 여운(Length): 0.1 │ 강도(Intensity): 0.2 │ 복합미(Complexity): 0.0 총 0.6/4<br>
+                                        칼칼한 알코올 느낌이 있어서 차라리 디켄팅으로 향 날리고 마시는게 나을듯함. 가격대에 맞는 와인  </p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+            <h2>Ribera Reserva Cabernet Sauvignon</h2>
+                <div class="wineis">
+                    <div class="cardhn"><img src="ribera reserva cabernet sauvignon.jpeg" height="200px"></div>
+                    <div class="cardhn">
+                        <p><strong>구매가:</strong> 8,000원↓</p>
+                        <p><strong>평점:</strong> ★☆☆☆☆ (1.5/5)</p>
+                        <p><strong>외관:</strong> 맑기: 맑음, 강도: 약함, 색상: 루비색색  </p>
+                        <p><strong>향(nose):</strong> 상태: 이상없음, 강도: 중하, 아로마: 레드베리류, 알코올 향이 남, 살짝 훈연향(오크칩 느낌)</p>
+                        <p><strong>맛(palate):</strong> 당도: 드라이, 산도: 중간, 탄닌: 약함, 알코올: 중상, 바디감: 중, 풍미 강도: 약함, 풍미 특징: nose랑 동일.</p>
+                        <p><strong>총평:</strong> 각 1점 기준 균형(Balancing): 0.3 │ 여운(Length): 0.1 │ 강도(Intensity): 0.2 │ 복합미(Complexity): 0.0 총 0.6/4<br>
+                                        칼칼한 알코올 느낌이 있어서 차라리 디켄팅으로 향 날리고 마시는게 나을듯함. 가격대에 맞는 와인  </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="rightcolumn">
+            <div class="card">
+            <h2>L`Orso Polare Barolo</h2>
+                <div class="wineis">
+                    <div class="cardhn"><img src="L`Orso Polare Barolo.jpeg" height="200px"></div>
+                    <div class="cardhn">
+                        <p><strong>구매가:</strong> 60,000원</p>
+                        <p><strong>평점:</strong> ★★★★☆ (4/5)</p>
+                        <p><strong>외관:</strong> 맑기: 맑음, 강도: 약함, 색상: 루비-황색  </p>
+                        <p><strong>향(nose):</strong> 상태: 이상없음, 강도: 중상, 아로마: 레드베리 올리브 향신료</p>
+                        <p><strong>맛(palate):</strong> 당도: 드라이, 산도: 중상, 탄닌: 중하(혀 중앙에 남음), 알코올: 중하, 바디감: 중, 풍미 강도: 중상, 풍미 특징: nose랑 동일.</p>
+                        <p><strong>총평:</strong> 각 1점 기준 균형(Balancing): 0.8 │ 여운(Length): 0.8 │ 강도(Intensity): 0.6 │ 복합미(Complexity): 0.8 총 3/4<br>
+                                        가성비 바롤로. 특별한 날 마시기에 충분함. 피자와 아주 잘어울림. </p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+            <h2>Monticello Chianti Classico</h2>
+                <div class="wineis">
+                    <div class="cardhn"><img src="Monticello Chianti Classico.jpeg" height="200px"></div>
+                    <div class="cardhn">
+                        <p><strong>구매가:</strong> 30,000원↓</p>
+                        <p><strong>평점:</strong> ★★★☆☆ (3/5)</p>
+                        <p><strong>외관:</strong> 맑기: 맑음, 강도: 중, 색상: 루비색  </p>
+                        <p><strong>향(nose):</strong> 상태: 이상없음, 강도: 중하, 아로마: 레드베리 스파이시 바닐라 가죽. 알코올 향이 남</p>
+                        <p><strong>맛(palate):</strong> 당도: 드라이, 산도: 중, 탄닌: 중(섬세한), 알코올: 중, 바디감: 중, 풍미 강도: 중하, 풍미 특징: 딸기청, 스파이시.</p>
+                        <p><strong>총평:</strong> 각 1점 기준 균형(Balancing): 0.5 │ 여운(Length): 0.6 │ 강도(Intensity): 0.6 │ 복합미(Complexity): 0.6 총 2.3/4<br>
+                                        알코올 향이 있어서 디켄딩 조금 하고 마시는게 좋을듯함. 3만원대의 준수한 와인  </p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+            <h2>Ribera Reserva Cabernet Sauvignon</h2>
+                <div class="wineis">
+                    <div class="cardhn"><img src="ribera reserva cabernet sauvignon.jpeg" height="200px"></div>
+                    <div class="cardhn">
+                        <p><strong>구매가:</strong> 8,000원↓</p>
+                        <p><strong>평점:</strong> ★☆☆☆☆ (1.5/5)</p>
+                        <p><strong>외관:</strong> 맑기: 맑음, 강도: 약함, 색상: 루비색색  </p>
+                        <p><strong>향(nose):</strong> 상태: 이상없음, 강도: 중하, 아로마: 레드베리류, 알코올 향이 남, 살짝 훈연향(오크칩 느낌)</p>
+                        <p><strong>맛(palate):</strong> 당도: 드라이, 산도: 중간, 탄닌: 약함, 알코올: 중상, 바디감: 중, 풍미 강도: 약함, 풍미 특징: nose랑 동일.</p>
+                        <p><strong>총평:</strong> 각 1점 기준 균형(Balancing): 0.3 │ 여운(Length): 0.1 │ 강도(Intensity): 0.2 │ 복합미(Complexity): 0.0 총 0.6/4<br>
+                                        칼칼한 알코올 느낌이 있어서 차라리 디켄팅으로 향 날리고 마시는게 나을듯함. 가격대에 맞는 와인  </p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+            <h2>Ribera Reserva Cabernet Sauvignon</h2>
+                <div class="wineis">
+                    <div class="cardhn"><img src="ribera reserva cabernet sauvignon.jpeg" height="200px"></div>
+                    <div class="cardhn">
+                        <p><strong>구매가:</strong> 8,000원↓</p>
+                        <p><strong>평점:</strong> ★☆☆☆☆ (1.5/5)</p>
+                        <p><strong>외관:</strong> 맑기: 맑음, 강도: 약함, 색상: 루비색색  </p>
+                        <p><strong>향(nose):</strong> 상태: 이상없음, 강도: 중하, 아로마: 레드베리류, 알코올 향이 남, 살짝 훈연향(오크칩 느낌)</p>
+                        <p><strong>맛(palate):</strong> 당도: 드라이, 산도: 중간, 탄닌: 약함, 알코올: 중상, 바디감: 중, 풍미 강도: 약함, 풍미 특징: nose랑 동일.</p>
+                        <p><strong>총평:</strong> 각 1점 기준 균형(Balancing): 0.3 │ 여운(Length): 0.1 │ 강도(Intensity): 0.2 │ 복합미(Complexity): 0.0 총 0.6/4<br>
+                                        칼칼한 알코올 느낌이 있어서 차라리 디켄팅으로 향 날리고 마시는게 나을듯함. 가격대에 맞는 와인  </p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+            <h2>Ribera Reserva Cabernet Sauvignon</h2>
+                <div class="wineis">
+                    <div class="cardhn"><img src="ribera reserva cabernet sauvignon.jpeg" height="200px"></div>
+                    <div class="cardhn">
+                        <p><strong>구매가:</strong> 8,000원↓</p>
+                        <p><strong>평점:</strong> ★☆☆☆☆ (1.5/5)</p>
+                        <p><strong>외관:</strong> 맑기: 맑음, 강도: 약함, 색상: 루비색색  </p>
+                        <p><strong>향(nose):</strong> 상태: 이상없음, 강도: 중하, 아로마: 레드베리류, 알코올 향이 남, 살짝 훈연향(오크칩 느낌)</p>
+                        <p><strong>맛(palate):</strong> 당도: 드라이, 산도: 중간, 탄닌: 약함, 알코올: 중상, 바디감: 중, 풍미 강도: 약함, 풍미 특징: nose랑 동일.</p>
+                        <p><strong>총평:</strong> 각 1점 기준 균형(Balancing): 0.3 │ 여운(Length): 0.1 │ 강도(Intensity): 0.2 │ 복합미(Complexity): 0.0 총 0.6/4<br>
+                                        칼칼한 알코올 느낌이 있어서 차라리 디켄팅으로 향 날리고 마시는게 나을듯함. 가격대에 맞는 와인  </p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+            <h2>Ribera Reserva Cabernet Sauvignon</h2>
+                <div class="wineis">
+                    <div class="cardhn"><img src="ribera reserva cabernet sauvignon.jpeg" height="200px"></div>
+                    <div class="cardhn">
+                        <p><strong>구매가:</strong> 8,000원↓</p>
+                        <p><strong>평점:</strong> ★☆☆☆☆ (1.5/5)</p>
+                        <p><strong>외관:</strong> 맑기: 맑음, 강도: 약함, 색상: 루비색색  </p>
+                        <p><strong>향(nose):</strong> 상태: 이상없음, 강도: 중하, 아로마: 레드베리류, 알코올 향이 남, 살짝 훈연향(오크칩 느낌)</p>
+                        <p><strong>맛(palate):</strong> 당도: 드라이, 산도: 중간, 탄닌: 약함, 알코올: 중상, 바디감: 중, 풍미 강도: 약함, 풍미 특징: nose랑 동일.</p>
+                        <p><strong>총평:</strong> 각 1점 기준 균형(Balancing): 0.3 │ 여운(Length): 0.1 │ 강도(Intensity): 0.2 │ 복합미(Complexity): 0.0 총 0.6/4<br>
+                                        칼칼한 알코올 느낌이 있어서 차라리 디켄팅으로 향 날리고 마시는게 나을듯함. 가격대에 맞는 와인  </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="footer">
+        <h2>Footer</h2>
+    </div>
+
+
+
+</body>
+</html>
