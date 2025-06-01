@@ -124,6 +124,8 @@
         background-color: white;
         padding: 20px;
         margin-bottom: 20px;
+        box-sizing: border-box;
+        flex: 1 1 50%;
     }
     .cardhn strong {
       font-size: 15px;
@@ -133,6 +135,14 @@
       font-size: 14px;
       color: #555;
       margin: 8px 0 0;
+    }
+    .cardhn img {
+        max-width: 100%;
+        height: auto;
+    }
+    .wineis {
+        display: flex;
+        flex-wrap: wrap;
     }
     .row:after {
         content: "";
@@ -200,20 +210,27 @@
         }
     }
     /* Responsive layout - when the screen is less than 400px wide, make the header text smaller */
-    @media screen and (max-width: 400px) {
+    @media screen and (max-width: 800px) {
         .topnav a {
             float:none;
             width: 100%;
         }
-    }
-    #wineis{
-        display: flex;
+        .wineis {
+            flex-direction: column;
+        }
+        .cardhn {
+            width: 100%;
+            flex: none;
+            padding: 10px;
+        }
     }
     #image1{
         padding:0;
+        width: 200px;
     }
     #image2{
         padding:0;
+        width: 200px;
     }
 </style>
 <body>
@@ -241,8 +258,8 @@
 
     <div class="card">
         <h2 >와인이란?</h2>
-        <div id="wineis">
-            <div class="cardhn" id="image1"><img src="Wine.webp" height="200px"></div>
+        <div class="wineis">
+            <div class="cardhn"><img src="Wine.jpg"></div>
             <div class="cardhn">
             <p><strong>와인의 역사:</strong> 와인은 인류가 만든 가장 오래된 술 중 하나로, 기원전 7,000년 전 조지아 지역에서 시작된 것으로 알려져 있습니다. </p>
             <p><strong>순수 발효주:</strong> 와인은 기본적으로 포도만으로 만들어집니다. 다만 현대에 들어 산화 방지나 품질 유지등의 목적으로 극소량의 첨가물을 넣습니다. </p> 
@@ -257,8 +274,8 @@
         <div class="leftcolumn">
             <div class="card">
             <h2>와인 라벨 읽는 법</h2>
-                <div id="wineis">
-                    <div class="cardhn" id="image2"><img src="winelabel.jpg" height="200px"></div>
+                <div class="wineis">
+                    <div class="cardhn"><img src="winelabel.jpg"></div>
                     <div class="cardhn">
                         <p>※국가마다 법이 달라서 라벨 구성내용이 다릅니다. 따라서 이탈리아 와인을 예시로 설명함을 밝힙니다.</p>
                         <p><strong>생산국 & 지역명:</strong> 이탈리아 와인은 레이블에 ‘Toscana’, ‘Piemonte’ 같은 지역명이 표시됩니다.</p>
@@ -291,9 +308,9 @@
     </div>
 
     <div class="footer">
-        <h2>Footer</h2>
+        <p>&copy; 2025 JY_CAVE. All rights reserved.</p>
+        <p>문의: wjdwlsdyd@gmail.com</p>
     </div>
-
 
 
 </body>

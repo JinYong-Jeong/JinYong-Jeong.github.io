@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>프랑스 와인 지도</title>
+  <style>
+    * {
+        box-sizing: border-box;
+    }
+    body {
+        font-family: Arial;
+        padding: 10px;
+        background: #f1f1f1;
+        color: #271116;
+    }
+    .header {
+        padding: 30px;
+        text-align: center;
+        background: white;
+    }
+    .header h1 {
+        font-size: 50px;
+    }
+    .topnav {
+        overflow: hidden;
+        background-color: #340e17;
+    }
+    .topnav a {
+        float: left;
+        display: block;
+        color: #f2f2f2;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        width: 120px;
+    }
+    .topnav a:hover {
+        background-color: #ddd;
+        color: #43131f;
+    }
+    #thispage {
+        background-color: white;
+        color: #43131f;
+    }
+    .subnav {
+        overflow: hidden;
+        background-color: #f1f1f1;
+    }
+    .subnav a {
+        float: left;
+        display: block;
+        color: #43131f;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        width: 120px;
+    }
+    .subnav a:hover {
+        background-color: #ddd;
+        color: #43131f;
+    }
+    .subsubnav {
+        overflow: hidden;
+        background-color: #f1f1f1;
+    }
+    .subsubnav a {
+        float: left;
+        display: block;
+        color: #43131f;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        width: 120px;
+    }
+    .subsubnav a:hover {
+        background-color: #ddd;
+        color: #43131f;
+    }
+    .submenu {
+        overflow: hidden;
+    }
+    .submenu a {
+        float: left;
+        display: block;
+        color: #43131f;
+        text-align: center;
+        /* padding: 14px 16px; */
+        text-decoration: none;
+        /* width: 12px; */
+    }
+    .submenu a:hover {
+        color: #43131f;
+    }
+    #left{
+        width:200px;
+        height:300px;
+        float:left;
+        background-color:white;
+        color:#e2e2e2;
+    }
+    #left li{
+        padding:3px;
+    }
+    #right{
+        width:500px;
+        height:300px;
+        float:left;
+        background-color: white;
+    }
+    #thissub {
+        background-color: #ddd;
+        color: #43131f;
+    }
+    .card {
+        background-color: white;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+    }
+    .card strong {
+        font-size: 15px;
+        color: #333;
+    }
+    .card p {
+        font-size: 14px;
+        color: #555;
+        margin: 8px 0 0;
+    }
+    .cardhn {
+        flex: 1 1 50%;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+    .cardhn img {
+        max-width: 100%;
+        height: auto;
+    }
+    .wineis {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .row:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+    .leftcolumn {
+        float: left;
+        width: 50%;
+    }
+    .rightcolumn {
+        float: left;
+        width: 50%;
+        padding-left: 20px;
+    }
+    .footer {
+        padding: 20px;
+        text-align: center;
+        background: #ddd;
+        margin-top: 20px;
+    }
+    @media screen and (max-width: 1000px) {
+        .leftcolumn, .rightcolumn {
+        width: 100%;
+        padding: 0;
+        }
+    }
+    @media screen and (max-width: 800px) {
+        .wineis {
+        flex-direction: column;
+        }
+        .cardhn {
+        width: 100%;
+        flex: 1 1 100%;
+        }
+        .content {
+        flex-direction: column;
+        }
+        #left ul{
+        display: inline-flex;
+        }
+    }
+  </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>JY_CAVE</h1>
+        <p>/wine_guide</p>
+    </div>
+
+    <div class="topnav">
+        <a href="sub1_1.html">와인가이드</a>
+        <a href="sub2.html">나의 취향</a>
+        <a href="sub3_1_1.html">나의 평점</a>
+        <a href="sub4_1_1.html"id="thispage">와인 지도</a>
+        <a href="sub5_1.html">시음 방법</a>
+        <a href="index.html" style="float:right">홈으로</a>
+    </div>
+
+    <div class="subnav">
+        <a href="sub4_1_1.html" id="thissub" >구대륙</a>
+        <a href="sub4_2_1.html">신대륙</a>
+    </div>
+    <div class="subsubnav">
+        <a href="sub4_1_1.html" id="thissub" >프랑스</a>
+        <a href="sub4_1_2.html">이탈리아</a>
+        <a href="sub4_1_3.html">스페인</a>
+    </div>
+    <div class="row">
+
+            
+    </div>
+    <div class="row">
+        <div class="leftcolumn">
+            <div class="card">
+            <h2>프랑스-부르고뉴</h2>
+                <div class="wineis">
+                    <div class="cardhn"><img src="Bourgogne.jpeg"></div>
+                    <div class="cardhn">
+                    <ul>
+                        <li class="submenu"><a href="sub4_1_1.html">+ 보르도</a></li>
+                        <li class="submenu"><a href="sub4_1_12.html">+ 부르고뉴</a></li>
+                        <li class="submenu"><a href="sub4_1_13.html">+ 론</a></li>
+                        <li class="submenu"><a href="sub4_1_14.html">+ 알자스</a></li>
+                    </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="rightcolumn">
+            <div class="card">
+                <ul>
+                    <li>보르도: 강한 구조감과 숙성 잠재력  <br>
+                        - 메독: 까베르네 중심의 구조적 와인  <br>
+                        - 포이약: 무게감 있고 농축된 스타일  <br>
+                        - 마르고: 섬세하고 우아한 보르도  <br>
+                        - 생테밀리옹: 메를로 중심, 부드럽고 빠른 숙성  <br>
+                        - 포므롤: 메를로 최고급 산지, 대표 와인 페트뤼스  <br>
+                        - 페삭-레오냥: 레드와 드라이 화이트 모두 유명  <br><br>
+                    </li>
+                    <li>부르고뉴: 섬세하고 향긋한 피노누아와 샤르도네  <br>
+                        - 코트 드 뉘: 피노누아 중심, 주브레-샹베르탱/샹볼-뮤지니<br>  
+                        - 코트 드 본: 샤르도네 중심, 뫼르소/퓔리니-몽라셰  <br>
+                        - 샤블리: 드라이하고 미네랄리한 샤르도네  <br><br>
+                    </li>
+                    <li>론: 진한 향신료와 과일 풍미  <br>
+                        - 북부 론: 시라 단일 품종, 코트 로티/에르미타쥬 <br> 
+                        - 남부 론: 블렌딩 중심, 샤토뇌프 뒤 파프/지공다스  <br><br>
+                    </li>
+                    <li>알자스: 아로마틱하고 드라이한 화이트 중심  <br>
+                        - 리슬링: 드라이하고 산도 높음  <br>
+                        - 게뷔르츠트라미너: 장미·리치·향신료 풍미<br>  
+                        - 피노 그리: 오일리한 질감, 약간의 단맛  <br>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <p>&copy; 2025 JY_CAVE. All rights reserved.</p>
+        <p>문의: wjdwlsdyd@gmail.com</p>
+    </div>
+
+</body>
+</html>

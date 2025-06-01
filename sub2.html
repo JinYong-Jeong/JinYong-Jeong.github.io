@@ -200,13 +200,21 @@
         }
     }
     /* Responsive layout - when the screen is less than 400px wide, make the header text smaller */
-    @media screen and (max-width: 400px) {
+    @media screen and (max-width: 800px) {
         .topnav a {
             float:none;
             width: 100%;
         }
+        .wineis {
+            flex-direction: column;
+        }
+        .cardhn {
+            width: 100%;
+            flex: none;
+            padding: 10px;
+        }
     }
-    #wineis{
+    .wineis{
         display: flex;
     }
     #image1{
@@ -246,7 +254,7 @@
 
     <div class="card">
         <h2 >레드 와인<img src="redwine.png" height="30px"></h2>
-        <div id="wineis">
+        <div class="wineis">
             <div class="cardhn" id="image1"><img src="L`Orso Polare Barolo.jpeg" height="200px"><br>
             -L`Orso Polare Barolo</div>
             <div class="cardhn">
@@ -268,7 +276,7 @@
     </div>
     <div class="card">
         <h2 >화이트 와인<img src="whitewine.png" height="30px"></h2>
-        <div id="wineis">
+        <div class="wineis">
             <div class="cardhn" id="image2"><img src="Vigneti di Foscarino Soave Classico.jpeg" height="200px"><br>
             -Vigneti di Foscarino <br>
             Soave Classico</div>
@@ -295,7 +303,7 @@
     </div>
     <div class="card">
         <h2 >기타 와인</h2>
-        <div id="wineis">
+        <div class="wineis">
             <div class="cardhn" id="image3"><img src="Royal tokaji 6 puttonyos.jpeg" height="200px"><br>
             -Royal tokaji 6 puttonyos</div>
             <div class="cardhn">
@@ -309,7 +317,8 @@
                 드라이하고 산미 있는 샴페인 스타일도 좋아하지만,<br>
                 높은 당도의 모스카토를 가장 자주 마십니다.<br>
                 음료수처럼 즐기며, 가볍고 달콤한 스타일을 선호합니다.<br></p>
-            <p><strong>4. 주정강화 와인<br></strong>
+            <p><strong>4. 기타 와인<br></strong>
+                주정강화 와인과 스위트 와인을 포함합니다.<br>
                 식후 디저트 와인으로 즐깁니다.<br>
                 특히 토카이 아수의 꿀 향과 숙성에서 비롯된 복합적인 향이 깊은 인상을 남겼습니다.<br></p> 
             </div>
@@ -318,9 +327,9 @@
 
    
     </div>
-
     <div class="footer">
-        <h2>Footer</h2>
+        <p>&copy; 2025 JY_CAVE. All rights reserved.</p>
+        <p>문의: wjdwlsdyd@gmail.com</p>
     </div>
 
 

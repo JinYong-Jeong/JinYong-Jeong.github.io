@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jinyong`s Tasting Note</title>
+</head>
+<style>
+    *{
+        box-sizing: border-box;
+    }
+
+    body{
+        font-family: Arial;
+        padding: 10px;
+        background: #f1f1f1;
+        color:#271116;
+    }
+
+    /* Header/Blog Title */
+    .header {
+        padding:30px;
+        text-align: center;
+        background: white;
+        
+    }
+
+    .header h1{
+        font-size: 50px;
+    }
+
+    /* Style the top navigation bar */
+    .topnav{
+        overflow: hidden;
+        background-color: #340e17;
+    }
+    /* Style the topnav links */
+    .topnav a {
+        float: left;
+        display: block;
+        color: #f2f2f2;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        width:120px;
+    }
+    /* Change color on hover */
+    .topnav a:hover {
+        background-color: #ddd;
+        color: #43131f;
+    }
+    #thispage{
+        background-color: white;
+        color: #43131f;
+    }
+    /* Create two unequal columns that floats next to each other */
+    /* 인트로 내용*/
+    .intro {
+      background-color: rgb(255, 255, 255);
+      padding: 30px 40px;
+      margin: 40px auto 20px;
+      max-width: 900px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .intro h2 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .intro p {
+      font-size: 15px;
+      color: #666;
+      line-height: 1.6;
+    }
+    /* 서브메뉴용 subnav */
+    .subnav{
+        overflow: hidden;
+        background-color: #f1f1f1;
+    }
+    .subnav a {
+        float: left;
+        display: block;
+        color: #43131f;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        width:120px;
+    }
+    /* Change color on hover */
+    .subnav a:hover {
+        background-color: #ddd;
+        color: #43131f;
+    }
+    #thissub{
+        background-color: #ddd;
+        color: #43131f;
+    }
+
+    /* Add a card effect for articles */
+    .card {
+        background-color: white;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+      /* cursor: pointer; */
+    }
+    .card strong {
+      font-size: 15px;
+      color: #333;
+    }
+    .card p {
+      font-size: 14px;
+      color: #555;
+      margin: 8px 0 0;
+    }
+    .cardhn {
+        background-color: white;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-sizing: border-box;
+        flex: 1 1 50%;
+    }
+    .cardhn strong {
+      font-size: 15px;
+      color: #333;
+    }
+    .cardhn p {
+      font-size: 14px;
+      color: #555;
+      margin: 8px 0 0;
+    }
+    .cardhn img {
+        max-width: 100%;
+        height: auto;
+    }
+    .wineis {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .row:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+    /* left coloumn */
+    .leftcolumn {
+        float: left;
+        width: 50%;
+    }
+    /* right column */
+    .rightcolumn {
+        float: left;
+        width: 50%;
+        padding-left: 20px;
+    }
+    /* 메뉴 설명용 subcard */
+    .subcard {
+      background-color: #fafafa;
+      padding: 15px 20px;
+      text-align: left;
+    }
+    .subcard:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+      /* cursor: pointer; */
+    }
+
+
+    .subcard strong {
+      font-size: 15px;
+      color: #333;
+    }
+    .subcard p {
+      font-size: 14px;
+      color: #555;
+      margin: 8px 0 0;
+    }
+
+
+    /* Clear floats after the columns */
+    .row:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+    /* Footer */
+    .footer {
+        padding: 20px;
+        text-align: center;
+        background: #ddd;
+        margin-top: 20px;
+    }
+    /* 너비가 600픽셀 미만인 스마트폰을 위한 기본 설정 */
+    [class*="c_"]{
+        width:100%;
+    }
+
+    /* Responsive layout - when thescreen is less than 800px wide, make the two columns stack on top of each other */
+    @media screen and (max-width: 1000px) {
+        .leftcolumn, .rightcolumn {
+            width: 100%;
+            padding: 0;
+        }
+    }
+    /* Responsive layout - when the screen is less than 400px wide, make the header text smaller */
+    @media screen and (max-width: 800px) {
+        .topnav a {
+            float:none;
+            width: 100%;
+        }
+        .wineis {
+            flex-direction: column;
+        }
+        .cardhn {
+            width: 100%;
+            flex: none;
+            padding: 10px;
+        }
+    }
+    #image1{
+        padding:0;
+        width: 200px;
+    }
+    #image2{
+        padding:0;
+        width: 200px;
+    }
+</style>
+<body>
+    
+    <div class="header">
+        <h1>JY_CAVE</h1>
+        <p>/wine_guide</p>
+    </div>
+
+    <div class="topnav">
+        <a href="sub1_1.html">와인 가이드</a>
+        <a href="sub2.html">나의 취향</a>
+        <a href="sub3_1_1.html">나의 평점</a>
+        <a href="sub4_1_1.html">와인 지도</a>
+        <a href="sub5_1.html" id="thispage">시음 방법</a>
+        <a href="index.html" style="float:right">홈으로</a>
+    </div>
+
+    <div class="subnav">
+        <a href="sub5_1.html">시음 방법</a>
+        <a href="sub5_2.html"id="thissub">시음 가이드</a>
+    </div>
+
+    <!-- 외관 -->
+    <div class="card">
+    <h2>눈 (Appearance)</h2>
+    <ul>
+        <li><strong>맑기:</strong> 맑음 / 흐림 / 탁함</li>
+        <li><strong>색상:</strong>
+        <ul>
+            <li><strong>화이트:</strong> 레몬 / 골드 / 호박</li>
+            <li><strong>로제:</strong> 연한 살몬 / 오렌지빛 / 핑크</li>
+            <li><strong>레드:</strong> 루비 / 가넷 / 보라 / 벽돌색</li>
+        </ul>
+        </li>
+        <li><strong>강도:</strong> 연함 / 중간 / 진함</li>
+    </ul>
+    </div>
+
+    <!-- 노즈 -->
+    <div class="card">
+    <h2>코 (Nose)</h2>
+
+    <h3>1차 향 (Primary Aromas)</h3>
+    <ul>
+        <li><strong>꽃:</strong> 아카시아, 캐모마일, 장미 등</li>
+        <li><strong>초록 과일:</strong> 사과, 구스베리, 배, 모과, 포도</li>
+        <li><strong>감귤류 과일:</strong> 자몽, 레몬, 라임, 오렌지 껍질</li>
+        <li><strong>핵과류:</strong> 복숭아, 살구, 천도 복숭아</li>
+        <li><strong>열대 과일:</strong> 바나나, 리치, 망고, 멜론, 패션푸르트, 파인애플</li>
+        <li><strong>붉은 과일:</strong> 라즈베리, 레드 체리, 딸기, 붉은 자두</li>
+        <li><strong>검은 과일:</strong> 블랙베리, 블루베리, 블랙체리, 블랙커런트</li>
+        <li><strong>말린/익힌 과일:</strong> 무화과, 건포도, 말린 자두, 잼 같은 향</li>
+        <li><strong>식물성/허브/향신료:</strong> 초록 피망, 민트, 후추 등</li>
+        <li><strong>기타:</strong> 부싯돌, 젖은 돌 등</li>
+    </ul>
+
+    <h3>2차 향 (Secondary Aromas)</h3>
+    <ul>
+        <li><strong>효모/자가발효:</strong> 빵, 토스트, 비스킷, 브리오슈</li>
+        <li><strong>MLF:</strong> 버터, 크림, 치즈</li>
+        <li><strong>오크 숙성:</strong> 바닐라, 커피, 초콜릿, 훈제, 코코넛, 삼나무</li>
+    </ul>
+
+    <h3>3차 향 (Tertiary Aromas)</h3>
+    <ul>
+        <li><strong>산화 향:</strong> 아몬드, 마지팬, 호두, 카라멜, 초콜릿</li>
+        <li><strong>숙성된 과일 향:</strong> 말린 자두, 무화과, 익힌 블랙베리 등</li>
+        <li><strong>병 숙성 화이트:</strong> 꿀, 휘발유, 버섯, 건초, 향신료</li>
+        <li><strong>병 숙성 레드:</strong> 가죽, 흙, 담배, 젖은 잎, 육향</li>
+    </ul>
+    </div>
+
+    <!-- 팔렛 -->
+    <div class="card">
+    <h2>입 (Palate)</h2>
+    <ul>
+        <li><strong>단맛 (Sweetness):</strong> 드라이 / 오프 드라이 / 미디엄 / 스위트</li>
+        <li><strong>산도 (Acidity):</strong> 낮음 / 중간 / 높음</li>
+        <li><strong>탄닌 (Tannin):</strong> 없음 / 낮음 / 중간 / 높음</li>
+        <li><strong>질감:</strong> 부드러운 / 날카로운 / 떫은 / 입 안을 조이는</li>
+        <li><strong>알코올 (Alcohol):</strong> 낮음 / 중간 / 높음</li>
+        <li><strong>바디감 (Body):</strong> 라이트 / 미디엄 / 풀바디</li>
+        <li><strong>풍미 강도:</strong> 약함 / 중간 / 강함</li>
+        <li><strong>풍미 종류:</strong> 향기 항목과 유사하게 선택</li>
+        <li><strong>여운 (Finish):</strong> 짧음 / 중간 / 김 / 매우 김</li>
+    </ul>
+    </div>
+
+
+
+
+
+    <div class="footer">
+        <p>&copy; 2025 JY_CAVE. All rights reserved.</p>
+        <p>문의: wjdwlsdyd@gmail.com</p>
+    </div>
+
+
+
+
+</body>
+</html>
