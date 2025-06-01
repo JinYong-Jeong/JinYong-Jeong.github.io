@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jinyong`s Tasting Note</title>
+</head>
+<style>
+    * {
+        box-sizing: border-box;
+    }
+    body {
+        font-family: Arial;
+        padding: 10px;
+        background: #f1f1f1;
+        color: #271116;
+    }
+    .header {
+        padding: 30px;
+        text-align: center;
+        background: white;
+    }
+    .header h1 {
+        font-size: 50px;
+    }
+    .topnav {
+        overflow: hidden;
+        background-color: #340e17;
+    }
+    .topnav a {
+        float: left;
+        display: block;
+        color: #f2f2f2;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        width: 120px;
+    }
+    .topnav a:hover {
+        background-color: #ddd;
+        color: #43131f;
+    }
+    #thispage {
+        background-color: white;
+        color: #43131f;
+    }
+    .subnav {
+        overflow: hidden;
+        background-color: #f1f1f1;
+    }
+    .subnav a {
+        float: left;
+        display: block;
+        color: #43131f;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        width: 120px;
+    }
+    .subnav a:hover {
+        background-color: #ddd;
+        color: #43131f;
+    }
+    #thissub {
+        background-color: #ddd;
+        color: #43131f;
+    }
+    .card {
+        background-color: white;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+    }
+    .card strong {
+        font-size: 15px;
+        color: #333;
+    }
+    .card p {
+        font-size: 14px;
+        color: #555;
+        margin: 8px 0 0;
+    }
+    .cardhn {
+        flex: 1 1 50%;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+    .cardhn img {
+        max-width: 100%;
+        height: auto;
+    }
+    .wineis {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .row:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+    .leftcolumn {
+        float: left;
+        width: 50%;
+    }
+    .rightcolumn {
+        float: left;
+        width: 50%;
+        padding-left: 20px;
+    }
+    .footer {
+        padding: 20px;
+        text-align: center;
+        background: #ddd;
+        margin-top: 20px;
+    }
+    @media screen and (max-width: 1000px) {
+        .leftcolumn, .rightcolumn {
+        width: 100%;
+        padding: 0;
+        }
+    }
+    @media screen and (max-width: 800px) {
+        .wineis {
+        flex-direction: column;
+        }
+        .cardhn {
+        width: 100%;
+        flex: 1 1 100%;
+        }
+    }
+</style>
+<body>
+    
+    <div class="header">
+        <h1>JY_CAVE</h1>
+        <p>/wine_guide</p>
+    </div>
+
+    <div class="topnav">
+        <a href="sub1_1.html">와인가이드</a>
+        <a href="sub2.html">나의 취향</a>
+        <a href="sub3_1_1.html"id="thispage">나의 평점</a>
+        <a href="sub4_1_1.html">와인 지도</a>
+        <a href="sub5_1.html">시음 방법</a>
+        <a href="index.html" style="float:right">홈으로</a>
+    </div>
+
+    <div class="subnav">
+        <a href="sub3_1_1.html" >레드</a>
+        <a href="sub3_2_1.html">화이트</a>
+        <a href="sub3_3_1.html">로제&오렌지</a>
+        <a href="sub3_4_1.html">스파클링</a>
+        <a href="sub3_5_1.html"id="thissub">기타</a>
+        <a href="sub3_5_2.html" style="float:right">3점 이상</a>
+    </div>
+
+    <div class="row">
+        <div class="leftcolumn">
+            <div class="card">
+            <h2>Royal Tokaji Aszu 6 Puttonyos</h2>
+                <div class="wineis">
+                    <div class="cardhn"><img src="Royal tokaji 6 puttonyos.jpeg" height="200px"></div>
+                    <div class="cardhn">
+                        <p><strong>구매가:</strong> 60,000원(현지가)</p>
+                        <p><strong>평점:</strong> ★★★★☆ (4.5/5)</p>
+                        <p><strong>외관:</strong> 맑기: 맑음, 강도: 강함, 색상: 황갈색  </p>
+                        <p><strong>향(nose):</strong> 상태: 이상없음, 강도: 상, 향: 꿀, 버섯, 견과류</p>
+                        <p><strong>맛(palate):</strong> 당도: 스위트, 산도: 중간~중상, 알코올: 중상, 바디감: 상, 풍미 강도: 상, 풍미 특징: nose랑 동일.</p>
+                        <p><strong>총평:</strong> 각 1점 기준 균형(Balancing): 0.9 │ 여운(Length): 0.9 │ 강도(Intensity): 0.9 │ 복합미(Complexity): 0.9 총 3.6/4<br>
+                                        스위트 와인의 정수. </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="rightcolumn">
+            <div class="card">
+            <h2>Barra Tokaji Aszu</h2>
+                <div class="wineis">
+                    <div class="cardhn"><img src="Barra Tokaji Aszu.jpeg" height="200px"></div>
+                    <div class="cardhn">
+                        <p><strong>구매가:</strong> 50,000원(현지가)</p>
+                        <p><strong>평점:</strong> ★★★★☆ (3.8/5)</p>
+                        <p><strong>외관:</strong> 맑기: 맑음, 강도: 강함, 색상: 진한 금색  </p>
+                        <p><strong>향(nose):</strong> 상태: 이상없음, 강도: 상, 향: 건포도, 꿀 말린 망고, 말린 살구, 건포도, 잘익은 망고, 파인애플 통조림</p>
+                        <p><strong>맛(palate):</strong> 당도: 스위트, 산도: 상, 알코올: 중상, 바디감: 상, 풍미 강도: 상, 풍미 특징: 꿀, 황도 복숭아.</p>
+                        <p><strong>총평:</strong> 각 1점 기준 균형(Balancing): 0.6 │ 여운(Length): 0.9 │ 강도(Intensity): 0.9 │ 복합미(Complexity): 0.8 총 3.2/4<br>
+                                         19빈티지 먹었었는데 royal tokaji와 며칠간격으로 마신터라 상대적으로 아쉬웠다. 그래도 충분히 맛있는 와인 </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2025 JY_CAVE. All rights reserved.</p>
+        <p>문의: wjdwlsdyd@gmail.com</p>
+    </div>
+
+
+</body>
+</html>
