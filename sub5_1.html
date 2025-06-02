@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jinyong`s Tasting Note</title>
+</head>
+<style>
+    *{
+        box-sizing: border-box;
+    }
+
+    body{
+        font-family: Arial;
+        padding: 10px;
+        background: #f1f1f1;
+        color:#271116;
+    }
+
+    /* Header/Blog Title */
+    .header {
+        padding:30px;
+        text-align: center;
+        background: white;
+        
+    }
+
+    .header h1{
+        font-size: 50px;
+    }
+
+    /* Style the top navigation bar */
+    .topnav{
+        overflow: hidden;
+        background-color: #340e17;
+    }
+    /* Style the topnav links */
+    .topnav a {
+        float: left;
+        display: block;
+        color: #f2f2f2;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        width:120px;
+    }
+    /* Change color on hover */
+    .topnav a:hover {
+        background-color: #ddd;
+        color: #43131f;
+    }
+    #thispage{
+        background-color: white;
+        color: #43131f;
+    }
+    /* Create two unequal columns that floats next to each other */
+    /* 인트로 내용*/
+    .intro {
+      background-color: rgb(255, 255, 255);
+      padding: 30px 40px;
+      margin: 40px auto 20px;
+      max-width: 900px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .intro h2 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .intro p {
+      font-size: 15px;
+      color: #666;
+      line-height: 1.6;
+    }
+    /* 서브메뉴용 subnav */
+    .subnav{
+        overflow: hidden;
+        background-color: #f1f1f1;
+    }
+    .subnav a {
+        float: left;
+        display: block;
+        color: #43131f;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        width:120px;
+    }
+    /* Change color on hover */
+    .subnav a:hover {
+        background-color: #ddd;
+        color: #43131f;
+    }
+    #thissub{
+        background-color: #ddd;
+        color: #43131f;
+    }
+
+    /* Add a card effect for articles */
+    .card {
+        background-color: white;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+      /* cursor: pointer; */
+    }
+    .card strong {
+      font-size: 15px;
+      color: #333;
+    }
+    .card p {
+      font-size: 14px;
+      color: #555;
+      margin: 8px 0 0;
+    }
+    .cardhn {
+        background-color: white;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-sizing: border-box;
+        flex: 1 1 50%;
+    }
+    .cardhn strong {
+      font-size: 15px;
+      color: #333;
+    }
+    .cardhn p {
+      font-size: 14px;
+      color: #555;
+      margin: 8px 0 0;
+    }
+    .cardhn img {
+        max-width: 100%;
+        height: auto;
+    }
+    .wineis {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .row:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+    /* left coloumn */
+    .leftcolumn {
+        float: left;
+        width: 50%;
+    }
+    /* right column */
+    .rightcolumn {
+        float: left;
+        width: 50%;
+        padding-left: 20px;
+    }
+    /* 메뉴 설명용 subcard */
+    .subcard {
+      background-color: #fafafa;
+      padding: 15px 20px;
+      text-align: left;
+    }
+    .subcard:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+      /* cursor: pointer; */
+    }
+
+
+    .subcard strong {
+      font-size: 15px;
+      color: #333;
+    }
+    .subcard p {
+      font-size: 14px;
+      color: #555;
+      margin: 8px 0 0;
+    }
+
+
+    /* Clear floats after the columns */
+    .row:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+    /* Footer */
+    .footer {
+        padding: 20px;
+        text-align: center;
+        background: #ddd;
+        margin-top: 20px;
+    }
+    /* 너비가 600픽셀 미만인 스마트폰을 위한 기본 설정 */
+    [class*="c_"]{
+        width:100%;
+    }
+
+    /* Responsive layout - when thescreen is less than 800px wide, make the two columns stack on top of each other */
+    @media screen and (max-width: 1000px) {
+        .leftcolumn, .rightcolumn {
+            width: 100%;
+            padding: 0;
+        }
+    }
+    /* Responsive layout - when the screen is less than 400px wide, make the header text smaller */
+    @media screen and (max-width: 800px) {
+        .topnav a {
+            float:none;
+            width: 100%;
+        }
+        .subnav a {
+            float:none;
+            width: 100%;
+        }
+        .wineis {
+            flex-direction: column;
+        }
+        .cardhn {
+            width: 100%;
+            flex: none;
+            padding: 10px;
+        }
+    }
+    #image1{
+        padding:0;
+        width: 200px;
+    }
+    #image2{
+        padding:0;
+        width: 200px;
+    }
+</style>
+<body>
+    
+    <div class="header">
+        <h1>JY_CAVE</h1>
+        <p>/wine_guide</p>
+    </div>
+
+    <div class="topnav">
+        <a href="sub1_1.html">와인 가이드</a>
+        <a href="sub2.html">나의 취향</a>
+        <a href="sub3_1_1.html">나의 평점</a>
+        <a href="sub4_1_1.html">와인 지도</a>
+        <a href="sub5_1.html" id="thispage">시음 방법</a>
+        <a href="index.html" style="float:right">홈으로</a>
+    </div>
+
+    <div class="subnav">
+        <a href="sub5_1.html" id="thissub">시음 방법</a>
+        <a href="sub5_2.html">시음 가이드</a>
+    </div>
+
+    <div class="card">
+        <h2>SAT 시음법이란?</h2>
+        <p>
+            SAT(Systematic Approach to Tasting)는 와인을 보다 객관적이고 일관된 기준으로 평가하기 위한 체계적인 시음 방법입니다. 
+            WSET(Wine & Spirit Education Trust)에서 제시한 방식으로, 와인을 <strong>눈(외관), 코(향), 입(맛), 결론</strong>의 순서로 분석합니다.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>1. 외관(눈): Appearance</h3>
+        <p>
+            시각적인 정보로 와인의 연령, 품종, 스타일을 추정할 수 있습니다.
+        </p>
+        <ul>
+            <li><strong>맑기:</strong> 와인의 투명도 및 청결 여부를 판단합니다.</li>
+            <li><strong>강도:</strong> 색의 진하기로 품종과 스타일을 추측할 수 있습니다.</li>
+            <li><strong>색상:</strong> 와인의 나이와 산화 정도를 예측할 수 있습니다.</li>
+        </ul>
+        </div>
+
+    <div class="card">
+        <h3>2. 향(코): Nose</h3>
+        <p>
+            향은 와인의 품질과 상태를 가장 잘 보여주는 요소입니다.
+        </p>
+        <ul>
+            <li><strong>상태:</strong> 깨끗한지, 결함(코르크 오염 등)이 있는지 판단합니다.</li>
+            <li><strong>강도:</strong> 향의 뚜렷함 정도로 품질을 가늠할 수 있습니다.</li>
+            <li><strong>향의 특징:</strong> 과일, 꽃, 향신료, 오크, 숙성향 등 향의 유형을 분류합니다.</li>
+        </ul>
+        </div>
+
+    <div class="card">
+        <h3>3. 맛(입): Palate</h3>
+        <p>
+            입 안에서의 느낌과 풍미의 변화를 통해 와인의 구조를 평가합니다.
+        </p>
+        <ul>
+            <li><strong>당도:</strong> 드라이/오프드라이/스위트 여부</li>
+            <li><strong>산도:</strong> 신맛의 정도로 와인의 신선도, 음식과의 궁합 등을 판단</li>
+            <li><strong>타닌:</strong> 떫은맛, 레드 와인의 구조감 판단</li>
+            <li><strong>알코올:</strong> 따뜻함, 무게감에 영향을 줌</li>
+            <li><strong>바디:</strong> 입 안에서 느껴지는 무게감</li>
+            <li><strong>풍미:</strong> 향과 유사한지, 어떤 맛이 지속되는지 확인</li>
+            <li><strong>여운:</strong> 마신 후 입 안에 남는 향과 맛의 지속 시간</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>4. 결론: Conclusion</h3>
+        <p>
+            앞의 모든 분석을 바탕으로 와인의 품질을 종합적으로 판단합니다.
+        </p>
+        <ul>
+            <li><strong>균형(Balance):</strong> 산도, 알코올, 풍미가 균형을 이루는지</li>
+            <li><strong>길이(Length):</strong> 여운이 얼마나 오래 지속되는지</li>
+            <li><strong>강도(Intensity):</strong> 향과 맛의 표현력이 뛰어난지</li>
+            <li><strong>복합성(Complexity):</strong> 다양한 향과 맛의 층이 있는지</li>
+        </ul>
+    </div>
+
+
+
+    <div class="footer">
+        <p>&copy; 2025 JY_CAVE. All rights reserved.</p>
+        <p>문의: wjdwlsdyd@gmail.com</p>
+    </div>
+
+
+
+</body>
+</html>

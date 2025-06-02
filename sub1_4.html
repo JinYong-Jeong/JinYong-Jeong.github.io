@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jinyong`s Tasting Note</title>
+</head>
+<style>
+    *{
+        box-sizing: border-box;
+    }
+
+    body{
+        font-family: Arial;
+        padding: 10px;
+        background: #f1f1f1;
+        color:#271116;
+    }
+
+    /* Header/Blog Title */
+    .header {
+        padding:30px;
+        text-align: center;
+        background: white;
+        
+    }
+
+    .header h1{
+        font-size: 50px;
+    }
+
+    /* Style the top navigation bar */
+    .topnav{
+        overflow: hidden;
+        background-color: #340e17;
+    }
+    /* Style the topnav links */
+    .topnav a {
+        float: left;
+        display: block;
+        color: #f2f2f2;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        width:120px;
+    }
+    /* Change color on hover */
+    .topnav a:hover {
+        background-color: #ddd;
+        color: #43131f;
+    }
+    #thispage{
+        background-color: white;
+        color: #43131f;
+    }
+    /* Create two unequal columns that floats next to each other */
+    /* 인트로 내용*/
+    .intro {
+      background-color: rgb(255, 255, 255);
+      padding: 30px 40px;
+      margin: 40px auto 20px;
+      max-width: 900px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .intro h2 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .intro p {
+      font-size: 15px;
+      color: #666;
+      line-height: 1.6;
+    }
+    /* 서브메뉴용 subnav */
+    .subnav{
+        overflow: hidden;
+        background-color: #f1f1f1;
+    }
+    .subnav a {
+        float: left;
+        display: block;
+        color: #43131f;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        width:120px;
+    }
+    /* Change color on hover */
+    .subnav a:hover {
+        background-color: #ddd;
+        color: #43131f;
+        width:120px;
+    }
+    #thissub{
+        background-color: #ddd;
+        color: #43131f;
+    }
+
+    /* Add a card effect for articles */
+    .card {
+        background-color: white;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+      /* cursor: pointer; */
+    }
+    .card strong {
+      font-size: 15px;
+      color: #333;
+    }
+    .card p {
+      font-size: 14px;
+      color: #555;
+      margin: 8px 0 0;
+    }
+    .cardhn {
+        background-color: white;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .cardhn strong {
+      font-size: 15px;
+      color: #333;
+    }
+    .cardhn p {
+      font-size: 14px;
+      color: #555;
+      margin: 8px 0 0;
+    }
+    .row:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+    /* left coloumn */
+    .leftcolumn {
+        float: left;
+        width: 65%;
+    }
+    /* right column */
+    .rightcolumn {
+        float: left;
+        width: 35%;
+        padding-left: 20px;
+    }
+    /* 메뉴 설명용 subcard */
+    .subcard {
+      background-color: #fafafa;
+      padding: 15px 20px;
+      text-align: left;
+    }
+    .subcard:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+      /* cursor: pointer; */
+    }
+
+
+    .subcard strong {
+      font-size: 15px;
+      color: #333;
+    }
+    .subcard p {
+      font-size: 14px;
+      color: #555;
+      margin: 8px 0 0;
+    }
+
+
+    /* Clear floats after the columns */
+    .row:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+    /* Footer */
+    .footer {
+        padding: 20px;
+        text-align: center;
+        background: #ddd;
+        margin-top: 20px;
+    }
+    /* 너비가 600픽셀 미만인 스마트폰을 위한 기본 설정 */
+    [class*="c_"]{
+        width:100%;
+    }
+
+    /* Responsive layout - when thescreen is less than 800px wide, make the two columns stack on top of each other */
+    @media screen and (max-width: 1000px) {
+        .leftcolumn, .rightcolumn {
+            width: 100%;
+            padding: 0;
+        }
+    }
+    /* Responsive layout - when the screen is less than 400px wide, make the header text smaller */
+    @media screen and (max-width: 800px) {
+        .topnav a {
+            float:none;
+            width: 100%;
+        }
+        .subnav a {
+            float:none;
+            width: 100%;
+        }
+    }
+    /* #wineis{
+        display: flex;
+    } */
+    #image{
+        padding:0;
+    }
+</style>
+<body>
+
+<div class="header">
+    <h1>JY_CAVE</h1>
+    <p>/wine_guide</p>
+</div>
+
+<div class="topnav">
+        <a href="sub1_1.html" id="thispage">와인 가이드</a>
+        <a href="sub2.html">나의 취향</a>
+        <a href="sub3_1_1.html">나의 평점</a>
+        <a href="sub4_1_1.html">와인 지도</a>
+        <a href="sub5_1.html">시음 방법</a>
+        <a href="index.html" style="float:right">홈으로</a>
+</div>
+
+<div class="subnav">
+    <a href="sub1_1.html">입문 가이드</a>
+    <a href="sub1_2.html">레드 와인</a>
+    <a href="sub1_3.html">화이트 와인</a>
+    <a href="sub1_4.html" id="thissub">기타 와인</a>
+</div>
+
+<div class="row">
+    <div class="leftcolumn">
+        <div class="card">
+        <h2>로제 와인이란?</h2>
+            <p><strong>로제 와인의 정의:</strong> 로제 와인은 적포도를 사용해 껍질과의 접촉 시간을 짧게 하여 만든 와인입니다. 
+                이로 인해 살구빛부터 선홍빛까지 다양한 분홍빛 색조를 띠며, 시각적으로도 매력적입니다.</p> 
+            <p><strong>로제 와인의 특징:</strong> 상큼한 과일 향, 가벼운 바디, 산뜻한 산도를 지녀 여름철에 특히 인기가 많습니다. 
+                대부분 드라이한 맛을 가지고 있으며, 신선한 스타일이 주를 이룹니다.</p> 
+            <p><strong>제조 방식에 따른 차이:</strong>
+                    <br>침용법: 껍질과 잠시 접촉 후 색만 추출하여 분리 
+                    <br>세니에법: 레드 와인에서 일부 포도즙만 덜어내 로제로 사용 
+                    <br>직접 압착법: 포도를 바로 압착해 매우 연한 색을 얻음 
+                    <br>블렌딩법: 화이트 와인에 소량의 레드 와인을 섞는 방식 (샴페인에서 주로 사용)</p>
+        </div>
+
+        <div class="card">
+        <h2>오렌지 와인이란?</h2>
+            <p><strong>오렌지 와인의 정의:</strong> 오렌지 와인은 청포도를 껍질째 발효하여 만드는 와인으로, 
+                화이트 와인에 레드 와인의 발효 방식을 접목한 독특한 스타일입니다.</p> 
+            <p><strong>오렌지 와인의 특징:</strong> 색은 주황빛 또는 진한 황갈색을 띠며, 
+                화이트 와인과는 달리 탄닌감과 구조감이 강하게 느껴집니다. 산화적인 풍미가 특징이며, 약간의 쓴맛이 감도는 경우도 있습니다.</p> 
+            <p><strong>양조의 핵심:</strong> 껍질과 씨를 함께 발효하며, 
+                이 과정에서 나오는 타닌과 풍미가 와인에 깊이를 부여합니다. 자연주의 와인에서 자주 볼 수 있는 스타일입니다.</p>
+        </div>
+
+        <div class="card">
+        <h2>스파클링 와인이란?</h2>
+            <p><strong>스파클링 와인의 정의:</strong> 스파클링 와인은 자연 탄산이 포함된 와인으로, 청량한 기포가 특징입니다. 
+                대표적인 종류로는 샴페인이 있으며, 축하 자리에서 자주 등장합니다.</p> 
+            <p><strong>스파클링 와인의 특징:</strong> 시원하고 경쾌한 산미와 섬세한 기포가 어우러져 기분 좋은 텍스처를 줍니다. 
+                드라이한 스타일부터 달콤한 스타일까지 다양합니다.</p> 
+            <p><strong>제조 방식에 따른 차이:</strong>  
+                <br>전통 방식(Champenoise): 병 속에서 2차 발효를 진행해 복잡한 풍미 형성
+                <br>샤름 방식(Charmat): 대형 탱크에서 2차 발효, 과실 향이 강조됨 
+                <br>탄산 주입 방식: 인공적으로 탄산을 넣는 방식 (저가 와인에서 흔함)</p>        
+        </div>
+
+        <div class="card">
+        <h2>주정강화 와인이란?</h2>
+            <p><strong>주정강화 와인의 정의:</strong> 주정강화 와인은 발효 도중 또는 후에 브랜디 등의 알코올을 첨가해 도수를 높인 와인입니다. 
+                당도와 알코올이 모두 높고, 오랜 숙성에 적합합니다.</p> 
+            <p><strong>주정강화 와인의 특징:</strong> 주로 진한 당도, 높은 도수, 깊고 복합적인 향이 특징입니다. 
+                대부분 디저트용으로 많이 마시며, 일부는 드라이(당도가 낮은) 스타일도 존재합니다.</p> 
+            <p><strong>대표적인 종류:</strong> 
+                <br>포트 와인: 포르투갈, 진한 단맛과 구조감
+                <br>셰리: 스페인, 드라이~스위트까지 다양
+                <br>마르살라: 이탈리아, 요리용이나 디저트 와인으로 사용</p>        
+            </div>
+    </div>
+
+    <div class="rightcolumn">
+        <div class="card">
+            <h2>로제 와인 양조 방법</h2>
+            <img src="rosewinemake1.jpg" width="45%">
+            <img src="rosewinemake2.jpg" width="45%">
+        </div>
+            <div class="card">
+            <h2>기타 와인에 대한 잘못된 상식</h2>
+                <div class="cardhn">
+                    <p><strong>"샴페인은 와인이 아니다?"</strong><br>
+                    샴페인은 프랑스 상파뉴(Champagne) 지역에서 특정 방식으로 만든 스파클링 와인입니다. 지역과 제조법이 엄격히 규정되어 있어 ‘샴페인’이라는 명칭을 독점할 뿐, 본질은 와인입니다.</p>
+
+                    <p><strong>"로제 와인은 레드와 화이트를 섞어서 만든다?"</strong><br>
+                    일부 예외를 제외하고는 거의 대부분 적포도를 짧게 껍질째 침용(Maceration)시켜 색을 우려낸 후 발효해 만듭니다. 레드와 화이트를 섞는 방식은 일부 스파클링 로제에만 허용됩니다.</p>
+
+                    <p><strong>"오렌지 와인은 오렌지로 만든다?"</strong><br>
+                    오렌지 와인은 백포도를 껍질째 발효해 만들어지는 와인입니다. 과일 ‘오렌지’와는 관련이 없으며, 색이 오렌지빛을 띠기 때문에 붙은 이름입니다.</p>
+
+                    <p><strong>"주정강화 와인은 다 단맛이 강하다?"</strong><br>
+                    대표적인 주정강화 와인인 포트(Port)는 달콤하지만, 쉐리(Sherry)나 마르살라(Marsala)처럼 드라이한 스타일도 존재합니다. 모두 같은 범주의 주정강화 와인입니다.</p>
+                </div>
+            </div>
+
+       <div class="card">
+        <h2>초보자를 위한 와인 팁</h2>
+        <p><strong>로제:</strong> 따뜻한 봄, 여름날 테라스에서 가볍게 즐기기 좋습니다.</p>
+        <p><strong>오렌지:</strong> 일반 화이트 와인보다 강한 맛을 선호할 때 도전해보세요.</p>
+        <p><strong>스파클링:</strong> 축하, 기념일, 연말연시에 적합한 와인입니다.</p>
+        <p><strong>주정강화:</strong> 디저트와 함께하거나 식사 후 마무리로 즐기기 좋습니다.</p>
+        </div>
+    </div>
+</div>
+
+    <div class="footer">
+        <p>&copy; 2025 JY_CAVE. All rights reserved.</p>
+        <p>문의: wjdwlsdyd@gmail.com</p>
+    </div>
+
+</body>
+</html>

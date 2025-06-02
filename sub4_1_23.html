@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>이탈리아 와인 지도</title>
+  <style>
+    * {
+        box-sizing: border-box;
+    }
+    body {
+        font-family: Arial;
+        padding: 10px;
+        background: #f1f1f1;
+        color: #271116;
+    }
+    .header {
+        padding: 30px;
+        text-align: center;
+        background: white;
+    }
+    .header h1 {
+        font-size: 50px;
+    }
+    .topnav {
+        overflow: hidden;
+        background-color: #340e17;
+    }
+    .topnav a {
+        float: left;
+        display: block;
+        color: #f2f2f2;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        width: 120px;
+    }
+    .topnav a:hover {
+        background-color: #ddd;
+        color: #43131f;
+    }
+    #thispage {
+        background-color: white;
+        color: #43131f;
+    }
+    .subnav {
+        overflow: hidden;
+        background-color: #f1f1f1;
+    }
+    .subnav a {
+        float: left;
+        display: block;
+        color: #43131f;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        width: 120px;
+    }
+    .subnav a:hover {
+        background-color: #ddd;
+        color: #43131f;
+    }
+    .subsubnav {
+        overflow: hidden;
+        background-color: #f1f1f1;
+    }
+    .subsubnav a {
+        float: left;
+        display: block;
+        color: #43131f;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        width: 120px;
+    }
+    .subsubnav a:hover {
+        background-color: #ddd;
+        color: #43131f;
+    }
+    .submenu {
+        overflow: hidden;
+    }
+    .submenu a {
+        float: left;
+        display: block;
+        color: #43131f;
+        text-align: center;
+        /* padding: 14px 16px; */
+        text-decoration: none;
+        /* width: 12px; */
+    }
+    .submenu a:hover {
+        color: #43131f;
+    }
+    #left{
+        width:200px;
+        height:300px;
+        float:left;
+        background-color:white;
+        color:#e2e2e2;
+    }
+    #left li{
+        padding:3px;
+    }
+    #right{
+        width:500px;
+        height:300px;
+        float:left;
+        background-color: white;
+    }
+    #thissub {
+        background-color: #ddd;
+        color: #43131f;
+    }
+    .card {
+        background-color: white;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+    }
+    .card strong {
+        font-size: 15px;
+        color: #333;
+    }
+    .card p {
+        font-size: 14px;
+        color: #555;
+        margin: 8px 0 0;
+    }
+    .cardhn {
+        flex: 1 1 50%;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+    .cardhn img {
+        max-width: 100%;
+        height: auto;
+    }
+    .wineis {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .row:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+    .leftcolumn {
+        float: left;
+        width: 50%;
+    }
+    .rightcolumn {
+        float: left;
+        width: 50%;
+        padding-left: 20px;
+    }
+    .footer {
+        padding: 20px;
+        text-align: center;
+        background: #ddd;
+        margin-top: 20px;
+    }
+    @media screen and (max-width: 1000px) {
+        .leftcolumn, .rightcolumn {
+        width: 100%;
+        padding: 0;
+        }
+    }
+    @media screen and (max-width: 800px) {
+        .topnav a {
+            float:none;
+            width: 100%;
+        }
+        .subnav a {
+            float:none;
+            width: 100%;
+        }
+        .wineis {
+        flex-direction: column;
+        }
+        .cardhn {
+        width: 100%;
+        flex: 1 1 100%;
+        }
+        .content {
+        flex-direction: column;
+        }
+        #left ul{
+        display: inline-flex;
+        }
+    }
+  </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>JY_CAVE</h1>
+        <p>/wine_guide</p>
+    </div>
+
+    <div class="topnav">
+        <a href="sub1_1.html">와인가이드</a>
+        <a href="sub2.html">나의 취향</a>
+        <a href="sub3_1_1.html">나의 평점</a>
+        <a href="sub4_1_1.html"id="thispage">와인 지도</a>
+        <a href="sub5_1.html">시음 방법</a>
+        <a href="index.html" style="float:right">홈으로</a>
+    </div>
+
+    <div class="subnav">
+        <a href="sub4_1_1.html" id="thissub" >구대륙</a>
+        <a href="sub4_2_1.html">신대륙</a>
+    </div>
+    <div class="subsubnav">
+        <a href="sub4_1_1.html">프랑스</a>
+        <a href="sub4_1_2.html"id="thissub">이탈리아</a>
+        <a href="sub4_1_3.html">스페인</a>
+    </div>
+    <div class="row">
+
+            
+    </div>
+    <div class="row">
+        <div class="leftcolumn">
+            <div class="card">
+            <h2>이탈리아-베네토</h2>
+                <div class="wineis">
+                    <div class="cardhn"><img src="Veneto.jpeg" ></div>
+                    <div class="cardhn">
+                    <ul>
+                        <li class="submenu"><a href="sub4_1_2.html">+ 토스카나</a></li>
+                        <li class="submenu"><a href="sub4_1_22.html">+ 피에몬테</a></li>
+                        <li class="submenu"><a href="sub4_1_23.html">+ 베네토</a></li>
+                        <li class="submenu"><a href="sub4_1_24.html">+ 시칠리아</a></li>
+                    </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="rightcolumn">
+            <div class="card">
+                <ul>
+                    <li>토스카나: 전통과 슈퍼 투스칸의 양대 축  <br>
+                        - 끼안티: 산지오베제로 만든 대표 와인, 산도와 탄닌 균형  <br>
+                        - 브루넬로 디 몬탈치노: 장기 숙성 가능한 고급 산지오베제  <br>
+                        - 볼게리: 슈퍼 투스칸의 본거지, 까베르네 중심 블렌딩  <br><br>
+                    </li>
+                    <li>피에몬테: 이탈리아의 부르고뉴라 불리는 지역  <br>
+                        - 바롤로: 네비올로 품종, 장기 숙성형 와인의 제왕  <br>
+                        - 바르바레스코: 바롤로보다 부드럽고 빠른 숙성  <br>
+                        - 바르베라: 산도 높고 과실미 풍부한 일상 와인  <br><br>
+                    </li>
+                    <li>베네토: 다양한 스타일의 와인 산지  <br>
+                        - 아마로네: 반건조 포도로 만든 농축된 레드  <br>
+                        - 소아베: 가르가네가 품종 중심, 산뜻한 화이트  <br>
+                        - 프로세코: 스푸만테 방식 스파클링, 깔끔하고 과일향  <br><br>
+                    </li>
+                    <li>시칠리아: 화산 토양 기반의 개성 강한 와인  <br>
+                        - 네로 다볼라: 진하고 풍부한 레드, 대표 토착 품종  <br>
+                        - 에트나 로쏘: 에트나 화산 기슭, 네렐로 마스칼레제 중심  <br>
+                        - 카타라토/그릴로: 산뜻하고 향긋한 화이트 품종  
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <p>&copy; 2025 JY_CAVE. All rights reserved.</p>
+        <p>문의: wjdwlsdyd@gmail.com</p>
+    </div>
+
+</body>
+</html>

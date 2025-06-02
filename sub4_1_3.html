@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>스페인 와인 지도</title>
+  <style>
+    * {
+        box-sizing: border-box;
+    }
+    body {
+        font-family: Arial;
+        padding: 10px;
+        background: #f1f1f1;
+        color: #271116;
+    }
+    .header {
+        padding: 30px;
+        text-align: center;
+        background: white;
+    }
+    .header h1 {
+        font-size: 50px;
+    }
+    .topnav {
+        overflow: hidden;
+        background-color: #340e17;
+    }
+    .topnav a {
+        float: left;
+        display: block;
+        color: #f2f2f2;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        width: 120px;
+    }
+    .topnav a:hover {
+        background-color: #ddd;
+        color: #43131f;
+    }
+    #thispage {
+        background-color: white;
+        color: #43131f;
+    }
+    .subnav {
+        overflow: hidden;
+        background-color: #f1f1f1;
+    }
+    .subnav a {
+        float: left;
+        display: block;
+        color: #43131f;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        width: 120px;
+    }
+    .subnav a:hover {
+        background-color: #ddd;
+        color: #43131f;
+    }
+    .subsubnav {
+        overflow: hidden;
+        background-color: #f1f1f1;
+    }
+    .subsubnav a {
+        float: left;
+        display: block;
+        color: #43131f;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        width: 120px;
+    }
+    .subsubnav a:hover {
+        background-color: #ddd;
+        color: #43131f;
+    }
+    .submenu {
+        overflow: hidden;
+    }
+    .submenu a {
+        float: left;
+        display: block;
+        color: #43131f;
+        text-align: center;
+        /* padding: 14px 16px; */
+        text-decoration: none;
+        /* width: 12px; */
+    }
+    .submenu a:hover {
+        color: #43131f;
+    }
+    #left{
+        width:200px;
+        height:300px;
+        float:left;
+        background-color:white;
+        color:#e2e2e2;
+    }
+    #left li{
+        padding:3px;
+    }
+    #right{
+        width:500px;
+        height:300px;
+        float:left;
+        background-color: white;
+    }
+    #thissub {
+        background-color: #ddd;
+        color: #43131f;
+    }
+    .card {
+        background-color: white;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+    }
+    .card strong {
+        font-size: 15px;
+        color: #333;
+    }
+    .card p {
+        font-size: 14px;
+        color: #555;
+        margin: 8px 0 0;
+    }
+    .cardhn {
+        flex: 1 1 50%;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+    .cardhn img {
+        max-width: 100%;
+        height: auto;
+    }
+    .wineis {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .row:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+    .leftcolumn {
+        float: left;
+        width: 50%;
+    }
+    .rightcolumn {
+        float: left;
+        width: 50%;
+        padding-left: 20px;
+    }
+    .footer {
+        padding: 20px;
+        text-align: center;
+        background: #ddd;
+        margin-top: 20px;
+    }
+    @media screen and (max-width: 1000px) {
+        .leftcolumn, .rightcolumn {
+        width: 100%;
+        padding: 0;
+        }
+    }
+    @media screen and (max-width: 800px) {
+        .topnav a {
+            float:none;
+            width: 100%;
+        }
+        .subnav a {
+            float:none;
+            width: 100%;
+        }
+        .wineis {
+        flex-direction: column;
+        }
+        .cardhn {
+        width: 100%;
+        flex: 1 1 100%;
+        }
+        .content {
+        flex-direction: column;
+        }
+        #left ul{
+        display: inline-flex;
+        }
+    }
+  </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>JY_CAVE</h1>
+        <p>/wine_guide</p>
+    </div>
+
+    <div class="topnav">
+        <a href="sub1_1.html">와인가이드</a>
+        <a href="sub2.html">나의 취향</a>
+        <a href="sub3_1_1.html">나의 평점</a>
+        <a href="sub4_1_1.html"id="thispage">와인 지도</a>
+        <a href="sub5_1.html">시음 방법</a>
+        <a href="index.html" style="float:right">홈으로</a>
+    </div>
+
+    <div class="subnav">
+        <a href="sub4_1_1.html" id="thissub" >구대륙</a>
+        <a href="sub4_2_1.html">신대륙</a>
+    </div>
+    <div class="subsubnav">
+        <a href="sub4_1_1.html">프랑스</a>
+        <a href="sub4_1_2.html">이탈리아</a>
+        <a href="sub4_1_3.html"id="thissub">스페인</a>
+    </div>
+    <div class="row">
+
+            
+    </div>
+    <div class="row">
+        <div class="leftcolumn">
+            <div class="card">
+            <h2>스페인-리오하</h2>
+                <div class="wineis">
+                    <div class="cardhn"><img src="Rioja.jpg" ></div>
+                    <div class="cardhn">
+                    <ul>
+                        <li class="submenu"><a href="sub4_1_3.html">+ 리오하</a></li>
+                        <li class="submenu"><a href="sub4_1_32.html">+ 리베라 델 두에로</a></li>
+                        <li class="submenu"><a href="sub4_1_33.html">+ 프리오랏</a></li>
+                        <li class="submenu"><a href="sub4_1_34.html">+ 갈리시아</a></li>
+                    </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="rightcolumn">
+            <div class="card">
+                <ul>
+                <li>리오하 (Rioja): 스페인의 대표 와인 산지  <br>
+                    - 템프라니요 중심 블렌딩, 오크 숙성 풍미  <br>
+                    - 리오하 알타: 전통적 스타일, 산도와 구조감  <br>
+                    - 리오하 알라베사: 우아하고 섬세한 표현  <br>
+                    - 리오하 바하: 따뜻한 기후, 과일 향 중심  <br><br>
+                </li>
+                <li>리베라 델 두에로 (Ribera del Duero): 파워풀한 레드 와인의 중심지  <br>
+                    - 템프라니요(현지명: 틴토 피노) 100% 또는 중심 블렌딩  <br>
+                    - 높은 고도, 일교차로 진한 색과 구조감 형성  <br>
+                    - 베가 시실리아 등 전설적인 와인 존재  <br><br>
+                </li>
+                <li>프리오랏 (Priorat): 소규모 고급 와인 산지  <br>
+                    - 가르나차와 카리녠 중심의 진한 레드  <br>
+                    - 검은 과일, 미네랄, 스모키한 풍미  <br>
+                    - 고산지대, 슬레이트 토양에서 강한 개성  <br><br>
+                </li>
+                <li>갈리시아 (Galicia): 산뜻한 화이트 와인의 산지  <br>
+                    - 리아스 바이샤스: 알바리뇨 중심, 상큼한 산도  <br>
+                    - 고도와 해양성 기후, 해산물과 환상 궁합  <br>
+                    - 고도에 따른 아틀란틱한 스타일  
+                </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <p>&copy; 2025 JY_CAVE. All rights reserved.</p>
+        <p>문의: wjdwlsdyd@gmail.com</p>
+    </div>
+
+</body>
+</html>
