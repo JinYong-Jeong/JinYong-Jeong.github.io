@@ -24,6 +24,9 @@ const imageUrl = new URL(image, siteUrl).toString();
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
@@ -41,6 +44,13 @@ const imageUrl = new URL(image, siteUrl).toString();
     <meta name="twitter:image" content={imageUrl} />
   </head>
   <body>
+    <script is:inline>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          registrations.forEach((registration) => registration.unregister());
+        });
+      }
+    </script>
     <Header />
     <main>
       <slot />
