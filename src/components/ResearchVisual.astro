@@ -3,12 +3,18 @@ import type { CategoryKey } from "@/config/site";
 
 interface Props {
   category: CategoryKey;
+  compact?: boolean;
 }
 
-const { category } = Astro.props;
+const { category, compact = false } = Astro.props;
 ---
 
-<div class="relative h-36 overflow-hidden rounded-t-[1rem] border-b border-[var(--color-border)] bg-[linear-gradient(135deg,#fffaf4,#f4ebe1)]">
+<div
+  class:list={[
+    "relative overflow-hidden bg-[linear-gradient(135deg,#fffaf4,#f4ebe1)]",
+    compact ? "h-28 rounded-[0.9rem] border border-[var(--color-border)]" : "h-36 rounded-[0.9rem]"
+  ]}
+>
   {
     category === "federated-learning" && (
       <svg viewBox="0 0 420 190" class="h-full w-full" role="img" aria-label="Federated learning diagram">

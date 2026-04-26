@@ -14,64 +14,95 @@ const featuredProjects = await getFeaturedProjects(3);
 ---
 
 <BaseLayout>
-  <div class="container-page py-8 lg:py-9">
-    <div class="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,7fr)_minmax(300px,3fr)]">
-      <div class="min-w-0 space-y-5">
-        <section class="grid gap-5 xl:grid-cols-[minmax(0,1.02fr)_minmax(330px,0.98fr)] xl:items-stretch">
-          <div class="panel p-6 sm:p-7 lg:p-8">
+  <div class="container-page py-8 lg:py-10">
+    <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <section class="surface-main">
+        <div class="home-hero-grid">
+          <header class="surface-section">
             <p class="chip mb-5 w-fit">{site.author.role}</p>
-            <h1 class="hero-title max-w-3xl text-4xl font-black leading-[0.98] tracking-normal text-[var(--color-text)] sm:text-5xl lg:text-[3.9rem]">
-              실험하고, 기록하고, 공유합니다.
+            <h1 class="hero-title max-w-3xl text-4xl font-black leading-[0.95] tracking-normal text-[var(--color-text)] sm:text-5xl lg:text-[4.3rem]">
+              실험하고,
+              <br />
+              기록하고,
+              <br />
+              공유합니다.
             </h1>
-            <p class="hero-copy mt-5 max-w-2xl text-base leading-8 text-[var(--color-muted)] lg:text-[1.05rem]">
-              LLM, Federated Learning, 그리고 더 나은 모델을 만들기 위한
-              <br class="hidden sm:block" />
-              기록을 남기는 개발자입니다.
+            <p class="hero-copy mt-6 max-w-2xl text-base leading-8 text-[var(--color-muted)] lg:text-[1.08rem]">
+              LLM, Federated Learning, 그리고 더 나은 모델을 만들기 위한 기록을
+              연구 노트처럼 정리합니다.
             </p>
             <div class="mt-7 flex flex-wrap gap-3">
-              <a class="focus-ring rounded-xl bg-[var(--color-accent)] px-5 py-3 font-semibold text-white shadow-[var(--shadow-card)] hover:bg-[#59331f]" href="/blog/">
+              <a class="focus-ring rounded-xl bg-[var(--color-accent)] px-5 py-3 font-semibold text-white hover:bg-[#59331f]" href="/blog/">
                 최근 글 읽기 →
               </a>
               <a class="focus-ring rounded-xl border border-[var(--color-border-strong)] px-5 py-3 font-semibold text-[var(--color-accent)] hover:bg-[var(--color-surface-soft)]" href="/projects/">
                 프로젝트 보기
               </a>
             </div>
-            <div class="hero-metric-grid mt-7">
-              <div class="hero-metric-card">
-                <span>Archive</span>
-                <strong>{posts.length}</strong>
-                <p>공개 글 아카이브</p>
+            <div class="mt-8 metric-ribbon">
+              <div>
+                <span class="metric-kicker">Archive</span>
+                <strong class="metric-value">{posts.length}</strong>
+                <p class="metric-copy">공개된 연구 노트</p>
               </div>
-              <div class="hero-metric-card">
-                <span>Projects</span>
-                <strong>{featuredProjects.length}</strong>
-                <p>정리된 주요 프로젝트</p>
+              <div>
+                <span class="metric-kicker">Projects</span>
+                <strong class="metric-value">{featuredProjects.length}</strong>
+                <p class="metric-copy">정리된 구현 기록</p>
               </div>
-              <div class="hero-metric-card">
-                <span>Focus</span>
-                <strong>{site.focusAreas.length}</strong>
-                <p>현재 집중하는 연구 트랙</p>
+              <div>
+                <span class="metric-kicker">Focus</span>
+                <strong class="metric-value">{site.focusAreas.length}</strong>
+                <p class="metric-copy">현재 집중하는 트랙</p>
               </div>
             </div>
-          </div>
+          </header>
 
-          <HeroVisual />
+          <div class="surface-section">
+            <HeroVisual embedded={true} />
+          </div>
+        </div>
+
+        <section class="surface-divider">
+          <div class="surface-section pb-4">
+            <SectionHeader title="최근 글" href="/blog/" linkLabel="모든 글 보기" />
+          </div>
+          <div class="grid xl:grid-cols-3">
+            {
+              recentPosts.map((post, index) => (
+                <div
+                  class:list={[
+                    "surface-section pt-0",
+                    index > 0 && "border-t subtle-divider xl:border-t-0 xl:border-l"
+                  ]}
+                >
+                  <PostCard post={post} />
+                </div>
+              ))
+            }
+          </div>
         </section>
 
-        <section class="panel p-5 sm:p-6">
-          <SectionHeader title="최근 글" href="/blog/" linkLabel="모든 글 보기" />
-          <div class="grid gap-4 xl:grid-cols-3">
-            {recentPosts.map((post) => <PostCard post={post} />)}
+        <section class="surface-divider">
+          <div class="surface-section pb-4">
+            <SectionHeader title="주요 프로젝트" href="/projects/" linkLabel="모든 프로젝트 보기" />
+          </div>
+          <div class="grid xl:grid-cols-3">
+            {
+              featuredProjects.map((project, index) => (
+                <div
+                  class:list={[
+                    "surface-section pt-0",
+                    index > 0 && "border-t subtle-divider xl:border-t-0 xl:border-l"
+                  ]}
+                >
+                  <ProjectCard project={project} />
+                </div>
+              ))
+            }
           </div>
         </section>
-
-        <section class="panel p-5 sm:p-6">
-          <SectionHeader title="주요 프로젝트" href="/projects/" linkLabel="모든 프로젝트 보기" />
-          <div class="grid gap-4 xl:grid-cols-3">
-            {featuredProjects.map((project) => <ProjectCard project={project} />)}
-          </div>
-        </section>
-      </div>
+      </section>
 
       <Sidebar projects={featuredProjects} />
     </div>

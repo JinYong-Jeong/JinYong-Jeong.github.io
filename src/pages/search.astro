@@ -36,54 +36,54 @@ const searchItems = [
 ---
 
 <BaseLayout title="Search" description="글과 프로젝트를 통합 검색합니다.">
-  <div class="container-page py-10">
-    <div class="grid gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(280px,3fr)]">
-      <div class="space-y-6">
-        <section class="panel p-6">
+  <div class="container-page py-8 lg:py-10">
+    <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <section class="surface-main">
+        <header class="surface-section">
           <p class="chip mb-4 w-fit">Unified Search</p>
-          <h1 class="text-4xl font-black tracking-normal">Search</h1>
-          <p class="mt-3 max-w-2xl text-[var(--color-muted)]">
+          <h1 class="text-4xl font-black tracking-normal sm:text-5xl">Search</h1>
+          <p class="mt-4 max-w-3xl text-[15px] leading-8 text-[var(--color-muted)]">
             글 제목, 설명, 태그, 프로젝트 설명을 한 번에 찾습니다.
           </p>
-          <label class="mt-6 block">
+          <label class="mt-7 block">
             <span class="sr-only">Search all content</span>
             <input
               id="site-search-input"
               type="search"
               placeholder="예: LoRA, Flower, quantization, evaluation"
-              class="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-soft)] px-4 py-4 text-base text-[var(--color-text)] outline-none transition-colors placeholder:text-[var(--color-subtle)] focus:border-[var(--color-accent-2)]"
+              class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-soft)] px-4 py-3.5 text-base text-[var(--color-text)] outline-none transition-colors placeholder:text-[var(--color-subtle)] focus:border-[var(--color-accent-2)]"
             />
           </label>
           <p id="site-search-summary" class="mt-3 text-sm text-[var(--color-muted)]">
             총 {searchItems.length}개의 항목
           </p>
-        </section>
+        </header>
 
-        <section class="panel p-5 sm:p-6">
-          <div id="site-search-results" class="grid gap-4">
+        <section class="surface-divider">
+          <div id="site-search-results" class="content-list">
             {
               searchItems.map((item) => (
                 <a
                   href={item.href}
-                  class="panel-subtle block p-5 transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)]"
+                  class="focus-ring block surface-section py-6 hover:bg-[rgba(255,253,248,0.4)]"
                   data-search-item
                   data-search-text={item.tokens.toLowerCase()}
                 >
-                  <div class="flex items-center gap-2 text-xs text-[var(--color-muted)]">
+                  <div class="flex flex-wrap items-center gap-2 text-xs text-[var(--color-muted)]">
                     <span class="chip">{item.type === "post" ? "Post" : "Project"}</span>
                     <span>{item.meta}</span>
                   </div>
-                  <h2 class="mt-4 text-xl font-bold tracking-normal text-[var(--color-text)]">{item.title}</h2>
-                  <p class="mt-2 text-sm leading-7 text-[var(--color-muted)]">{item.description}</p>
+                  <h2 class="mt-4 text-[1.55rem] font-bold leading-[1.25] tracking-normal text-[var(--color-text)]">{item.title}</h2>
+                  <p class="mt-3 max-w-3xl text-sm leading-7 text-[var(--color-muted)]">{item.description}</p>
                 </a>
               ))
             }
           </div>
-          <div id="site-search-empty" class="hidden rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface-soft)] px-5 py-10 text-center text-sm text-[var(--color-muted)]">
+          <div id="site-search-empty" class="hidden surface-section text-center text-sm text-[var(--color-muted)]">
             일치하는 결과가 없습니다. 다른 키워드로 다시 검색해보세요.
           </div>
         </section>
-      </div>
+      </section>
 
       <Sidebar projects={sidebarProjects} />
     </div>

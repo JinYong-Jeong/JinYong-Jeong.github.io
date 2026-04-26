@@ -3,13 +3,14 @@ import type { Project } from "@/lib/content";
 
 interface Props {
   project: Project;
+  compact?: boolean;
 }
 
-const { project } = Astro.props;
+const { project, compact = false } = Astro.props;
 const key = project.id.toLowerCase();
 ---
 
-<div class="project-visual">
+<div class:list={["project-visual overflow-hidden", compact ? "rounded-[0.9rem] border border-[var(--color-border)]" : "rounded-[0.9rem]"]}>
   {
     key.includes("flower") && (
       <svg viewBox="0 0 420 190" class="h-full w-full" role="img" aria-label="Federated learning project visual">

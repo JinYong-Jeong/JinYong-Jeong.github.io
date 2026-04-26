@@ -15,9 +15,10 @@ const visibleHeadings = headings.filter((heading) => heading.depth === 2 || head
 
 {
   visibleHeadings.length > 0 && (
-    <nav class="panel p-5" aria-label="Table of contents">
-      <h2 class="mb-4 text-sm font-bold uppercase tracking-[0.08em] text-[var(--color-accent)]">Contents</h2>
-      <ol class="space-y-2 text-sm">
+    <nav class="surface-main" aria-label="Table of contents">
+      <div class="surface-section">
+        <h2 class="mb-4 text-sm font-bold uppercase tracking-[0.08em] text-[var(--color-accent)]">Contents</h2>
+        <ol class="space-y-2 text-sm">
         {visibleHeadings.map((heading) => (
           <li style={`padding-left: ${heading.depth === 3 ? "0.85rem" : "0"}`}>
             <a class="focus-ring block rounded-lg py-1 text-[var(--color-muted)] hover:text-[var(--color-accent)]" href={`#${heading.slug}`}>
@@ -25,7 +26,8 @@ const visibleHeadings = headings.filter((heading) => heading.depth === 2 || head
             </a>
           </li>
         ))}
-      </ol>
+        </ol>
+      </div>
     </nav>
   )
 }

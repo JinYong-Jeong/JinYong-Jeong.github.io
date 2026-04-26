@@ -5,36 +5,64 @@ import type { Project } from "@/lib/content";
 
 interface Props {
   project: Project;
+  variant?: "tile" | "row";
 }
 
-const { project } = Astro.props;
+const { project, variant = "tile" } = Astro.props;
 ---
 
-<article
-  id={project.id}
-  class="panel-subtle scroll-mt-24 overflow-hidden transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)]"
->
-  <ProjectVisual project={project} />
-  <div class="p-5">
-    <div class="mb-3 flex flex-wrap items-center gap-2">
-      <h3 class="text-lg font-bold tracking-normal">{project.data.title}</h3>
-      <span class="chip">{project.data.status}</span>
-    </div>
-    <p class="text-sm leading-7 text-[var(--color-muted)]">{project.data.description}</p>
-    <div class="mt-4 flex flex-wrap gap-2">
-      {project.data.techStack.map((tech) => <span class="chip">{tech}</span>)}
-    </div>
-    {
-      project.data.links.length > 0 && (
-        <div class="mt-4 flex flex-wrap gap-3">
-          {project.data.links.map((link) => (
-            <a class="focus-ring inline-flex items-center gap-1 text-sm font-semibold text-[var(--color-accent)] hover:underline" href={link.href}>
-              {link.label}
-              <ExternalLink size={14} />
-            </a>
-          ))}
+{
+  variant === "row" ? (
+    <article id={project.id} class="grid gap-6 py-7 xl:grid-cols-[240px_minmax(0,1fr)] xl:items-start">
+      <ProjectVisual project={project} compact={true} />
+      <div class="min-w-0">
+        <div class="mb-3 flex flex-wrap items-center gap-2">
+          <h3 class="text-[1.6rem] font-bold leading-[1.25] tracking-normal">{project.data.title}</h3>
+          <span class="chip">{project.data.status}</span>
         </div>
-      )
-    }
-  </div>
-</article>
+        <p class="max-w-3xl text-[15px] leading-8 text-[var(--color-muted)]">{project.data.description}</p>
+        <div class="mt-5 flex flex-wrap gap-2">
+          {project.data.techStack.map((tech) => <span class="chip">{tech}</span>)}
+        </div>
+        {
+          project.data.links.length > 0 && (
+            <div class="mt-5 flex flex-wrap gap-4">
+              {project.data.links.map((link) => (
+                <a class="focus-ring inline-flex items-center gap-1 text-sm font-semibold text-[var(--color-accent)] hover:underline" href={link.href}>
+                  {link.label}
+                  <ExternalLink size={14} />
+                </a>
+              ))}
+            </div>
+          )
+        }
+      </div>
+    </article>
+  ) : (
+    <article id={project.id} class="group">
+      <ProjectVisual project={project} compact={true} />
+      <div class="pt-4">
+        <div class="mb-3 flex flex-wrap items-center gap-2">
+          <h3 class="text-xl font-bold tracking-normal">{project.data.title}</h3>
+          <span class="chip">{project.data.status}</span>
+        </div>
+        <p class="text-sm leading-7 text-[var(--color-muted)]">{project.data.description}</p>
+        <div class="mt-4 flex flex-wrap gap-2">
+          {project.data.techStack.map((tech) => <span class="chip">{tech}</span>)}
+        </div>
+        {
+          project.data.links.length > 0 && (
+            <div class="mt-4 flex flex-wrap gap-3">
+              {project.data.links.map((link) => (
+                <a class="focus-ring inline-flex items-center gap-1 text-sm font-semibold text-[var(--color-accent)] hover:underline" href={link.href}>
+                  {link.label}
+                  <ExternalLink size={14} />
+                </a>
+              ))}
+            </div>
+          )
+        }
+      </div>
+    </article>
+  )
+}

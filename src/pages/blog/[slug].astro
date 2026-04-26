@@ -23,14 +23,14 @@ const category = post.data.category as CategoryKey;
 ---
 
 <BaseLayout title={post.data.title} description={post.data.description} type="article">
-  <div class="container-page py-10">
-    <div class="grid gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(250px,3fr)]">
-      <article class="panel overflow-hidden">
-        <header class="border-b border-[var(--color-border)] p-6 sm:p-8">
+  <div class="container-page py-8 lg:py-10">
+    <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
+      <article class="surface-main">
+        <header class="surface-section">
           <a class="chip focus-ring mb-5 w-fit" href={`/blog/category/${category}/`}>
             {site.categories[category].label}
           </a>
-          <h1 class="max-w-4xl text-3xl font-black leading-tight tracking-normal sm:text-5xl">
+          <h1 class="max-w-4xl text-3xl font-black leading-[1.12] tracking-normal sm:text-5xl">
             {post.data.title}
           </h1>
           <p class="mt-5 max-w-3xl text-lg leading-9 text-[var(--color-muted)]">{post.data.description}</p>
@@ -44,7 +44,7 @@ const category = post.data.category as CategoryKey;
           </div>
           {
             post.data.paper && (
-              <div class="mt-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-soft)] p-4 text-sm text-[var(--color-muted)]">
+              <div class="mt-8 border-t subtle-divider pt-6 text-sm text-[var(--color-muted)]">
                 <p class="font-semibold text-[var(--color-text)]">{post.data.paper.title}</p>
                 <p class="mt-1">
                   {post.data.paper.authors.join(", ")}
@@ -62,15 +62,17 @@ const category = post.data.category as CategoryKey;
             )
           }
         </header>
-        <div class="prose-blog p-6 sm:p-8">
+        <div class="surface-divider prose-blog surface-section">
           <Content />
         </div>
       </article>
       <div class="space-y-4 lg:sticky lg:top-24 lg:self-start">
         <TableOfContents headings={headings} />
-        <div class="panel p-5 text-sm leading-7 text-[var(--color-muted)]">
-          <p class="font-semibold text-[var(--color-text)]">기록 원칙</p>
-          <p class="mt-2">문제, 설정, 결과, 다음 액션을 분리해 나중에 다시 검증할 수 있게 남깁니다.</p>
+        <div class="surface-main">
+          <div class="surface-section text-sm leading-7 text-[var(--color-muted)]">
+            <p class="font-semibold text-[var(--color-text)]">기록 원칙</p>
+            <p class="mt-2">문제, 설정, 결과, 다음 액션을 분리해 나중에 다시 검증할 수 있게 남깁니다.</p>
+          </div>
         </div>
       </div>
     </div>

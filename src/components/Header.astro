@@ -7,8 +7,8 @@ const isActive = (href: string) =>
   href === "/" ? pathname === "/" : pathname.startsWith(href);
 ---
 
-<header class="sticky top-0 z-30 border-b border-[var(--color-border)] bg-[rgba(250,247,241,0.88)] backdrop-blur-xl">
-  <div class="container-page flex h-16 items-center gap-6">
+<header class="sticky top-0 z-30 border-b border-[var(--color-border)] bg-[rgba(250,247,241,0.82)] backdrop-blur-xl">
+  <div class="container-page flex h-16 items-center gap-7">
     <a href="/" class="focus-ring flex shrink-0 items-center gap-3" aria-label="Go to home">
       <span class="text-2xl font-black tracking-normal text-[var(--color-accent)]">{site.shortName}</span>
     </a>
@@ -29,23 +29,23 @@ const isActive = (href: string) =>
         ))
       }
     </nav>
-    <div class="ml-auto flex items-center gap-2">
+    <div class="ml-auto flex items-center gap-3">
       <a
-        class="focus-ring inline-flex size-10 items-center justify-center rounded-full text-[var(--color-accent)] transition-colors hover:bg-[var(--color-surface-soft)]"
+        class="focus-ring inline-flex items-center justify-center text-[var(--color-accent)] transition-colors hover:text-[var(--color-accent-2)]"
         href="/search/"
         aria-label="Search"
       >
         <Search size={18} stroke-width={1.8} />
       </a>
       <a
-        class="focus-ring inline-flex size-10 items-center justify-center rounded-full text-[var(--color-accent)] transition-colors hover:bg-[var(--color-surface-soft)]"
+        class="focus-ring inline-flex items-center justify-center text-[var(--color-accent)] transition-colors hover:text-[var(--color-accent-2)]"
         href="https://github.com/JinYong-Jeong"
         aria-label="GitHub"
       >
         <GitFork size={18} stroke-width={1.8} />
       </a>
       <a
-        class="focus-ring inline-flex size-10 items-center justify-center rounded-full text-[var(--color-accent)] transition-colors hover:bg-[var(--color-surface-soft)]"
+        class="focus-ring inline-flex items-center justify-center text-[var(--color-accent)] transition-colors hover:text-[var(--color-accent-2)]"
         href="/rss.xml"
         aria-label="RSS"
       >

@@ -12,18 +12,18 @@ const iconMap = { github: GitFork, mail: Mail, linkedin: BriefcaseBusiness, rss:
 const sidebarTechStack = site.techStack.slice(0, 8);
 ---
 
-<aside class="space-y-4 lg:sticky lg:top-24 lg:self-start">
-  <section class="panel p-5 lg:p-6">
-    <h2 class="mb-4 text-lg font-bold tracking-normal">About Me</h2>
+<aside class="surface-main sidebar-shell lg:sticky lg:top-24 lg:self-start">
+  <section class="surface-section">
+    <h2 class="mb-5 text-lg font-bold tracking-normal">About Me</h2>
     <div class="flex gap-4">
       <img
         src={site.author.avatar}
         alt={`${site.author.displayName} avatar`}
-        class="size-20 shrink-0 rounded-[1.5rem] border border-[var(--color-border)] object-cover"
+        class="size-20 shrink-0 rounded-[1rem] border border-[var(--color-border)] object-cover"
         loading="lazy"
         referrerpolicy="no-referrer"
       />
-      <div>
+      <div class="min-w-0">
         <p class="font-semibold">{site.author.displayName}입니다.</p>
         <p class="mt-2 text-sm leading-7 text-[var(--color-muted)]">{site.author.bio}</p>
       </div>
@@ -33,61 +33,53 @@ const sidebarTechStack = site.techStack.slice(0, 8);
     </div>
   </section>
 
-  <section class="panel p-5 lg:p-6">
-    <h2 class="mb-4 text-lg font-bold tracking-normal">Tech Stack</h2>
-    <div class="grid grid-cols-4 gap-3">
+  <section class="surface-section">
+    <h2 class="mb-5 text-lg font-bold tracking-normal">Tech Stack</h2>
+    <ul class="sidebar-tech-list">
       {
         sidebarTechStack.map((tech) => (
-          <div class="panel-subtle flex min-h-20 flex-col items-center justify-center gap-2 p-2 text-center">
-            <span class="flex size-8 items-center justify-center rounded-full bg-[var(--color-surface-soft)] text-sm font-black text-[var(--color-accent)]">
-              {tech.slice(0, 2)}
-            </span>
-            <span class="text-[11px] font-medium leading-4 text-[var(--color-muted)]">{tech}</span>
-          </div>
+          <li>
+            <span class="sidebar-tech-dot"></span>
+            <span class="truncate">{tech}</span>
+          </li>
         ))
       }
-    </div>
+    </ul>
   </section>
 
-  <section class="panel p-5 lg:p-6">
-    <h2 class="mb-4 text-lg font-bold tracking-normal">Recent Projects</h2>
-    <div class="space-y-2">
+  <section class="surface-section">
+    <div class="mb-5 flex items-center justify-between gap-3">
+      <h2 class="text-lg font-bold tracking-normal">Recent Projects</h2>
+      <a class="focus-ring text-sm font-semibold text-[var(--color-accent)] hover:underline" href="/projects/">
+        All
+      </a>
+    </div>
+    <div class="content-list">
       {
         projects.slice(0, 3).map((project) => (
-          <a
-            class="focus-ring group flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-[var(--color-surface-soft)]"
-            href={getProjectUrl(project)}
-          >
-            <span class="flex size-9 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)] text-xs font-black text-[var(--color-accent)]">
-              {project.data.title.slice(0, 1)}
-            </span>
+          <a class="focus-ring flex items-start gap-3 py-3 first:pt-0 last:pb-0 hover:text-[var(--color-accent)]" href={getProjectUrl(project)}>
+            <span class="rail-label mt-0.5 shrink-0">{project.data.title.slice(0, 1)}</span>
             <span class="min-w-0 flex-1">
-              <span class="block truncate text-sm font-semibold">{project.data.title}</span>
-              <span class="block truncate text-xs text-[var(--color-muted)]">{project.data.description}</span>
+              <span class="block truncate text-sm font-semibold text-[var(--color-text)]">{project.data.title}</span>
+              <span class="mt-1 block truncate text-sm text-[var(--color-muted)]">{project.data.description}</span>
             </span>
-            <ArrowRight class="text-[var(--color-accent)] transition-transform group-hover:translate-x-0.5" size={16} />
+            <ArrowRight class="mt-0.5 shrink-0 text-[var(--color-accent)]" size={15} />
           </a>
         ))
       }
     </div>
-    <a
-      class="focus-ring mt-4 flex justify-center rounded-xl bg-[var(--color-surface-soft)] px-4 py-2 text-sm font-semibold text-[var(--color-accent)] hover:bg-[#efe2d7]"
-      href="/projects/"
-    >
-      모든 프로젝트 보기 →
-    </a>
   </section>
 
-  <section class="panel p-5 lg:p-6">
-    <h2 class="mb-4 text-lg font-bold tracking-normal">Stay in Touch</h2>
-    <div class="grid grid-cols-4 gap-3">
+  <section class="surface-section">
+    <h2 class="mb-5 text-lg font-bold tracking-normal">Stay in Touch</h2>
+    <div class="sidebar-link-grid">
       {
         site.socials.map((link) => {
           const Icon = iconMap[link.icon as keyof typeof iconMap];
           return (
-            <a class="focus-ring panel-subtle flex min-h-20 flex-col items-center justify-center gap-2 p-2 text-center text-[11px] font-medium leading-4 text-[var(--color-muted)] hover:text-[var(--color-accent)]" href={link.href}>
-              <Icon size={22} stroke-width={1.8} />
-              {link.label}
+            <a class="focus-ring" href={link.href}>
+              <Icon size={18} stroke-width={1.8} />
+              <span>{link.label}</span>
             </a>
           );
         })
