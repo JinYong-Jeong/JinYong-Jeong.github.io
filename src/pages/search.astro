@@ -1,0 +1,125 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Sidebar from "@/components/Sidebar.astro";
+import { site } from "@/config/site";
+import {
+  formatDate,
+  getAllProjects,
+  getFeaturedProjects,
+  getPostUrl,
+  getProjectUrl,
+  getPublishedPosts
+} from "@/lib/content";
+
+const posts = await getPublishedPosts();
+const projects = await getAllProjects();
+const sidebarProjects = await getFeaturedProjects(3);
+
+const searchItems = [
+  ...posts.map((post) => ({
+    type: "post",
+    title: post.data.title,
+    description: post.data.description,
+    href: getPostUrl(post),
+    meta: `${site.categories[post.data.category].label} · ${formatDate(post.data.date)}`,
+    tokens: [post.data.title, post.data.description, post.data.category, ...post.data.tags].join(" ")
+  })),
+  ...projects.map((project) => ({
+    type: "project",
+    title: project.data.title,
+    description: project.data.description,
+    href: getProjectUrl(project),
+    meta: `Project · ${formatDate(project.data.date)}`,
+    tokens: [project.data.title, project.data.description, ...project.data.techStack].join(" ")
+  }))
+];
+---
+
+<BaseLayout title="Search" description="글과 프로젝트를 통합 검색합니다.">
+  <div class="container-page py-10">
+    <div class="grid gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(280px,3fr)]">
+      <div class="space-y-6">
+        <section class="panel p-6">
+          <p class="chip mb-4 w-fit">Unified Search</p>
+          <h1 class="text-4xl font-black tracking-normal">Search</h1>
+          <p class="mt-3 max-w-2xl text-[var(--color-muted)]">
+            글 제목, 설명, 태그, 프로젝트 설명을 한 번에 찾습니다.
+          </p>
+          <label class="mt-6 block">
+            <span class="sr-only">Search all content</span>
+            <input
+              id="site-search-input"
+              type="search"
+              placeholder="예: LoRA, Flower, quantization, evaluation"
+              class="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-soft)] px-4 py-4 text-base text-[var(--color-text)] outline-none transition-colors placeholder:text-[var(--color-subtle)] focus:border-[var(--color-accent-2)]"
+            />
+          </label>
+          <p id="site-search-summary" class="mt-3 text-sm text-[var(--color-muted)]">
+            총 {searchItems.length}개의 항목
+          </p>
+        </section>
+
+        <section class="panel p-5 sm:p-6">
+          <div id="site-search-results" class="grid gap-4">
+            {
+              searchItems.map((item) => (
+                <a
+                  href={item.href}
+                  class="panel-subtle block p-5 transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)]"
+                  data-search-item
+                  data-search-text={item.tokens.toLowerCase()}
+                >
+                  <div class="flex items-center gap-2 text-xs text-[var(--color-muted)]">
+                    <span class="chip">{item.type === "post" ? "Post" : "Project"}</span>
+                    <span>{item.meta}</span>
+                  </div>
+                  <h2 class="mt-4 text-xl font-bold tracking-normal text-[var(--color-text)]">{item.title}</h2>
+                  <p class="mt-2 text-sm leading-7 text-[var(--color-muted)]">{item.description}</p>
+                </a>
+              ))
+            }
+          </div>
+          <div id="site-search-empty" class="hidden rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface-soft)] px-5 py-10 text-center text-sm text-[var(--color-muted)]">
+            일치하는 결과가 없습니다. 다른 키워드로 다시 검색해보세요.
+          </div>
+        </section>
+      </div>
+
+      <Sidebar projects={sidebarProjects} />
+    </div>
+  </div>
+
+  <script is:inline>
+    const params = new URLSearchParams(window.location.search);
+    const initialQuery = params.get("q") || "";
+    const input = document.querySelector("#site-search-input");
+    const summary = document.querySelector("#site-search-summary");
+    const emptyState = document.querySelector("#site-search-empty");
+    const items = Array.from(document.querySelectorAll("[data-search-item]"));
+
+    if (input) input.value = initialQuery;
+
+    const update = () => {
+      const query = String(input?.value || "").trim().toLowerCase();
+      let visible = 0;
+
+      for (const item of items) {
+        const text = item.getAttribute("data-search-text") || "";
+        const match = !query || text.includes(query);
+        item.toggleAttribute("hidden", !match);
+        if (match) visible += 1;
+      }
+
+      if (summary) {
+        summary.textContent = query
+          ? `"${query}" 검색 결과 ${visible}개`
+          : `총 ${items.length}개의 항목`;
+      }
+
+      emptyState?.classList.toggle("hidden", visible !== 0);
+    };
+
+    input?.addEventListener("input", update);
+    update();
+  </script>
+</BaseLayout>

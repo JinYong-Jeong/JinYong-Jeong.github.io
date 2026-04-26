@@ -22,6 +22,23 @@ const projects = await getFeaturedProjects(3);
           <p class="mt-3 max-w-2xl text-[var(--color-muted)]">
             공부한 개념, 읽은 논문, 실험 결과, 구현하면서 정리한 문제 해결 기록을 모읍니다.
           </p>
+          <div class="mt-6 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
+            <label class="block">
+              <span class="sr-only">검색</span>
+              <input
+                id="blog-search"
+                type="search"
+                placeholder="제목, 설명, 태그 검색"
+                class="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-soft)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors placeholder:text-[var(--color-subtle)] focus:border-[var(--color-accent-2)]"
+              />
+            </label>
+            <a class="focus-ring inline-flex items-center justify-center rounded-2xl border border-[var(--color-border)] px-4 py-3 text-sm font-semibold text-[var(--color-accent)] hover:bg-[var(--color-surface-soft)]" href="/search/">
+              전체 검색 페이지 →
+            </a>
+          </div>
+          <p id="blog-search-summary" class="mt-3 text-sm text-[var(--color-muted)]">
+            {posts.length}개의 공개 글
+          </p>
         </section>
 
         <section class="panel p-5 sm:p-6">
@@ -41,13 +58,48 @@ const projects = await getFeaturedProjects(3);
         </section>
 
         <section class="panel p-5 sm:p-6">
-          <SectionHeader title="전체 글" description={`${posts.length}개의 공개 글`} />
-          <div class="grid gap-4 xl:grid-cols-2">
-            {posts.map((post) => <PostCard post={post} />)}
+          <SectionHeader title="전체 글" description="연구 노트와 구현 기록을 시간순으로 정리했습니다." />
+          <div id="blog-post-grid" class="grid gap-4 xl:grid-cols-2">
+            {
+              posts.map((post) => (
+                <div
+                  data-post-card
+                  data-search={`${post.data.title} ${post.data.description} ${post.data.tags.join(" ")} ${post.data.category}`.toLowerCase()}
+                >
+                  <PostCard post={post} />
+                </div>
+              ))
+            }
           </div>
         </section>
       </div>
       <Sidebar projects={projects} />
     </div>
   </div>
+
+  <script is:inline>
+    const input = document.querySelector("#blog-search");
+    const summary = document.querySelector("#blog-search-summary");
+    const cards = Array.from(document.querySelectorAll("[data-post-card]"));
+
+    const update = () => {
+      const query = String(input?.value || "").trim().toLowerCase();
+      let visible = 0;
+
+      for (const card of cards) {
+        const searchText = card.getAttribute("data-search") || "";
+        const match = !query || searchText.includes(query);
+        card.toggleAttribute("hidden", !match);
+        if (match) visible += 1;
+      }
+
+      if (summary) {
+        summary.textContent = query
+          ? `"${query}" 검색 결과 ${visible}개`
+          : `${cards.length}개의 공개 글`;
+      }
+    };
+
+    input?.addEventListener("input", update);
+  </script>
 </BaseLayout>

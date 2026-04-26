@@ -42,6 +42,16 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-subtle);
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
 h1,
 h2,
 h3,

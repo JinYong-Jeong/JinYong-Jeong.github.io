@@ -13,11 +13,15 @@ const iconMap = { github: GitBranch, mail: Mail, linkedin: BriefcaseBusiness, rs
 
 <aside class="space-y-4 lg:sticky lg:top-24">
   <section class="panel p-5">
-    <h2 class="mb-4 text-lg font-bold tracking-normal">About Me</h2>
+    <h2 class="mb-4 text-lg font-bold tracking-normal">About</h2>
     <div class="flex gap-4">
-      <div class="flex size-20 shrink-0 items-center justify-center rounded-3xl border border-[var(--color-border)] bg-[linear-gradient(135deg,#f3e3d5,#d8b49a)] text-2xl font-black text-[var(--color-accent)]">
-        {site.shortName}
-      </div>
+      <img
+        src={site.author.avatar}
+        alt={`${site.author.displayName} avatar`}
+        class="size-20 shrink-0 rounded-3xl border border-[var(--color-border)] object-cover"
+        loading="lazy"
+        referrerpolicy="no-referrer"
+      />
       <div>
         <p class="font-semibold">{site.author.displayName}입니다.</p>
         <p class="mt-2 text-sm leading-7 text-[var(--color-muted)]">{site.author.bio}</p>

@@ -11,13 +11,15 @@ export const site = {
     displayName: "Jinyong",
     role: "Developer · Researcher · Builder",
     location: "Seoul, Korea",
-    bio: "LLM과 Federated Learning을 중심으로 연구하고, 실험하고, 구현하며 배운 내용을 재현 가능한 기록으로 남깁니다.",
+    avatar: "https://avatars.githubusercontent.com/u/174023460?v=4",
+    bio: "LLM과 Federated Learning을 중심으로 연구하고, 실험하고, 구현하면서 배운 내용을 재현 가능한 기록으로 남깁니다.",
     longBio:
-      "모델을 더 잘 이해하기 위해 논문을 읽고, 작은 실험을 설계하고, 구현 과정에서 마주친 문제를 기록합니다. 이 블로그는 공부한 내용을 정리하는 공간이면서, 나중에 같은 문제를 다시 풀 때 바로 참고할 수 있는 연구 노트입니다."
+      "논문을 읽고 끝내지 않고 직접 구현하고 검증하는 편입니다. 모델 성능 자체보다 왜 그런 결과가 나왔는지, 다음 실험에서 무엇을 바꿔야 하는지까지 남기는 기록을 선호합니다. 이 블로그는 그 과정을 쌓아두는 연구 노트이자 개발 아카이브입니다."
   },
   nav: [
     { label: "Home", href: "/" },
     { label: "Blog", href: "/blog/" },
+    { label: "Search", href: "/search/" },
     { label: "Projects", href: "/projects/" },
     { label: "About", href: "/about/" }
   ],
@@ -28,19 +30,19 @@ export const site = {
     },
     "federated-learning": {
       label: "Federated Learning",
-      description: "분산 학습, client sampling, domain shift, Flower 실험"
+      description: "분산 학습, client sampling, domain shift, Flower 실험 기록"
     },
     "paper-review": {
       label: "Paper Review",
-      description: "논문 핵심 아이디어, 실험, 구현 관점 정리"
+      description: "논문 핵심 아이디어와 구현 관점을 정리한 리뷰"
     },
     "experiment-log": {
       label: "Experiment Log",
-      description: "실험 설정, 결과, 실패 원인, 다음 action"
+      description: "실험 설정, 결과, 실패 원인, 다음 액션을 기록한 로그"
     },
     development: {
       label: "Development",
-      description: "개발 환경, 자동화, 도구, 블로그 운영 기록"
+      description: "개발 환경, 자동화, 도구, 블로그 운영 관련 기록"
     }
   },
   techStack: [
@@ -66,6 +68,32 @@ export const site = {
     { label: "Email", href: "mailto:your-email@example.com", icon: "mail" },
     { label: "LinkedIn", href: "https://www.linkedin.com/", icon: "linkedin" },
     { label: "RSS", href: "/rss.xml", icon: "rss" }
+  ],
+  achievements: [
+    {
+      title: "Aing 운영진",
+      organization: "Aing",
+      period: "2025.06 - Present",
+      note: "커뮤니티 운영과 프로그램 기획을 담당"
+    },
+    {
+      title: "Aing 부회장",
+      organization: "Aing",
+      period: "2026.01 - Present",
+      note: "운영 체계 정리와 대외 협업 조율"
+    },
+    {
+      title: "가천인재상",
+      organization: "Gachon University",
+      period: "예시",
+      note: "추후 실제 수상 내역으로 교체 예정"
+    },
+    {
+      title: "논문 실적",
+      organization: "To be updated",
+      period: "예시",
+      note: "논문 제목, 저자 순서, 게재 정보 추가 예정"
+    }
   ]
 } as const;
 

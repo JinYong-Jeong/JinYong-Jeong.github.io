@@ -46,8 +46,18 @@ const category = post.data.category as CategoryKey;
             post.data.paper && (
               <div class="mt-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-soft)] p-4 text-sm text-[var(--color-muted)]">
                 <p class="font-semibold text-[var(--color-text)]">{post.data.paper.title}</p>
-                <p class="mt-1">{post.data.paper.authors.join(", ")} {post.data.paper.year ? `· ${post.data.paper.year}` : ""}</p>
-                {post.data.paper.url && <a class="mt-2 inline-block font-semibold text-[var(--color-accent)] hover:underline" href={post.data.paper.url}>Paper link →</a>}
+                <p class="mt-1">
+                  {post.data.paper.authors.join(", ")}
+                  {post.data.paper.year ? ` · ${post.data.paper.year}` : ""}
+                  {post.data.paper.venue ? ` · ${post.data.paper.venue}` : ""}
+                </p>
+                {
+                  post.data.paper.url && (
+                    <a class="mt-2 inline-block font-semibold text-[var(--color-accent)] hover:underline" href={post.data.paper.url}>
+                      Paper link →
+                    </a>
+                  )
+                }
               </div>
             )
           }
@@ -60,7 +70,7 @@ const category = post.data.category as CategoryKey;
         <TableOfContents headings={headings} />
         <div class="panel p-5 text-sm leading-7 text-[var(--color-muted)]">
           <p class="font-semibold text-[var(--color-text)]">기록 원칙</p>
-          <p class="mt-2">문제, 설정, 결과, 다음 action을 분리해 나중에 다시 검증할 수 있게 남깁니다.</p>
+          <p class="mt-2">문제, 설정, 결과, 다음 액션을 분리해 나중에 다시 검증할 수 있게 남깁니다.</p>
         </div>
       </div>
     </div>

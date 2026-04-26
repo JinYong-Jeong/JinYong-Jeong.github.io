@@ -5,8 +5,8 @@ import PostCard from "@/components/PostCard.astro";
 import ProjectCard from "@/components/ProjectCard.astro";
 import SectionHeader from "@/components/SectionHeader.astro";
 import Sidebar from "@/components/Sidebar.astro";
-import { site } from "@/config/site";
-import { getFeaturedProjects, getPublishedPosts } from "@/lib/content";
+import { site, type CategoryKey } from "@/config/site";
+import { categoryKeys, getFeaturedProjects, getPublishedPosts } from "@/lib/content";
 
 const posts = await getPublishedPosts();
 const recentPosts = posts.slice(0, 3);
@@ -17,29 +17,90 @@ const featuredProjects = await getFeaturedProjects(3);
   <div class="container-page py-10 lg:py-14">
     <div class="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(280px,3fr)]">
       <div class="min-w-0 space-y-6">
-        <section class="grid min-w-0 items-center gap-7 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)]">
-          <div class="min-w-0 py-4">
-            <p class="chip mb-5 w-fit">{site.author.role}</p>
-            <h1 class="hero-title max-w-3xl text-4xl font-black leading-tight tracking-normal text-[var(--color-text)] sm:text-5xl lg:text-6xl">
-              <span class="block sm:inline-block">실험하고,</span>
-              <span class="block sm:inline-block">기록하고,</span>
-              <span class="block sm:inline-block">공유합니다.</span>
-            </h1>
-            <p class="hero-copy mt-5 max-w-2xl text-lg leading-9 text-[var(--color-muted)]">
-              <span class="block">LLM과 Federated Learning을 중심으로</span>
-              <span class="block">논문 리뷰와 실험 로그를 쌓아갑니다.</span>
-              <span class="block">다시 검증할 수 있는 기록을 먼저 남깁니다.</span>
-            </p>
-            <div class="mt-8 flex flex-wrap gap-3">
-              <a class="focus-ring rounded-xl bg-[var(--color-accent)] px-5 py-3 font-semibold text-white shadow-[var(--shadow-card)] hover:bg-[#59331f]" href="/blog/">
-                최근 글 읽기 →
-              </a>
-              <a class="focus-ring rounded-xl border border-[var(--color-border-strong)] px-5 py-3 font-semibold text-[var(--color-accent)] hover:bg-[var(--color-surface-soft)]" href="/projects/">
-                프로젝트 보기
-              </a>
+        <section class="panel p-6 sm:p-8">
+          <div class="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)] lg:items-center">
+            <div class="min-w-0">
+              <p class="chip mb-5 w-fit">{site.author.role}</p>
+              <h1 class="hero-title max-w-3xl text-4xl font-black leading-tight tracking-normal text-[var(--color-text)] sm:text-5xl lg:text-6xl">
+                <span class="block sm:inline-block">실험하고,</span>
+                <span class="block sm:inline-block">기록하고,</span>
+                <span class="block sm:inline-block">공유합니다.</span>
+              </h1>
+              <p class="hero-copy mt-5 max-w-2xl text-lg leading-9 text-[var(--color-muted)]">
+                <span class="block">LLM과 Federated Learning을 중심으로</span>
+                <span class="block">논문 리뷰와 실험 로그를 쌓아갑니다.</span>
+                <span class="block">다시 검증할 수 있는 기록을 먼저 남깁니다.</span>
+              </p>
+              <div class="mt-8 flex flex-wrap gap-3">
+                <a class="focus-ring rounded-xl bg-[var(--color-accent)] px-5 py-3 font-semibold text-white shadow-[var(--shadow-card)] hover:bg-[#59331f]" href="/blog/">
+                  최근 글 읽기 →
+                </a>
+                <a class="focus-ring rounded-xl border border-[var(--color-border-strong)] px-5 py-3 font-semibold text-[var(--color-accent)] hover:bg-[var(--color-surface-soft)]" href="/search/">
+                  검색 시작하기
+                </a>
+              </div>
+              <div class="mt-8 grid gap-3 sm:grid-cols-3">
+                <div class="panel-subtle p-4">
+                  <p class="text-xs uppercase tracking-[0.08em] text-[var(--color-subtle)]">Posts</p>
+                  <p class="mt-2 text-2xl font-black text-[var(--color-accent)]">{posts.length}</p>
+                  <p class="mt-1 text-sm text-[var(--color-muted)]">공개 글 아카이브</p>
+                </div>
+                <div class="panel-subtle p-4">
+                  <p class="text-xs uppercase tracking-[0.08em] text-[var(--color-subtle)]">Projects</p>
+                  <p class="mt-2 text-2xl font-black text-[var(--color-accent)]">{featuredProjects.length}</p>
+                  <p class="mt-1 text-sm text-[var(--color-muted)]">현재 소개 중인 프로젝트</p>
+                </div>
+                <div class="panel-subtle p-4">
+                  <p class="text-xs uppercase tracking-[0.08em] text-[var(--color-subtle)]">Focus</p>
+                  <p class="mt-2 text-2xl font-black text-[var(--color-accent)]">{site.focusAreas.length}</p>
+                  <p class="mt-1 text-sm text-[var(--color-muted)]">핵심 연구 트랙</p>
+                </div>
+              </div>
+            </div>
+            <HeroVisual />
+          </div>
+        </section>
+
+        <section class="grid gap-6 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+          <div class="panel p-5 sm:p-6">
+            <SectionHeader title="Search Archive" description="제목, 설명, 태그를 기준으로 바로 찾을 수 있습니다." />
+            <form action="/search/" class="space-y-4">
+              <label class="block">
+                <span class="mb-2 block text-sm font-medium text-[var(--color-text)]">무엇을 찾고 있나요?</span>
+                <input
+                  name="q"
+                  type="search"
+                  placeholder="예: LoRA, Flower, quantization"
+                  class="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-soft)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors placeholder:text-[var(--color-subtle)] focus:border-[var(--color-accent-2)]"
+                />
+              </label>
+              <div class="flex flex-wrap gap-2">
+                <span class="chip">#llm</span>
+                <span class="chip">#flower</span>
+                <span class="chip">#paper</span>
+                <span class="chip">#quantization</span>
+              </div>
+              <button class="focus-ring rounded-xl bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#59331f]" type="submit">
+                전체 아카이브 검색
+              </button>
+            </form>
+          </div>
+
+          <div class="panel p-5 sm:p-6">
+            <SectionHeader title="Research Tracks" description="지금 블로그가 다루는 큰 흐름입니다." />
+            <div class="grid gap-3 sm:grid-cols-2">
+              {
+                categoryKeys.map((category) => (
+                  <a href={`/blog/category/${category}/`} class="panel-subtle p-4 transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)]">
+                    <p class="text-sm font-semibold text-[var(--color-accent)]">{site.categories[category as CategoryKey].label}</p>
+                    <p class="mt-2 text-sm leading-7 text-[var(--color-muted)]">
+                      {site.categories[category as CategoryKey].description}
+                    </p>
+                  </a>
+                ))
+              }
             </div>
           </div>
-          <HeroVisual />
         </section>
 
         <section class="panel p-5 sm:p-6">
