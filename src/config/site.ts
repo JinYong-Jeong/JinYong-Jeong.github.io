@@ -46,16 +46,10 @@ export const site = {
     }
   },
   techStack: [
-    "Python",
-    "PyTorch",
-    "Hugging Face",
-    "Flower",
-    "LoRA",
-    "PEFT",
-    "Docker",
-    "Linux",
-    "Git",
-    "Astro"
+    "AI Agnet",
+    "AI",
+    "LLM",
+    "vibe coding"
   ],
   focusAreas: [
     "Federated LLM fine-tuning",
@@ -65,8 +59,8 @@ export const site = {
   ],
   socials: [
     { label: "GitHub", href: "https://github.com/JinYong-Jeong", icon: "github" },
-    { label: "Email", href: "mailto:your-email@example.com", icon: "mail" },
-    { label: "LinkedIn", href: "https://www.linkedin.com/", icon: "linkedin" },
+    { label: "Email", href: "mailto:wjdwlsdyd5373@gmail.com", icon: "mail" },
+    { label: "LinkedIn", href: "https://www.linkedin.com/in/jinyongjeong", icon: "linkedin" },
     { label: "RSS", href: "/rss.xml", icon: "rss" }
   ],
   achievements: [
@@ -83,7 +77,7 @@ export const site = {
       note: "운영 체계 정리와 대외 협업 조율"
     },
     {
-      title: "가천인재상",
+      title: "00상",
       organization: "Gachon University",
       period: "예시",
       note: "추후 실제 수상 내역으로 교체 예정"
