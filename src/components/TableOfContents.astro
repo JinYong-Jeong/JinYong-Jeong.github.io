@@ -1,0 +1,31 @@
+---
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+}
+
+const { headings } = Astro.props;
+const visibleHeadings = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+---
+
+{
+  visibleHeadings.length > 0 && (
+    <nav class="panel p-5" aria-label="Table of contents">
+      <h2 class="mb-4 text-sm font-bold uppercase tracking-[0.08em] text-[var(--color-accent)]">Contents</h2>
+      <ol class="space-y-2 text-sm">
+        {visibleHeadings.map((heading) => (
+          <li style={`padding-left: ${heading.depth === 3 ? "0.85rem" : "0"}`}>
+            <a class="focus-ring block rounded-lg py-1 text-[var(--color-muted)] hover:text-[var(--color-accent)]" href={`#${heading.slug}`}>
+              {heading.text}
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  )
+}

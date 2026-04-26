@@ -1,0 +1,46 @@
+---
+title: "4-bit Quantization과 bitsandbytes 이슈 해결기"
+description: "4-bit inference 실험 중 발생한 CUDA, bitsandbytes, device map 문제를 정리한 실험 로그입니다."
+date: 2026-04-18
+category: experiment-log
+tags: ["quantization", "bitsandbytes", "cuda", "llm"]
+draft: false
+featured: true
+slug: "bitsandbytes-4bit-quantization-log"
+---
+
+## 목적
+
+단일 GPU 환경에서 큰 LLM을 평가하기 위해 4-bit quantization을 적용했습니다.
+목표는 memory 사용량을 낮추면서 evaluation pipeline이 동일하게 동작하는지 확인하는 것입니다.
+
+## 설정
+
+| Item | Value |
+| --- | --- |
+| Quantization | 4-bit NF4 |
+| Compute dtype | bfloat16 |
+| Loader | transformers |
+| Backend | bitsandbytes |
+
+## 발생한 문제
+
+첫 실행에서 `device_map="auto"`와 CUDA library path가 충돌했습니다. 모델 일부가 CPU에 남으면서
+평가 속도가 급격히 느려졌고, 특정 layer에서 dtype mismatch가 발생했습니다.
+
+```python
+model = AutoModelForCausalLM.from_pretrained(
+    model_name,
+    load_in_4bit=True,
+    device_map="auto",
+)
+```
+
+## 해결 방향
+
+환경 로그를 먼저 남기고, CUDA와 bitsandbytes 버전을 고정했습니다. 이후 `max_memory`를 명시해
+CPU offload가 의도치 않게 발생하지 않도록 했습니다.
+
+## 다음 action
+
+동일 prompt set에 대해 fp16 baseline과 4-bit 결과를 비교하고, latency와 memory peak를 함께 기록합니다.

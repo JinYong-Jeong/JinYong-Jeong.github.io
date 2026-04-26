@@ -1,0 +1,63 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import HeroVisual from "@/components/HeroVisual.astro";
+import PostCard from "@/components/PostCard.astro";
+import ProjectCard from "@/components/ProjectCard.astro";
+import SectionHeader from "@/components/SectionHeader.astro";
+import Sidebar from "@/components/Sidebar.astro";
+import { site } from "@/config/site";
+import { getFeaturedProjects, getPublishedPosts } from "@/lib/content";
+
+const posts = await getPublishedPosts();
+const recentPosts = posts.slice(0, 3);
+const featuredProjects = await getFeaturedProjects(3);
+---
+
+<BaseLayout>
+  <div class="container-page py-10 lg:py-14">
+    <div class="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(280px,3fr)]">
+      <div class="min-w-0 space-y-6">
+        <section class="grid min-w-0 items-center gap-7 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)]">
+          <div class="min-w-0 py-4">
+            <p class="chip mb-5 w-fit">{site.author.role}</p>
+            <h1 class="hero-title max-w-3xl text-4xl font-black leading-tight tracking-normal text-[var(--color-text)] sm:text-5xl lg:text-6xl">
+              <span class="block sm:inline-block">실험하고,</span>
+              <span class="block sm:inline-block">기록하고,</span>
+              <span class="block sm:inline-block">공유합니다.</span>
+            </h1>
+            <p class="hero-copy mt-5 max-w-2xl text-lg leading-9 text-[var(--color-muted)]">
+              <span class="block">LLM과 Federated Learning을 중심으로</span>
+              <span class="block">논문 리뷰와 실험 로그를 쌓아갑니다.</span>
+              <span class="block">다시 검증할 수 있는 기록을 먼저 남깁니다.</span>
+            </p>
+            <div class="mt-8 flex flex-wrap gap-3">
+              <a class="focus-ring rounded-xl bg-[var(--color-accent)] px-5 py-3 font-semibold text-white shadow-[var(--shadow-card)] hover:bg-[#59331f]" href="/blog/">
+                최근 글 읽기 →
+              </a>
+              <a class="focus-ring rounded-xl border border-[var(--color-border-strong)] px-5 py-3 font-semibold text-[var(--color-accent)] hover:bg-[var(--color-surface-soft)]" href="/projects/">
+                프로젝트 보기
+              </a>
+            </div>
+          </div>
+          <HeroVisual />
+        </section>
+
+        <section class="panel p-5 sm:p-6">
+          <SectionHeader title="최근 글" href="/blog/" linkLabel="모든 글 보기" />
+          <div class="grid gap-4 xl:grid-cols-3">
+            {recentPosts.map((post) => <PostCard post={post} />)}
+          </div>
+        </section>
+
+        <section class="panel p-5 sm:p-6">
+          <SectionHeader title="주요 프로젝트" href="/projects/" linkLabel="모든 프로젝트 보기" />
+          <div class="grid gap-4 xl:grid-cols-3">
+            {featuredProjects.map((project) => <ProjectCard project={project} />)}
+          </div>
+        </section>
+      </div>
+
+      <Sidebar projects={featuredProjects} />
+    </div>
+  </div>
+</BaseLayout>

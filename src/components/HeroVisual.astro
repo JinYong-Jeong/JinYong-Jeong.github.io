@@ -1,0 +1,36 @@
+---
+---
+
+<div class="hero-visual panel min-w-0 overflow-hidden p-5">
+  <div class="grid min-w-0 gap-4">
+    <div class="grid min-w-0 gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)]">
+      <div class="min-w-0 overflow-x-auto rounded-2xl bg-[#25170f] p-5 font-mono text-xs leading-7 text-[#f6eadf] shadow-sm sm:text-sm" style="width: 100%; max-width: 100%; min-width: 0;">
+        <p><span class="text-[#b88762]">$</span> python train.py --mode mixed</p>
+        <p>Round 10: loss 1.234</p>
+        <p>Round 20: loss 0.945</p>
+        <p>Round 30: loss 0.723</p>
+        <p class="text-[#8fcf9d]">✓ Training completed</p>
+      </div>
+      <svg viewBox="0 0 220 170" class="min-h-40 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-soft)]" role="img" aria-label="LLM network sketch">
+        <g stroke="#9a6241" stroke-width="1" opacity="0.65">
+          <path d="M48 48L100 30L165 54L144 112L70 132Z" fill="none" />
+          <path d="M48 48L144 112M100 30L70 132M165 54L70 132M48 48L165 54" />
+          <path d="M82 80L128 72L145 112L100 128Z" fill="none" />
+        </g>
+        {[48,100,165,144,70,82,128,100].map((x, index) => (
+          <circle cx={x} cy={[48,30,54,112,132,80,72,128][index]} r="5" fill="#9a6241" />
+        ))}
+      </svg>
+    </div>
+    <svg viewBox="0 0 520 170" class="h-48 w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]" role="img" aria-label="Training loss chart">
+      <line x1="54" y1="136" x2="482" y2="136" stroke="#d8c7b6" />
+      <line x1="54" y1="24" x2="54" y2="136" stroke="#d8c7b6" />
+      <polyline points="54,30 118,58 182,78 246,94 310,107 374,117 438,124" fill="none" stroke="#6b3f26" stroke-width="3" />
+      <polyline points="54,32 118,76 182,99 246,112 310,121 374,128 438,132" fill="none" stroke="#b98753" stroke-width="3" />
+      <polyline points="54,34 118,66 182,89 246,105 310,118 374,127 438,134" fill="none" stroke="#60725f" stroke-width="3" />
+      <text x="360" y="42" fill="#6b3f26" font-size="13">mixed</text>
+      <text x="360" y="64" fill="#b98753" font-size="13">medical_only</text>
+      <text x="360" y="86" fill="#60725f" font-size="13">finance_only</text>
+    </svg>
+  </div>
+</div>

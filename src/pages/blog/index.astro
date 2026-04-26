@@ -1,0 +1,53 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import PostCard from "@/components/PostCard.astro";
+import SectionHeader from "@/components/SectionHeader.astro";
+import Sidebar from "@/components/Sidebar.astro";
+import TagList from "@/components/TagList.astro";
+import { site, type CategoryKey } from "@/config/site";
+import { categoryKeys, getAllTags, getCategoryUrl, getFeaturedProjects, getPublishedPosts } from "@/lib/content";
+
+const posts = await getPublishedPosts();
+const tags = getAllTags(posts);
+const projects = await getFeaturedProjects(3);
+---
+
+<BaseLayout title="Blog" description="LLM, Federated Learning, 논문 리뷰, 실험 로그 글 목록입니다.">
+  <div class="container-page py-10">
+    <div class="grid gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(280px,3fr)]">
+      <div class="space-y-6">
+        <section class="panel p-6">
+          <p class="chip mb-4 w-fit">Research Notes</p>
+          <h1 class="text-4xl font-black tracking-normal">Blog</h1>
+          <p class="mt-3 max-w-2xl text-[var(--color-muted)]">
+            공부한 개념, 읽은 논문, 실험 결과, 구현하면서 정리한 문제 해결 기록을 모읍니다.
+          </p>
+        </section>
+
+        <section class="panel p-5 sm:p-6">
+          <SectionHeader title="카테고리" description="관심 주제별로 빠르게 이동합니다." />
+          <div class="flex flex-wrap gap-2">
+            {
+              categoryKeys.map((category) => (
+                <a class="chip focus-ring hover:border-[var(--color-accent-2)]" href={getCategoryUrl(category)}>
+                  {site.categories[category as CategoryKey].label}
+                </a>
+              ))
+            }
+          </div>
+          <div class="mt-5 border-t border-[var(--color-border)] pt-5">
+            <TagList tags={tags} />
+          </div>
+        </section>
+
+        <section class="panel p-5 sm:p-6">
+          <SectionHeader title="전체 글" description={`${posts.length}개의 공개 글`} />
+          <div class="grid gap-4 xl:grid-cols-2">
+            {posts.map((post) => <PostCard post={post} />)}
+          </div>
+        </section>
+      </div>
+      <Sidebar projects={projects} />
+    </div>
+  </div>
+</BaseLayout>

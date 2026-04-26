@@ -1,0 +1,35 @@
+---
+import ResearchVisual from "@/components/ResearchVisual.astro";
+import TagList from "@/components/TagList.astro";
+import { site, type CategoryKey } from "@/config/site";
+import { estimateReadingMinutes, formatDate, getPostUrl, type Post } from "@/lib/content";
+
+interface Props {
+  post: Post;
+  visual?: boolean;
+}
+
+const { post, visual = true } = Astro.props;
+const category = post.data.category as CategoryKey;
+---
+
+<article class="panel-subtle group overflow-hidden transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)]">
+  {visual && <ResearchVisual category={category} />}
+  <div class="flex h-full flex-col p-5">
+    <div class="mb-3 flex flex-wrap items-center gap-2 text-xs text-[var(--color-muted)]">
+      <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+      <span aria-hidden="true">·</span>
+      <a class="chip focus-ring" href={`/blog/category/${category}/`}>{site.categories[category].label}</a>
+    </div>
+    <h3 class="text-lg font-bold leading-snug tracking-normal text-[var(--color-text)]">
+      <a class="focus-ring rounded-sm group-hover:text-[var(--color-accent)]" href={getPostUrl(post)}>
+        {post.data.title}
+      </a>
+    </h3>
+    <p class="mt-3 line-clamp-3 text-sm leading-7 text-[var(--color-muted)]">{post.data.description}</p>
+    <div class="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <span class="text-xs text-[var(--color-subtle)]">{estimateReadingMinutes(post.body)} min read</span>
+      <TagList tags={post.data.tags.slice(0, 3)} />
+    </div>
+  </div>
+</article>

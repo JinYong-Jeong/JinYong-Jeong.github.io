@@ -1,0 +1,24 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+  href?: string;
+  linkLabel?: string;
+}
+
+const { title, description, href, linkLabel = "모두 보기" } = Astro.props;
+---
+
+<div class="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+  <div>
+    <h2 class="text-xl font-bold tracking-normal text-[var(--color-text)]">{title}</h2>
+    {description && <p class="mt-1 text-sm text-[var(--color-muted)]">{description}</p>}
+  </div>
+  {
+    href && (
+      <a class="focus-ring text-sm font-semibold text-[var(--color-accent)] hover:underline" href={href}>
+        {linkLabel} →
+      </a>
+    )
+  }
+</div>

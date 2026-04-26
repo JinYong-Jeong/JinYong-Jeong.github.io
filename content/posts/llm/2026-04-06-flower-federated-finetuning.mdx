@@ -1,0 +1,46 @@
+---
+title: "Flower로 LLM Federated Fine-tuning 파이프라인 구축기"
+description: "Flower를 활용해 여러 도메인 client가 참여하는 LLM fine-tuning 흐름을 설계한 기록입니다."
+date: 2026-04-06
+category: federated-learning
+tags: ["flower", "fedllm", "llm"]
+draft: false
+featured: true
+slug: "flower-federated-finetuning-pipeline"
+---
+
+## 요약
+
+Federated LLM 실험에서 가장 먼저 고정해야 할 것은 모델 코드가 아니라 실험 경계입니다.
+client 데이터 분리, aggregation 전략, metric 수집 위치가 흔들리면 이후 결과 비교가 어려워집니다.
+
+## 문제 정의
+
+medical, finance처럼 도메인이 다른 client가 있다고 가정했습니다. 각 client는 자기 데이터를 외부로
+보내지 않고 local fine-tuning을 수행하고, server는 update만 모아 global model을 갱신합니다.
+
+## 파이프라인 구성
+
+구성 요소는 다음처럼 나눴습니다.
+
+- server: round orchestration, strategy, checkpoint 관리
+- client: dataset loading, local training, metric reporting
+- evaluator: 공통 평가 set으로 round별 결과 비교
+- logger: config, seed, loss, metric을 한 파일에 저장
+
+```python
+strategy = FedAvg(
+    fraction_fit=0.5,
+    min_fit_clients=3,
+    min_available_clients=6,
+)
+```
+
+## 배운 점
+
+초기에는 학습 코드부터 작성했지만, 실험이 반복될수록 config와 logging 구조가 더 중요했습니다.
+특히 round별 client sampling 결과를 남겨야 domain imbalance가 결과에 미친 영향을 추적할 수 있습니다.
+
+## 다음 action
+
+client별 데이터 크기와 label 분포를 함께 기록하고, aggregation 전략별 결과를 비교할 예정입니다.

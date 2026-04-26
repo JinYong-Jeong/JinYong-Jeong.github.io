@@ -1,0 +1,100 @@
+---
+import type { CategoryKey } from "@/config/site";
+
+interface Props {
+  category: CategoryKey;
+}
+
+const { category } = Astro.props;
+---
+
+<div class="relative h-44 overflow-hidden rounded-t-[1rem] border-b border-[var(--color-border)] bg-[linear-gradient(135deg,#fffaf4,#f4ebe1)]">
+  {
+    category === "federated-learning" && (
+      <svg viewBox="0 0 420 190" class="h-full w-full" role="img" aria-label="Federated learning diagram">
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#9a6241" />
+          </marker>
+        </defs>
+        <rect x="252" y="52" width="118" height="86" rx="12" fill="#6b3f26" />
+        <text x="311" y="88" text-anchor="middle" fill="#fffdf8" font-size="17" font-weight="700">Flower</text>
+        <text x="311" y="112" text-anchor="middle" fill="#fffdf8" font-size="17" font-weight="700">Server</text>
+        {[32, 80, 128].map((y, index) => (
+          <>
+            <rect x="44" y={y} width="98" height="32" rx="7" fill="#fffdf8" stroke="#e1d0bf" />
+            <text x="93" y={y + 20} text-anchor="middle" fill="#2b1c14" font-size="12">
+              Client {index + 1}
+            </text>
+            <path d={`M148 ${y + 16} C184 ${y + 16}, 204 92, 248 94`} stroke="#9a6241" stroke-width="1.4" stroke-dasharray="4 4" fill="none" marker-end="url(#arrow)" />
+          </>
+        ))}
+      </svg>
+    )
+  }
+  {
+    category === "paper-review" && (
+      <div class="grid h-full grid-cols-2 place-items-center gap-5 px-7">
+        <div class="space-y-3 text-center">
+          <p class="text-xs font-semibold text-[var(--color-muted)]">Before LoRA</p>
+          <div class="mx-auto h-20 w-28 rounded-lg border border-[var(--color-border)] bg-[linear-gradient(135deg,#d9aaa0,#f1e2d6)] shadow-sm"></div>
+          <p class="text-sm font-medium">W</p>
+        </div>
+        <div class="space-y-3 text-center">
+          <p class="text-xs font-semibold text-[var(--color-muted)]">After LoRA</p>
+          <div class="flex items-center justify-center gap-3">
+            <div class="h-20 w-16 rounded-lg border border-[var(--color-border)] bg-[#fffdf8]"></div>
+            <span class="text-lg text-[var(--color-accent)]">+</span>
+            <div class="h-12 w-12 rounded-md bg-[#b87542]"></div>
+          </div>
+          <p class="text-sm font-medium">W + ΔW</p>
+        </div>
+      </div>
+    )
+  }
+  {
+    category === "experiment-log" && (
+      <svg viewBox="0 0 420 190" class="h-full w-full" role="img" aria-label="Experiment chart">
+        <line x1="54" y1="150" x2="370" y2="150" stroke="#d8c7b6" />
+        <line x1="54" y1="30" x2="54" y2="150" stroke="#d8c7b6" />
+        <polyline points="54,40 104,68 154,91 204,108 254,121 304,131 354,138" fill="none" stroke="#6b3f26" stroke-width="3" />
+        <polyline points="54,42 104,86 154,112 204,128 254,138 304,144 354,147" fill="none" stroke="#b98753" stroke-width="3" />
+        <text x="76" y="42" fill="#6b3f26" font-size="12">mixed</text>
+        <text x="76" y="62" fill="#9a6241" font-size="12">medical_only</text>
+      </svg>
+    )
+  }
+  {
+    category === "development" && (
+      <div class="h-full bg-[#25170f] p-5 font-mono text-[13px] text-[#f6eadf]">
+        <p><span class="text-[#b88762]">1</span> import astro from "astro";</p>
+        <p><span class="text-[#b88762]">2</span> import mdx from "@astrojs/mdx";</p>
+        <p><span class="text-[#b88762]">3</span></p>
+        <p><span class="text-[#b88762]">4</span> const blog = defineCollection({"{"}</p>
+        <p><span class="text-[#b88762]">5</span>   schema: postSchema</p>
+        <p><span class="text-[#b88762]">6</span> {"}"});</p>
+      </div>
+    )
+  }
+  {
+    category === "llm" && (
+      <div class="grid h-full grid-cols-[1.1fr_0.9fr] gap-4 p-5">
+        <div class="rounded-xl bg-[#25170f] p-4 font-mono text-xs leading-6 text-[#f6eadf] shadow-sm">
+          <p>$ python train.py --mode mixed</p>
+          <p>loss: 1.234</p>
+          <p>loss: 0.945</p>
+          <p class="text-[#8fcf9d]">✓ training completed</p>
+        </div>
+        <svg viewBox="0 0 150 150" class="h-full w-full" role="img" aria-label="Model network">
+          {[20, 46, 74, 104, 128].map((x, i) => (
+            <>
+              <circle cx={x} cy={28 + (i % 2) * 28} r="5" fill="#9a6241" />
+              <circle cx={146 - x} cy={112 - (i % 2) * 24} r="5" fill="#9a6241" />
+              <line x1={x} y1={28 + (i % 2) * 28} x2={146 - x} y2={112 - (i % 2) * 24} stroke="#9a6241" stroke-width="1" opacity="0.6" />
+            </>
+          ))}
+        </svg>
+      </div>
+    )
+  }
+</div>

@@ -1,0 +1,60 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { site } from "@/config/site";
+---
+
+<BaseLayout title="About" description={`${site.name}의 프로필과 블로그 운영 목적입니다.`}>
+  <div class="container-page py-10">
+    <div class="grid gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(280px,3fr)]">
+      <section class="panel p-6 sm:p-8">
+        <p class="chip mb-5 w-fit">Profile</p>
+        <h1 class="text-4xl font-black tracking-normal sm:text-5xl">{site.name}</h1>
+        <p class="mt-3 text-lg font-semibold text-[var(--color-accent)]">{site.author.role}</p>
+        <p class="mt-6 max-w-3xl text-lg leading-9 text-[var(--color-muted)]">{site.author.longBio}</p>
+
+        <div class="mt-8 grid gap-4 md:grid-cols-2">
+          <div class="panel-subtle p-5">
+            <h2 class="text-lg font-bold">관심 분야</h2>
+            <ul class="mt-4 space-y-3 text-sm leading-7 text-[var(--color-muted)]">
+              {site.focusAreas.map((area) => <li>· {area}</li>)}
+            </ul>
+          </div>
+          <div class="panel-subtle p-5">
+            <h2 class="text-lg font-bold">기술 스택</h2>
+            <div class="mt-4 flex flex-wrap gap-2">
+              {site.techStack.map((tech) => <span class="chip">{tech}</span>)}
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8 panel-subtle p-5">
+          <h2 class="text-lg font-bold">블로그 운영 목적</h2>
+          <p class="mt-3 leading-8 text-[var(--color-muted)]">
+            이 블로그는 단순한 결과 공유보다 과정의 재현성을 우선합니다. 논문에서 얻은 아이디어,
+            실험 설정, 실패한 원인, 다음에 확인할 질문을 한 곳에 모아 장기적으로 다시 꺼내 쓸 수 있는
+            개발 연구 기록을 만드는 것이 목표입니다.
+          </p>
+        </div>
+      </section>
+
+      <aside class="space-y-4 lg:sticky lg:top-24 lg:self-start">
+        <section class="panel p-5">
+          <h2 class="text-lg font-bold">Contact</h2>
+          <div class="mt-4 space-y-2">
+            {
+              site.socials.map((link) => (
+                <a class="focus-ring flex rounded-xl px-3 py-2 text-sm font-medium text-[var(--color-muted)] hover:bg-[var(--color-surface-soft)] hover:text-[var(--color-accent)]" href={link.href}>
+                  {link.label}
+                </a>
+              ))
+            }
+          </div>
+        </section>
+        <section class="panel p-5">
+          <h2 class="text-lg font-bold">Location</h2>
+          <p class="mt-3 text-sm text-[var(--color-muted)]">{site.author.location}</p>
+        </section>
+      </aside>
+    </div>
+  </div>
+</BaseLayout>

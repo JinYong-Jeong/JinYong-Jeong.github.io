@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="Jinyong Jeong Dev Blog">
+  <rect width="1200" height="630" fill="#faf7f1"/>
+  <rect x="72" y="72" width="1056" height="486" rx="34" fill="#fffdf8" stroke="#e7d9cc"/>
+  <text x="118" y="164" fill="#6b3f26" font-family="Inter, Arial, sans-serif" font-size="36" font-weight="700">JJ</text>
+  <text x="118" y="280" fill="#2b1c14" font-family="Inter, Arial, sans-serif" font-size="66" font-weight="800">Jinyong Jeong Dev Blog</text>
+  <text x="118" y="356" fill="#6f5c4c" font-family="Inter, Arial, sans-serif" font-size="34">LLM · Federated Learning · Paper Review · Experiment Log</text>
+  <g transform="translate(790 162)" stroke="#9a6241" fill="none" stroke-width="3">
+    <circle cx="96" cy="42" r="10" fill="#9a6241"/>
+    <circle cx="178" cy="88" r="10" fill="#9a6241"/>
+    <circle cx="118" cy="168" r="10" fill="#9a6241"/>
+    <circle cx="248" cy="176" r="10" fill="#9a6241"/>
+    <path d="M96 42l82 46-60 80 130 8M178 88l70 88M96 42l22 126"/>
+    <path d="M20 260c84-120 198-120 320-18" opacity=".35"/>
+    <path d="M20 304c96-76 198-76 320-8" opacity=".55"/>
+  </g>
+</svg>

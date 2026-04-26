@@ -1,0 +1,49 @@
+---
+title: "Qwen3 계열 모델에 LoRA Target Modules 적용 시 확인할 점"
+description: "LoRA target module 선택이 학습 안정성과 adapter 크기에 미치는 영향을 논문 리뷰 형식으로 정리합니다."
+date: 2026-04-14
+category: paper-review
+tags: ["lora", "peft", "qwen", "paper"]
+draft: false
+featured: true
+slug: "qwen-lora-target-modules"
+paper:
+  title: "LoRA: Low-Rank Adaptation of Large Language Models"
+  authors: ["Edward J. Hu", "Yelong Shen", "Phillip Wallis"]
+  year: 2021
+  venue: "ICLR"
+  url: "https://arxiv.org/abs/2106.09685"
+---
+
+## 한 줄 요약
+
+LoRA는 전체 파라미터를 업데이트하지 않고 low-rank adapter를 추가해 fine-tuning 비용을 줄입니다.
+하지만 어떤 module에 adapter를 붙이는지에 따라 결과와 비용이 달라집니다.
+
+## 확인할 module
+
+Qwen 계열에서는 attention projection과 MLP projection을 나눠 확인하는 편이 좋습니다.
+
+- `q_proj`, `k_proj`, `v_proj`, `o_proj`
+- `gate_proj`, `up_proj`, `down_proj`
+
+## 실험할 조합
+
+처음부터 모든 module에 붙이기보다 아래 순서로 비교합니다.
+
+1. attention projection만 사용
+2. attention + MLP projection 사용
+3. rank와 alpha를 줄인 전체 module 사용
+
+```python
+config = LoraConfig(
+    r=16,
+    lora_alpha=32,
+    target_modules=["q_proj", "v_proj", "o_proj"],
+)
+```
+
+## 구현 관점의 결론
+
+target module은 성능뿐 아니라 checkpoint 크기, 학습 속도, GPU memory 사용량까지 바꿉니다.
+따라서 실험 로그에는 target module list와 trainable parameter 수를 함께 저장해야 합니다.

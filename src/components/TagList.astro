@@ -1,0 +1,24 @@
+---
+import { getTagUrl } from "@/lib/content";
+
+interface Props {
+  tags: string[];
+  linked?: boolean;
+}
+
+const { tags, linked = true } = Astro.props;
+---
+
+<div class="flex flex-wrap gap-2">
+  {
+    tags.map((tag) =>
+      linked ? (
+        <a class="chip focus-ring hover:border-[var(--color-accent-2)]" href={getTagUrl(tag)}>
+          #{tag}
+        </a>
+      ) : (
+        <span class="chip">#{tag}</span>
+      )
+    )
+  }
+</div>

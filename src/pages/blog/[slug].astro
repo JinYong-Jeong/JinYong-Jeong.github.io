@@ -1,0 +1,68 @@
+---
+import { render } from "astro:content";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import TableOfContents from "@/components/TableOfContents.astro";
+import TagList from "@/components/TagList.astro";
+import { site, type CategoryKey } from "@/config/site";
+import {
+  estimateReadingMinutes,
+  formatDate,
+  getPostSlug,
+  getPublishedPosts,
+  type Post
+} from "@/lib/content";
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts();
+  return posts.map((post) => ({ params: { slug: getPostSlug(post) }, props: { post } }));
+}
+
+const { post } = Astro.props as { post: Post };
+const { Content, headings } = await render(post);
+const category = post.data.category as CategoryKey;
+---
+
+<BaseLayout title={post.data.title} description={post.data.description} type="article">
+  <div class="container-page py-10">
+    <div class="grid gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(250px,3fr)]">
+      <article class="panel overflow-hidden">
+        <header class="border-b border-[var(--color-border)] p-6 sm:p-8">
+          <a class="chip focus-ring mb-5 w-fit" href={`/blog/category/${category}/`}>
+            {site.categories[category].label}
+          </a>
+          <h1 class="max-w-4xl text-3xl font-black leading-tight tracking-normal sm:text-5xl">
+            {post.data.title}
+          </h1>
+          <p class="mt-5 max-w-3xl text-lg leading-9 text-[var(--color-muted)]">{post.data.description}</p>
+          <div class="mt-6 flex flex-wrap items-center gap-3 text-sm text-[var(--color-muted)]">
+            <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+            {post.data.updated && <span>Updated {formatDate(post.data.updated)}</span>}
+            <span>{estimateReadingMinutes(post.body)} min read</span>
+          </div>
+          <div class="mt-5">
+            <TagList tags={post.data.tags} />
+          </div>
+          {
+            post.data.paper && (
+              <div class="mt-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-soft)] p-4 text-sm text-[var(--color-muted)]">
+                <p class="font-semibold text-[var(--color-text)]">{post.data.paper.title}</p>
+                <p class="mt-1">{post.data.paper.authors.join(", ")} {post.data.paper.year ? `· ${post.data.paper.year}` : ""}</p>
+                {post.data.paper.url && <a class="mt-2 inline-block font-semibold text-[var(--color-accent)] hover:underline" href={post.data.paper.url}>Paper link →</a>}
+              </div>
+            )
+          }
+        </header>
+        <div class="prose-blog p-6 sm:p-8">
+          <Content />
+        </div>
+      </article>
+      <div class="space-y-4 lg:sticky lg:top-24 lg:self-start">
+        <TableOfContents headings={headings} />
+        <div class="panel p-5 text-sm leading-7 text-[var(--color-muted)]">
+          <p class="font-semibold text-[var(--color-text)]">기록 원칙</p>
+          <p class="mt-2">문제, 설정, 결과, 다음 action을 분리해 나중에 다시 검증할 수 있게 남깁니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
