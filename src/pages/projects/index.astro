@@ -32,11 +32,75 @@ const projects = await getAllProjects();
             <p class="metric-copy">정리된 프로젝트 기록</p>
           </div>
         </div>
+        <div class="mt-8 grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]">
+          <label class="block">
+            <span class="sr-only">프로젝트 검색</span>
+            <input
+              id="project-search"
+              type="search"
+              placeholder="제목, 설명, 기술 스택 검색"
+              class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-soft)] px-4 py-3.5 text-sm text-[var(--color-text)] outline-none transition-colors placeholder:text-[var(--color-subtle)] focus:border-[var(--color-accent-2)]"
+            />
+          </label>
+          <a class="focus-ring inline-flex items-center justify-center rounded-xl border border-[var(--color-border)] px-4 py-3.5 text-sm font-semibold text-[var(--color-accent)] hover:bg-[var(--color-surface-soft)]" href="/search/">
+            전체 검색 페이지 →
+          </a>
+        </div>
+        <p id="project-search-summary" class="mt-3 text-sm text-[var(--color-muted)]">
+          {projects.length}개의 프로젝트 기록
+        </p>
       </header>
 
-      <div class="surface-divider content-list">
-        {projects.map((project) => <div class="surface-section py-0"><ProjectCard project={project} variant="row" /></div>)}
+      <div id="project-list" class="surface-divider content-list">
+        {
+          projects.map((project) => (
+            <div
+              class="surface-section py-0"
+              data-project-row
+              data-search={`${project.data.title} ${project.data.description} ${project.data.status} ${project.data.techStack.join(" ")}`.toLowerCase()}
+            >
+              <ProjectCard project={project} variant="row" />
+            </div>
+          ))
+        }
+      </div>
+      <div id="project-empty" class="hidden surface-section text-center text-sm text-[var(--color-muted)]">
+        일치하는 프로젝트가 없습니다. 다른 키워드로 다시 검색해보세요.
       </div>
     </section>
   </div>
+
+  <script is:inline>
+    const params = new URLSearchParams(window.location.search);
+    const initialQuery = params.get("q") || "";
+    const input = document.querySelector("#project-search");
+    const summary = document.querySelector("#project-search-summary");
+    const emptyState = document.querySelector("#project-empty");
+    const rows = Array.from(document.querySelectorAll("[data-project-row]"));
+
+    if (input) input.value = initialQuery;
+
+    const update = () => {
+      const query = String(input?.value || "").trim().toLowerCase();
+      let visible = 0;
+
+      for (const row of rows) {
+        const text = row.getAttribute("data-search") || "";
+        const match = !query || text.includes(query);
+        row.toggleAttribute("hidden", !match);
+        if (match) visible += 1;
+      }
+
+      if (summary) {
+        summary.textContent = query
+          ? `"${query}" 검색 결과 ${visible}개`
+          : `${rows.length}개의 프로젝트 기록`;
+      }
+
+      emptyState?.classList.toggle("hidden", visible !== 0);
+    };
+
+    input?.addEventListener("input", update);
+    update();
+  </script>
 </BaseLayout>
