@@ -8,19 +8,19 @@ const isActive = (href: string) =>
 ---
 
 <header class="sticky top-0 z-30 border-b border-[var(--color-border)] bg-[rgba(250,247,241,0.88)] backdrop-blur-xl">
-  <div class="container-page flex h-16 items-center justify-between gap-6">
-    <a href="/" class="focus-ring flex items-center gap-3" aria-label="Go to home">
+  <div class="container-page flex h-16 items-center gap-6">
+    <a href="/" class="focus-ring flex shrink-0 items-center gap-3" aria-label="Go to home">
       <span class="text-2xl font-black tracking-normal text-[var(--color-accent)]">{site.shortName}</span>
     </a>
-    <nav class="hidden items-center gap-1 sm:flex" aria-label="Primary navigation">
+    <nav class="hidden h-full items-center gap-6 sm:flex" aria-label="Primary navigation">
       {
         site.nav.map((item) => (
           <a
             href={item.href}
             class:list={[
-              "focus-ring rounded-full px-4 py-2 text-sm font-medium transition-colors",
+              "focus-ring inline-flex h-full items-center border-b-2 border-transparent px-1 text-sm font-medium transition-colors",
               isActive(item.href)
-                ? "bg-[var(--color-surface-soft)] text-[var(--color-accent)]"
+                ? "border-[var(--color-accent)] text-[var(--color-accent)]"
                 : "text-[var(--color-muted)] hover:text-[var(--color-accent)]"
             ]}
           >
@@ -29,7 +29,7 @@ const isActive = (href: string) =>
         ))
       }
     </nav>
-    <div class="flex items-center gap-2">
+    <div class="ml-auto flex items-center gap-2">
       <a
         class="focus-ring inline-flex size-10 items-center justify-center rounded-full text-[var(--color-accent)] transition-colors hover:bg-[var(--color-surface-soft)]"
         href="/search/"

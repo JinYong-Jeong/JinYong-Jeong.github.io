@@ -1,0 +1,35 @@
+---
+import { ArrowRight } from "@lucide/astro";
+import { site, type CategoryKey } from "@/config/site";
+import { estimateReadingMinutes, formatDate, getPostUrl, type Post } from "@/lib/content";
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const category = post.data.category as CategoryKey;
+---
+
+<article class="home-post-item group">
+  <div class="flex flex-wrap items-center justify-between gap-3 text-[11px] uppercase tracking-[0.08em] text-[var(--color-subtle)]">
+    <span class="flex flex-wrap items-center gap-2">
+      <span>{site.categories[category].label}</span>
+      <span class="size-1 rounded-full bg-[var(--color-border-strong)]" aria-hidden="true"></span>
+      <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+    </span>
+    <span class="inline-flex items-center gap-1">
+      {estimateReadingMinutes(post.body)} min
+      <ArrowRight size={14} stroke-width={1.8} />
+    </span>
+  </div>
+  <h3 class="mt-2 text-base font-semibold leading-7 text-[var(--color-text)]">
+    <a class="focus-ring rounded-sm transition-colors group-hover:text-[var(--color-accent)]" href={getPostUrl(post)}>
+      {post.data.title}
+    </a>
+  </h3>
+  <div class="mt-2 flex items-end justify-between gap-3">
+    <p class="line-clamp-1 flex-1 text-sm leading-6 text-[var(--color-muted)]">{post.data.description}</p>
+    <span class="chip shrink-0">#{post.data.tags[0]}</span>
+  </div>
+</article>

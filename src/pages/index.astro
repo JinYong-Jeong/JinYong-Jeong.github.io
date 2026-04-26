@@ -1,124 +1,132 @@
 ---
-import BaseLayout from "@/layouts/BaseLayout.astro";
+import CompactPostItem from "@/components/CompactPostItem.astro";
+import HomeSidebar from "@/components/HomeSidebar.astro";
 import HeroVisual from "@/components/HeroVisual.astro";
-import PostCard from "@/components/PostCard.astro";
-import ProjectCard from "@/components/ProjectCard.astro";
-import SectionHeader from "@/components/SectionHeader.astro";
-import Sidebar from "@/components/Sidebar.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
 import { site, type CategoryKey } from "@/config/site";
 import { categoryKeys, getFeaturedProjects, getPublishedPosts } from "@/lib/content";
 
 const posts = await getPublishedPosts();
-const recentPosts = posts.slice(0, 3);
+const recentPosts = posts.slice(0, 2);
 const featuredProjects = await getFeaturedProjects(3);
+const homeCategories = categoryKeys.filter((category) => category !== "development");
 ---
 
-<BaseLayout>
-  <div class="container-page py-10 lg:py-14">
-    <div class="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(280px,3fr)]">
-      <div class="min-w-0 space-y-6">
-        <section class="panel p-6 sm:p-8">
-          <div class="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)] lg:items-center">
-            <div class="min-w-0">
+<BaseLayout
+  hideFooter={true}
+  bodyClass="home-page"
+  mainClass="home-main-shell"
+  description="LLM, Federated Learning, 논문 리뷰, 실험 로그를 한눈에 정리한 연구 블로그입니다."
+>
+  <section class="container-page home-screen py-4 lg:py-5">
+    <section class="home-stage" aria-label="Homepage overview">
+      <div class="home-grid">
+        <div class="home-primary">
+          <header class="home-hero">
+            <div class="home-copy min-w-0">
               <p class="chip mb-5 w-fit">{site.author.role}</p>
-              <h1 class="hero-title max-w-3xl text-4xl font-black leading-tight tracking-normal text-[var(--color-text)] sm:text-5xl lg:text-6xl">
-                <span class="block sm:inline-block">실험하고,</span>
-                <span class="block sm:inline-block">기록하고,</span>
-                <span class="block sm:inline-block">공유합니다.</span>
+              <h1 class="home-title hero-title max-w-3xl font-black tracking-normal text-[var(--color-text)]">
+                실험하고, 기록하고, 공유합니다.
               </h1>
-              <p class="hero-copy mt-5 max-w-2xl text-lg leading-9 text-[var(--color-muted)]">
-                <span class="block">LLM과 Federated Learning을 중심으로</span>
-                <span class="block">논문 리뷰와 실험 로그를 쌓아갑니다.</span>
-                <span class="block">다시 검증할 수 있는 기록을 먼저 남깁니다.</span>
+              <p class="hero-copy home-lead mt-5 max-w-2xl text-[var(--color-muted)]">
+                LLM, Federated Learning, 논문 리뷰, 실험 로그를 다시 구현하고
+                검증할 수 있는 연구 기록으로 정리합니다.
               </p>
-              <div class="mt-8 flex flex-wrap gap-3">
-                <a class="focus-ring rounded-xl bg-[var(--color-accent)] px-5 py-3 font-semibold text-white shadow-[var(--shadow-card)] hover:bg-[#59331f]" href="/blog/">
-                  최근 글 읽기 →
+              <dl class="home-stats" aria-label="Blog metrics">
+                <div class="home-stat">
+                  <dt>Archive</dt>
+                  <dd>{posts.length}</dd>
+                </div>
+                <div class="home-stat">
+                  <dt>Projects</dt>
+                  <dd>{featuredProjects.length}</dd>
+                </div>
+                <div class="home-stat">
+                  <dt>Tracks</dt>
+                  <dd>{site.focusAreas.length}</dd>
+                </div>
+              </dl>
+              <nav class="mt-8 flex flex-wrap gap-3" aria-label="Homepage primary actions">
+                <a
+                  class="focus-ring rounded-xl bg-[var(--color-accent)] px-4 py-2.5 font-semibold text-white shadow-[var(--shadow-card)] hover:bg-[#59331f]"
+                  href="/blog/"
+                >
+                  최근 글 읽기
                 </a>
-                <a class="focus-ring rounded-xl border border-[var(--color-border-strong)] px-5 py-3 font-semibold text-[var(--color-accent)] hover:bg-[var(--color-surface-soft)]" href="/search/">
-                  검색 시작하기
+                <a
+                  class="focus-ring rounded-xl border border-[var(--color-border-strong)] px-4 py-2.5 font-semibold text-[var(--color-accent)] hover:bg-[var(--color-surface-soft)]"
+                  href="/search/"
+                >
+                  아카이브 검색
                 </a>
-              </div>
-              <div class="mt-8 grid gap-3 sm:grid-cols-3">
-                <div class="panel-subtle p-4">
-                  <p class="text-xs uppercase tracking-[0.08em] text-[var(--color-subtle)]">Posts</p>
-                  <p class="mt-2 text-2xl font-black text-[var(--color-accent)]">{posts.length}</p>
-                  <p class="mt-1 text-sm text-[var(--color-muted)]">공개 글 아카이브</p>
-                </div>
-                <div class="panel-subtle p-4">
-                  <p class="text-xs uppercase tracking-[0.08em] text-[var(--color-subtle)]">Projects</p>
-                  <p class="mt-2 text-2xl font-black text-[var(--color-accent)]">{featuredProjects.length}</p>
-                  <p class="mt-1 text-sm text-[var(--color-muted)]">현재 소개 중인 프로젝트</p>
-                </div>
-                <div class="panel-subtle p-4">
-                  <p class="text-xs uppercase tracking-[0.08em] text-[var(--color-subtle)]">Focus</p>
-                  <p class="mt-2 text-2xl font-black text-[var(--color-accent)]">{site.focusAreas.length}</p>
-                  <p class="mt-1 text-sm text-[var(--color-muted)]">핵심 연구 트랙</p>
-                </div>
-              </div>
+              </nav>
             </div>
-            <HeroVisual />
-          </div>
-        </section>
+            <HeroVisual compact={true} />
+          </header>
 
-        <section class="grid gap-6 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
-          <div class="panel p-5 sm:p-6">
-            <SectionHeader title="Search Archive" description="제목, 설명, 태그를 기준으로 바로 찾을 수 있습니다." />
-            <form action="/search/" class="space-y-4">
-              <label class="block">
-                <span class="mb-2 block text-sm font-medium text-[var(--color-text)]">무엇을 찾고 있나요?</span>
+          <div class="home-library">
+            <section class="home-section" aria-labelledby="recent-notes-heading">
+              <header class="home-section-heading">
+                <div>
+                  <p class="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--color-subtle)]">Archive</p>
+                  <h2 id="recent-notes-heading" class="mt-1 text-xl font-semibold tracking-normal text-[var(--color-text)]">
+                    Recent Notes
+                  </h2>
+                </div>
+                <a class="focus-ring text-sm font-semibold text-[var(--color-accent)] hover:underline" href="/blog/">
+                  전체 글 보기
+                </a>
+              </header>
+              <ol class="home-post-list">
+                {recentPosts.map((post) => <li><CompactPostItem post={post} /></li>)}
+              </ol>
+            </section>
+
+            <section class="home-section" aria-labelledby="research-track-heading">
+              <header class="home-section-heading">
+                <div>
+                  <p class="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--color-subtle)]">Overview</p>
+                  <h2 id="research-track-heading" class="mt-1 text-xl font-semibold tracking-normal text-[var(--color-text)]">
+                    Search & Tracks
+                  </h2>
+                </div>
+                <a class="focus-ring text-sm font-semibold text-[var(--color-accent)] hover:underline" href="/search/">
+                  검색 열기
+                </a>
+              </header>
+
+              <form action="/search/" class="home-search-form">
+                <label class="sr-only" for="home-search-input">검색어</label>
                 <input
+                  id="home-search-input"
                   name="q"
                   type="search"
-                  placeholder="예: LoRA, Flower, quantization"
-                  class="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-soft)] px-4 py-3 text-sm text-[var(--color-text)] outline-none transition-colors placeholder:text-[var(--color-subtle)] focus:border-[var(--color-accent-2)]"
+                  placeholder="LoRA, Flower, quantization"
+                  class="home-search-input"
                 />
-              </label>
-              <div class="flex flex-wrap gap-2">
-                <span class="chip">#llm</span>
-                <span class="chip">#flower</span>
-                <span class="chip">#paper</span>
-                <span class="chip">#quantization</span>
-              </div>
-              <button class="focus-ring rounded-xl bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#59331f]" type="submit">
-                전체 아카이브 검색
-              </button>
-            </form>
-          </div>
+                <button class="focus-ring home-search-button" type="submit">찾기</button>
+              </form>
 
-          <div class="panel p-5 sm:p-6">
-            <SectionHeader title="Research Tracks" description="지금 블로그가 다루는 큰 흐름입니다." />
-            <div class="grid gap-3 sm:grid-cols-2">
-              {
-                categoryKeys.map((category) => (
-                  <a href={`/blog/category/${category}/`} class="panel-subtle p-4 transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)]">
-                    <p class="text-sm font-semibold text-[var(--color-accent)]">{site.categories[category as CategoryKey].label}</p>
-                    <p class="mt-2 text-sm leading-7 text-[var(--color-muted)]">
-                      {site.categories[category as CategoryKey].description}
-                    </p>
-                  </a>
-                ))
-              }
-            </div>
+              <nav class="home-track-list" aria-label="Research categories">
+                {
+                  homeCategories.map((category) => (
+                    <a class="home-track-item" href={`/blog/category/${category}/`}>
+                      <span class="home-track-label">
+                        {site.categories[category as CategoryKey].label}
+                      </span>
+                      <span class="home-track-description">
+                        {site.categories[category as CategoryKey].description}
+                      </span>
+                    </a>
+                  ))
+                }
+              </nav>
+            </section>
           </div>
-        </section>
+        </div>
 
-        <section class="panel p-5 sm:p-6">
-          <SectionHeader title="최근 글" href="/blog/" linkLabel="모든 글 보기" />
-          <div class="grid gap-4 xl:grid-cols-3">
-            {recentPosts.map((post) => <PostCard post={post} />)}
-          </div>
-        </section>
-
-        <section class="panel p-5 sm:p-6">
-          <SectionHeader title="주요 프로젝트" href="/projects/" linkLabel="모든 프로젝트 보기" />
-          <div class="grid gap-4 xl:grid-cols-3">
-            {featuredProjects.map((project) => <ProjectCard project={project} />)}
-          </div>
-        </section>
+        <HomeSidebar projects={featuredProjects} />
       </div>
-
-      <Sidebar projects={featuredProjects} />
-    </div>
-  </div>
+    </section>
+  </section>
 </BaseLayout>
