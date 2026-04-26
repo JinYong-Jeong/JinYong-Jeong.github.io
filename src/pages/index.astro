@@ -3,13 +3,13 @@ import CompactPostItem from "@/components/CompactPostItem.astro";
 import HomeSidebar from "@/components/HomeSidebar.astro";
 import HeroVisual from "@/components/HeroVisual.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { site, type CategoryKey } from "@/config/site";
+import { site } from "@/config/site";
 import { categoryKeys, getFeaturedProjects, getPublishedPosts } from "@/lib/content";
 
 const posts = await getPublishedPosts();
-const recentPosts = posts.slice(0, 2);
+const recentPosts = posts.slice(0, 1);
 const featuredProjects = await getFeaturedProjects(3);
-const homeCategories = categoryKeys.filter((category) => category !== "development");
+const homeCategories = categoryKeys.filter((category) => category !== "development").slice(0, 4);
 ---
 
 <BaseLayout
@@ -46,6 +46,15 @@ const homeCategories = categoryKeys.filter((category) => category !== "developme
                   <dd>{site.focusAreas.length}</dd>
                 </div>
               </dl>
+              <nav class="home-topic-list mt-6" aria-label="Core topics">
+                {
+                  homeCategories.map((category) => (
+                    <a class="home-topic-chip" href={`/blog/category/${category}/`}>
+                      {site.categories[category].label}
+                    </a>
+                  ))
+                }
+              </nav>
               <nav class="mt-8 flex flex-wrap gap-3" aria-label="Homepage primary actions">
                 <a
                   class="focus-ring rounded-xl bg-[var(--color-accent)] px-4 py-2.5 font-semibold text-white shadow-[var(--shadow-card)] hover:bg-[#59331f]"
@@ -64,68 +73,25 @@ const homeCategories = categoryKeys.filter((category) => category !== "developme
             <HeroVisual compact={true} />
           </header>
 
-          <div class="home-library">
-            <section class="home-section" aria-labelledby="recent-notes-heading">
-              <header class="home-section-heading">
-                <div>
-                  <p class="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--color-subtle)]">Archive</p>
-                  <h2 id="recent-notes-heading" class="mt-1 text-xl font-semibold tracking-normal text-[var(--color-text)]">
-                    Recent Notes
-                  </h2>
-                </div>
-                <a class="focus-ring text-sm font-semibold text-[var(--color-accent)] hover:underline" href="/blog/">
-                  전체 글 보기
-                </a>
-              </header>
-              <ol class="home-post-list">
-                {recentPosts.map((post) => <li><CompactPostItem post={post} /></li>)}
-              </ol>
-            </section>
-
-            <section class="home-section" aria-labelledby="research-track-heading">
-              <header class="home-section-heading">
-                <div>
-                  <p class="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--color-subtle)]">Overview</p>
-                  <h2 id="research-track-heading" class="mt-1 text-xl font-semibold tracking-normal text-[var(--color-text)]">
-                    Search & Tracks
-                  </h2>
-                </div>
-                <a class="focus-ring text-sm font-semibold text-[var(--color-accent)] hover:underline" href="/search/">
-                  검색 열기
-                </a>
-              </header>
-
-              <form action="/search/" class="home-search-form">
-                <label class="sr-only" for="home-search-input">검색어</label>
-                <input
-                  id="home-search-input"
-                  name="q"
-                  type="search"
-                  placeholder="LoRA, Flower, quantization"
-                  class="home-search-input"
-                />
-                <button class="focus-ring home-search-button" type="submit">찾기</button>
-              </form>
-
-              <nav class="home-track-list" aria-label="Research categories">
-                {
-                  homeCategories.map((category) => (
-                    <a class="home-track-item" href={`/blog/category/${category}/`}>
-                      <span class="home-track-label">
-                        {site.categories[category as CategoryKey].label}
-                      </span>
-                      <span class="home-track-description">
-                        {site.categories[category as CategoryKey].description}
-                      </span>
-                    </a>
-                  ))
-                }
-              </nav>
-            </section>
-          </div>
+          <section class="home-section home-archive" aria-labelledby="recent-notes-heading">
+            <header class="home-section-heading">
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--color-subtle)]">Archive</p>
+                <h2 id="recent-notes-heading" class="mt-1 text-xl font-semibold tracking-normal text-[var(--color-text)]">
+                  Recent Notes
+                </h2>
+              </div>
+              <a class="focus-ring text-sm font-semibold text-[var(--color-accent)] hover:underline" href="/blog/">
+                전체 글 보기
+              </a>
+            </header>
+            <ol class="home-post-list">
+              {recentPosts.map((post) => <li><CompactPostItem post={post} /></li>)}
+            </ol>
+          </section>
         </div>
 
-        <HomeSidebar projects={featuredProjects} />
+        <HomeSidebar />
       </div>
     </section>
   </section>
