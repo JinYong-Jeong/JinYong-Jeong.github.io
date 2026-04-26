@@ -1,5 +1,5 @@
 ---
-import { GitBranch, Rss, Search } from "@lucide/astro";
+import { GitFork, Rss, Search } from "@lucide/astro";
 import { site } from "@/config/site";
 
 const pathname = Astro.url.pathname;
@@ -42,7 +42,7 @@ const isActive = (href: string) =>
         href="https://github.com/JinYong-Jeong"
         aria-label="GitHub"
       >
-        <GitBranch size={18} stroke-width={1.8} />
+        <GitFork size={18} stroke-width={1.8} />
       </a>
       <a
         class="focus-ring inline-flex size-10 items-center justify-center rounded-full text-[var(--color-accent)] transition-colors hover:bg-[var(--color-surface-soft)]"

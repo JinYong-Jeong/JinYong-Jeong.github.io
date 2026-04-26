@@ -1,4 +1,5 @@
 ---
+import ProjectVisual from "@/components/ProjectVisual.astro";
 import { ExternalLink } from "@lucide/astro";
 import type { Project } from "@/lib/content";
 
@@ -9,32 +10,31 @@ interface Props {
 const { project } = Astro.props;
 ---
 
-<article id={project.id} class="panel-subtle scroll-mt-24 p-5 transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)]">
-  <div class="flex gap-5">
-    <div class="flex size-16 shrink-0 items-center justify-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-soft)] text-xl font-black text-[var(--color-accent)]">
-      {project.data.title.split(" ").map((word) => word[0]).join("").slice(0, 2)}
+<article
+  id={project.id}
+  class="panel-subtle scroll-mt-24 overflow-hidden transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)]"
+>
+  <ProjectVisual project={project} />
+  <div class="p-5">
+    <div class="mb-3 flex flex-wrap items-center gap-2">
+      <h3 class="text-lg font-bold tracking-normal">{project.data.title}</h3>
+      <span class="chip">{project.data.status}</span>
     </div>
-    <div class="min-w-0 flex-1">
-      <div class="mb-2 flex flex-wrap items-center gap-2">
-        <h3 class="text-lg font-bold tracking-normal">{project.data.title}</h3>
-        <span class="chip">{project.data.status}</span>
-      </div>
-      <p class="text-sm leading-7 text-[var(--color-muted)]">{project.data.description}</p>
-      <div class="mt-4 flex flex-wrap gap-2">
-        {project.data.techStack.map((tech) => <span class="chip">{tech}</span>)}
-      </div>
-      {
-        project.data.links.length > 0 && (
-          <div class="mt-4 flex flex-wrap gap-3">
-            {project.data.links.map((link) => (
-              <a class="focus-ring inline-flex items-center gap-1 text-sm font-semibold text-[var(--color-accent)] hover:underline" href={link.href}>
-                {link.label}
-                <ExternalLink size={14} />
-              </a>
-            ))}
-          </div>
-        )
-      }
+    <p class="text-sm leading-7 text-[var(--color-muted)]">{project.data.description}</p>
+    <div class="mt-4 flex flex-wrap gap-2">
+      {project.data.techStack.map((tech) => <span class="chip">{tech}</span>)}
     </div>
+    {
+      project.data.links.length > 0 && (
+        <div class="mt-4 flex flex-wrap gap-3">
+          {project.data.links.map((link) => (
+            <a class="focus-ring inline-flex items-center gap-1 text-sm font-semibold text-[var(--color-accent)] hover:underline" href={link.href}>
+              {link.label}
+              <ExternalLink size={14} />
+            </a>
+          ))}
+        </div>
+      )
+    }
   </div>
 </article>

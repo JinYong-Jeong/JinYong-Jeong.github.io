@@ -1,0 +1,91 @@
+---
+import type { Project } from "@/lib/content";
+
+interface Props {
+  project: Project;
+}
+
+const { project } = Astro.props;
+const key = project.id.toLowerCase();
+---
+
+<div class="project-visual">
+  {
+    key.includes("flower") && (
+      <svg viewBox="0 0 420 190" class="h-full w-full" role="img" aria-label="Federated learning project visual">
+        <defs>
+          <marker id="project-arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#9a6241" />
+          </marker>
+        </defs>
+        <rect x="252" y="52" width="118" height="86" rx="12" fill="#6b3f26" />
+        <text x="311" y="88" text-anchor="middle" fill="#fffdf8" font-size="17" font-weight="700">Flower</text>
+        <text x="311" y="112" text-anchor="middle" fill="#fffdf8" font-size="17" font-weight="700">Server</text>
+        {[32, 80, 128].map((y, index) => (
+          <>
+            <rect x="44" y={y} width="98" height="32" rx="7" fill="#fffdf8" stroke="#e1d0bf" />
+            <text x="93" y={y + 20} text-anchor="middle" fill="#2b1c14" font-size="12">
+              Client {index + 1}
+            </text>
+            <path
+              d={`M148 ${y + 16} C184 ${y + 16}, 204 92, 248 94`}
+              stroke="#9a6241"
+              stroke-width="1.4"
+              stroke-dasharray="4 4"
+              fill="none"
+              marker-end="url(#project-arrow)"
+            />
+          </>
+        ))}
+      </svg>
+    )
+  }
+  {
+    key.includes("evaluation") && (
+      <svg viewBox="0 0 420 190" class="h-full w-full" role="img" aria-label="Evaluation dashboard visual">
+        <line x1="50" y1="146" x2="374" y2="146" stroke="#dbcdbc" />
+        <line x1="50" y1="34" x2="50" y2="146" stroke="#dbcdbc" />
+        {[84, 132, 180, 228].map((x, index) => (
+          <rect
+            x={x}
+            y={130 - index * 18}
+            width="18"
+            height={index * 18 + 16}
+            rx="4"
+            fill={["#d3b4a5", "#c48a73", "#b46b4b", "#9a6241"][index]}
+          />
+        ))}
+        <path
+          d="M78 122 C126 84, 178 96, 230 68 S330 58, 356 42"
+          fill="none"
+          stroke="#6b3f26"
+          stroke-width="3"
+        />
+        <circle cx="356" cy="42" r="5" fill="#6b3f26" />
+      </svg>
+    )
+  }
+  {
+    key.includes("logger") && (
+      <div class="grid h-full place-items-center p-6">
+        <div class="w-24 rounded-[1rem] border border-[#43372e] bg-[#20130e] p-3 shadow-[0_18px_40px_rgba(37,23,15,0.24)]">
+          <div class="mb-3 flex gap-1.5">
+            <span class="size-2 rounded-full bg-[#8a6d5b]"></span>
+            <span class="size-2 rounded-full bg-[#8a6d5b]"></span>
+            <span class="size-2 rounded-full bg-[#8a6d5b]"></span>
+          </div>
+          <div class="space-y-2">
+            <div class="h-1.5 rounded-full bg-[#6b3f26]"></div>
+            <div class="h-1.5 w-3/4 rounded-full bg-[#b98753]"></div>
+            <div class="h-1.5 w-4/5 rounded-full bg-[#907968]"></div>
+            <div class="mt-4 grid grid-cols-3 gap-1.5">
+              <div class="h-7 rounded-md bg-[#2b1c14]"></div>
+              <div class="h-7 rounded-md bg-[#2b1c14]"></div>
+              <div class="h-7 rounded-md bg-[#2b1c14]"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+</div>

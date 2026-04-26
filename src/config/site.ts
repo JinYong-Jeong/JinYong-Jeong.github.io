@@ -19,7 +19,6 @@ export const site = {
   nav: [
     { label: "Home", href: "/" },
     { label: "Blog", href: "/blog/" },
-    { label: "Search", href: "/search/" },
     { label: "Projects", href: "/projects/" },
     { label: "About", href: "/about/" }
   ],
@@ -46,10 +45,14 @@ export const site = {
     }
   },
   techStack: [
-    "AI Agnet",
-    "AI",
-    "LLM",
-    "vibe coding"
+    "Python",
+    "PyTorch",
+    "Hugging Face",
+    "Flower",
+    "Docker",
+    "Linux",
+    "Git",
+    "VS Code"
   ],
   focusAreas: [
     "Federated LLM fine-tuning",

@@ -9,7 +9,7 @@ const { compact = false } = Astro.props;
 <div
   class:list={[
     "hero-visual min-w-0 overflow-hidden",
-    compact ? "home-visual-frame" : "panel p-5"
+    compact ? "home-visual-frame" : "panel p-4 lg:p-5"
   ]}
 >
   <div class:list={["grid min-w-0", compact ? "gap-3" : "gap-4"]}>
@@ -17,7 +17,7 @@ const { compact = false } = Astro.props;
       <div
         class:list={[
           "min-w-0 overflow-x-auto rounded-2xl bg-[#25170f] font-mono text-[#f6eadf] shadow-sm",
-          compact ? "p-3 text-[9px] leading-[1.2rem] sm:text-[10px]" : "p-5 text-xs leading-7 sm:text-sm"
+          compact ? "p-3 text-[9px] leading-[1.2rem] sm:text-[10px]" : "p-4 text-[11px] leading-6 sm:text-xs"
         ]}
         style="width: 100%; max-width: 100%; min-width: 0;"
       >
@@ -31,7 +31,7 @@ const { compact = false } = Astro.props;
         viewBox="0 0 220 170"
         class:list={[
           "rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-soft)]",
-          compact ? "min-h-24" : "min-h-40"
+          compact ? "min-h-24" : "min-h-36"
         ]}
         role="img"
         aria-label="LLM network sketch"
@@ -50,7 +50,7 @@ const { compact = false } = Astro.props;
       viewBox="0 0 520 170"
       class:list={[
         "w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]",
-        compact ? "h-24" : "h-48"
+        compact ? "h-24" : "h-40"
       ]}
       role="img"
       aria-label="Training loss chart"
