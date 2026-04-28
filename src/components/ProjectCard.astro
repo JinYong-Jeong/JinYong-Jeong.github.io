@@ -13,11 +13,11 @@ const { project, variant = "tile" } = Astro.props;
 
 {
   variant === "row" ? (
-    <article id={project.id} class="grid gap-6 py-7 xl:grid-cols-[240px_minmax(0,1fr)] xl:items-start">
+    <article id={project.id} class="grid gap-5 py-6 md:grid-cols-[210px_minmax(0,1fr)] md:items-start">
       <ProjectVisual project={project} compact={true} />
       <div class="min-w-0">
         <div class="mb-3 flex flex-wrap items-center gap-2">
-          <h3 class="text-[1.6rem] font-bold leading-[1.25] tracking-normal">{project.data.title}</h3>
+          <h3 class="text-[1.45rem] font-bold leading-[1.25] tracking-normal text-[var(--color-text)]">{project.data.title}</h3>
           <span class="chip">{project.data.status}</span>
         </div>
         <p class="max-w-3xl text-[15px] leading-8 text-[var(--color-muted)]">{project.data.description}</p>

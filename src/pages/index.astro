@@ -1,81 +1,87 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import HeroVisual from "@/components/HeroVisual.astro";
 import PostCard from "@/components/PostCard.astro";
 import ProjectCard from "@/components/ProjectCard.astro";
-import SectionHeader from "@/components/SectionHeader.astro";
 import Sidebar from "@/components/Sidebar.astro";
 import { site } from "@/config/site";
 import { getFeaturedProjects, getPublishedPosts } from "@/lib/content";
+import {
+  ArrowRight,
+  BookOpenText,
+  BrainCircuit,
+  Cpu,
+  FolderKanban,
+  Network,
+  PenLine
+} from "@lucide/astro";
+import bgImage from "../../engineering/design/bg.png";
 
 const posts = await getPublishedPosts();
 const recentPosts = posts.slice(0, 3);
 const featuredProjects = await getFeaturedProjects(3);
+const heroImage = typeof bgImage === "string" ? bgImage : bgImage.src;
+const topics = [
+  { label: "LLM", icon: BrainCircuit },
+  { label: "Federated Learning", icon: Network },
+  { label: "NLP", icon: BookOpenText },
+  { label: "Deep Learning", icon: Cpu },
+  { label: "MLOps", icon: PenLine }
+];
 ---
 
-<BaseLayout>
-  <div class="container-page py-8 lg:py-10">
-    <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-      <section class="surface-main">
-        <div class="home-hero-grid">
-          <header class="surface-section">
-            <p class="chip mb-5 w-fit">{site.author.role}</p>
-            <h1 class="hero-title max-w-3xl text-4xl font-black leading-[0.95] tracking-normal text-[var(--color-text)] sm:text-5xl lg:text-[4.3rem]">
-              실험하고,
+<BaseLayout bodyClass="home-page" mainClass="home-main">
+  <div class="container-page home-wrap">
+    <div class="home-layout">
+      <section class="home-content-panel">
+        <header class="home-hero" style={`--hero-bg: url(${heroImage});`}>
+          <div class="home-hero-content">
+            <p class="home-eyebrow">{site.author.role}</p>
+            <h1 class="home-title">
+              Research. Build.
               <br />
-              기록하고,
-              <br />
-              공유합니다.
+              Learn. Share.
             </h1>
-            <p class="hero-copy mt-6 max-w-2xl text-base leading-8 text-[var(--color-muted)] lg:text-[1.08rem]">
-              LLM, Federated Learning, 그리고 더 나은 모델을 만들기 위한 기록을
-              연구 노트처럼 정리합니다.
+            <p class="home-copy">
+              LLM과 Federated Learning을 중심으로 연구하고, 실험을 기록하며,
+              배운 것을 재현 가능한 노트로 공유합니다.
             </p>
-            <div class="mt-7 flex flex-wrap gap-3">
-              <a class="focus-ring rounded-xl bg-[var(--color-accent)] px-5 py-3 font-semibold text-white hover:bg-[#59331f]" href="/blog/">
-                최근 글 읽기 →
+            <div class="home-actions">
+              <a class="home-button home-button-primary focus-ring" href="/blog/">
+                최근 글 보기
+                <ArrowRight size={18} stroke-width={1.8} />
               </a>
-              <a class="focus-ring rounded-xl border border-[var(--color-border-strong)] px-5 py-3 font-semibold text-[var(--color-accent)] hover:bg-[var(--color-surface-soft)]" href="/projects/">
+              <a class="home-button home-button-secondary focus-ring" href="/projects/">
                 프로젝트 보기
               </a>
             </div>
-            <div class="mt-8 metric-ribbon">
-              <div>
-                <span class="metric-kicker">Archive</span>
-                <strong class="metric-value">{posts.length}</strong>
-                <p class="metric-copy">공개된 연구 노트</p>
-              </div>
-              <div>
-                <span class="metric-kicker">Projects</span>
-                <strong class="metric-value">{featuredProjects.length}</strong>
-                <p class="metric-copy">정리된 구현 기록</p>
-              </div>
-              <div>
-                <span class="metric-kicker">Focus</span>
-                <strong class="metric-value">{site.focusAreas.length}</strong>
-                <p class="metric-copy">현재 집중하는 트랙</p>
-              </div>
+            <div class="home-topic-row" aria-label="Focus topics">
+              {
+                topics.map((topic) => {
+                  const Icon = topic.icon;
+                  return (
+                    <span class="home-topic-pill">
+                      <Icon size={16} stroke-width={1.8} />
+                      {topic.label}
+                    </span>
+                  );
+                })
+              }
             </div>
-          </header>
-
-          <div class="surface-section">
-            <HeroVisual embedded={true} />
           </div>
-        </div>
+        </header>
 
-        <section class="surface-divider">
-          <div class="surface-section pb-4">
-            <SectionHeader title="최근 글" href="/blog/" linkLabel="모든 글 보기" />
+        <section class="home-section-block">
+          <div class="home-section-heading">
+            <div class="home-section-title">
+              <BookOpenText size={20} stroke-width={1.8} />
+              <h2>Latest Posts</h2>
+            </div>
+            <a class="home-inline-link focus-ring" href="/blog/">모든 글 보기 <ArrowRight size={16} /></a>
           </div>
-          <div class="grid xl:grid-cols-3">
+          <div class="home-card-grid">
             {
-              recentPosts.map((post, index) => (
-                <div
-                  class:list={[
-                    "surface-section pt-0",
-                    index > 0 && "border-t subtle-divider xl:border-t-0 xl:border-l"
-                  ]}
-                >
+              recentPosts.map((post) => (
+                <div class="home-card">
                   <PostCard post={post} />
                 </div>
               ))
@@ -83,19 +89,18 @@ const featuredProjects = await getFeaturedProjects(3);
           </div>
         </section>
 
-        <section class="surface-divider">
-          <div class="surface-section pb-4">
-            <SectionHeader title="주요 프로젝트" href="/projects/" linkLabel="모든 프로젝트 보기" />
+        <section class="home-section-block home-section-tight">
+          <div class="home-section-heading">
+            <div class="home-section-title">
+              <FolderKanban size={20} stroke-width={1.8} />
+              <h2>Featured Projects</h2>
+            </div>
+            <a class="home-inline-link focus-ring" href="/projects/">모든 프로젝트 보기 <ArrowRight size={16} /></a>
           </div>
-          <div class="grid xl:grid-cols-3">
+          <div class="home-project-grid">
             {
-              featuredProjects.map((project, index) => (
-                <div
-                  class:list={[
-                    "surface-section pt-0",
-                    index > 0 && "border-t subtle-divider xl:border-t-0 xl:border-l"
-                  ]}
-                >
+              featuredProjects.map((project) => (
+                <div class="home-card home-project-card">
                   <ProjectCard project={project} />
                 </div>
               ))
@@ -104,7 +109,7 @@ const featuredProjects = await getFeaturedProjects(3);
         </section>
       </section>
 
-      <Sidebar projects={featuredProjects} />
+      <Sidebar projects={featuredProjects} variant="home" />
     </div>
   </div>
 </BaseLayout>

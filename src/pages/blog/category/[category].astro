@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import PageHero from "@/components/PageHero.astro";
 import PostCard from "@/components/PostCard.astro";
 import Sidebar from "@/components/Sidebar.astro";
 import { site, type CategoryKey } from "@/config/site";
@@ -16,16 +17,12 @@ const categoryInfo = site.categories[category];
 ---
 
 <BaseLayout title={categoryInfo.label} description={categoryInfo.description}>
-  <div class="container-page py-8 lg:py-10">
-    <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-      <section class="surface-main">
-        <header class="surface-section">
-          <p class="chip mb-4 w-fit">Category</p>
-          <h1 class="text-4xl font-black tracking-normal sm:text-5xl">{categoryInfo.label}</h1>
-          <p class="mt-4 max-w-3xl text-[15px] leading-8 text-[var(--color-muted)]">{categoryInfo.description}</p>
-        </header>
-        <div class="surface-divider content-list">
-          {posts.map((post) => <div class="surface-section py-0"><PostCard post={post} variant="row" /></div>)}
+  <div class="container-page page-wrap">
+    <div class="page-layout">
+      <section class="page-main-panel">
+        <PageHero kicker="Category" title={categoryInfo.label} description={categoryInfo.description} />
+        <div class="content-card-list">
+          {posts.map((post) => <div class="content-row-card"><PostCard post={post} variant="row" /></div>)}
         </div>
       </section>
       <Sidebar projects={projects} />

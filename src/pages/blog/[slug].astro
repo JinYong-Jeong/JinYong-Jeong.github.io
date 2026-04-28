@@ -23,9 +23,9 @@ const category = post.data.category as CategoryKey;
 ---
 
 <BaseLayout title={post.data.title} description={post.data.description} type="article">
-  <div class="container-page py-8 lg:py-10">
+  <div class="container-page page-wrap">
     <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
-      <article class="surface-main">
+      <article class="page-main-panel">
         <header class="surface-section">
           <a class="chip focus-ring mb-5 w-fit" href={`/blog/category/${category}/`}>
             {site.categories[category].label}
@@ -68,7 +68,7 @@ const category = post.data.category as CategoryKey;
       </article>
       <div class="space-y-4 lg:sticky lg:top-24 lg:self-start">
         <TableOfContents headings={headings} />
-        <div class="surface-main">
+        <div class="home-sidebar-card">
           <div class="surface-section text-sm leading-7 text-[var(--color-muted)]">
             <p class="font-semibold text-[var(--color-text)]">기록 원칙</p>
             <p class="mt-2">문제, 설정, 결과, 다음 액션을 분리해 나중에 다시 검증할 수 있게 남깁니다.</p>

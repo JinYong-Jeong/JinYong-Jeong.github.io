@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import PageHero from "@/components/PageHero.astro";
 import Sidebar from "@/components/Sidebar.astro";
 import { site } from "@/config/site";
 import {
@@ -36,36 +37,35 @@ const searchItems = [
 ---
 
 <BaseLayout title="Search" description="글과 프로젝트를 통합 검색합니다.">
-  <div class="container-page py-8 lg:py-10">
-    <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-      <section class="surface-main">
-        <header class="surface-section">
-          <p class="chip mb-4 w-fit">Unified Search</p>
-          <h1 class="text-4xl font-black tracking-normal sm:text-5xl">Search</h1>
-          <p class="mt-4 max-w-3xl text-[15px] leading-8 text-[var(--color-muted)]">
-            글 제목, 설명, 태그, 프로젝트 설명을 한 번에 찾습니다.
-          </p>
-          <label class="mt-7 block">
+  <div class="container-page page-wrap">
+    <div class="page-layout">
+      <section class="page-main-panel">
+        <PageHero
+          kicker="Unified Search"
+          title="Search"
+          description="글 제목, 설명, 태그, 프로젝트 설명을 한 번에 찾습니다."
+        />
+        <div class="page-toolbar">
+          <label class="block">
             <span class="sr-only">Search all content</span>
             <input
               id="site-search-input"
               type="search"
               placeholder="예: LoRA, Flower, quantization, evaluation"
-              class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-soft)] px-4 py-3.5 text-base text-[var(--color-text)] outline-none transition-colors placeholder:text-[var(--color-subtle)] focus:border-[var(--color-accent-2)]"
+              class="page-search-input"
             />
           </label>
-          <p id="site-search-summary" class="mt-3 text-sm text-[var(--color-muted)]">
-            총 {searchItems.length}개의 항목
-          </p>
-        </header>
+        </div>
+        <p id="site-search-summary" class="page-result-summary">
+          총 {searchItems.length}개의 항목
+        </p>
 
-        <section class="surface-divider">
-          <div id="site-search-results" class="content-list">
+        <section id="site-search-results" class="content-card-list">
             {
               searchItems.map((item) => (
                 <a
                   href={item.href}
-                  class="focus-ring block surface-section py-6 hover:bg-[rgba(255,253,248,0.4)]"
+                  class="content-row-card focus-ring block py-6"
                   data-search-item
                   data-search-text={item.tokens.toLowerCase()}
                 >
@@ -78,11 +78,10 @@ const searchItems = [
                 </a>
               ))
             }
-          </div>
-          <div id="site-search-empty" class="hidden surface-section text-center text-sm text-[var(--color-muted)]">
-            일치하는 결과가 없습니다. 다른 키워드로 다시 검색해보세요.
-          </div>
         </section>
+        <div id="site-search-empty" class="hidden page-empty-state">
+          일치하는 결과가 없습니다. 다른 키워드로 다시 검색해보세요.
+        </div>
       </section>
 
       <Sidebar projects={sidebarProjects} />

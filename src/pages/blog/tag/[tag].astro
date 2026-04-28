@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import PageHero from "@/components/PageHero.astro";
 import PostCard from "@/components/PostCard.astro";
 import Sidebar from "@/components/Sidebar.astro";
 import { getAllTags, getFeaturedProjects, getPublishedPosts } from "@/lib/content";
@@ -17,16 +18,12 @@ const projects = await getFeaturedProjects(3);
 ---
 
 <BaseLayout title={`#${tag}`} description={`#${tag} 태그가 달린 글 목록입니다.`}>
-  <div class="container-page py-8 lg:py-10">
-    <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-      <section class="surface-main">
-        <header class="surface-section">
-          <p class="chip mb-4 w-fit">Tag</p>
-          <h1 class="text-4xl font-black tracking-normal sm:text-5xl">#{tag}</h1>
-          <p class="mt-4 text-[15px] leading-8 text-[var(--color-muted)]">{posts.length}개의 글이 있습니다.</p>
-        </header>
-        <div class="surface-divider content-list">
-          {posts.map((post) => <div class="surface-section py-0"><PostCard post={post} variant="row" /></div>)}
+  <div class="container-page page-wrap">
+    <div class="page-layout">
+      <section class="page-main-panel">
+        <PageHero kicker="Tag" title={`#${tag}`} description={`${posts.length}개의 글이 있습니다.`} />
+        <div class="content-card-list">
+          {posts.map((post) => <div class="content-row-card"><PostCard post={post} variant="row" /></div>)}
         </div>
       </section>
       <Sidebar projects={projects} />

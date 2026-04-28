@@ -1,0 +1,20 @@
+---
+import bgImage from "../../engineering/design/bg.png";
+
+interface Props {
+  kicker: string;
+  title: string;
+  description: string;
+}
+
+const { kicker, title, description } = Astro.props;
+const heroImage = typeof bgImage === "string" ? bgImage : bgImage.src;
+---
+
+<header class="page-hero" style={`--page-hero-bg: url(${heroImage});`}>
+  <div class="page-hero-copy">
+    <p class="chip mb-4 w-fit">{kicker}</p>
+    <h1>{title}</h1>
+    <p>{description}</p>
+  </div>
+</header>

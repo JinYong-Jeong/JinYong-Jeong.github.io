@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "@astrojs/mdx": "latest",
-    "@astrojs/rss": "latest",
     "@astrojs/sitemap": "latest",
     "@lucide/astro": "^1.11.0",
     "@tailwindcss/vite": "^4.1.17",

@@ -1,20 +1,43 @@
 ---
-import { ArrowRight, BriefcaseBusiness, GitFork, Mail, Rss } from "@lucide/astro";
+import { ArrowRight, BriefcaseBusiness, GitFork, Mail, MapPin } from "@lucide/astro";
 import { site } from "@/config/site";
 import { getProjectUrl, type Project } from "@/lib/content";
 
 interface Props {
   projects: Project[];
+  variant?: "shell" | "cards" | "home";
 }
 
-const { projects } = Astro.props;
-const iconMap = { github: GitFork, mail: Mail, linkedin: BriefcaseBusiness, rss: Rss };
+const { projects, variant = "cards" } = Astro.props;
+const iconMap = { github: GitFork, mail: Mail, linkedin: BriefcaseBusiness };
+const contactLinks = site.socials;
 const sidebarTechStack = site.techStack.slice(0, 8);
+const sidebarTopics = [
+  ...Object.values(site.categories).map((category) => category.label),
+  "LoRA",
+  "Evaluation",
+  "MLOps"
+];
+const isCardStack = variant === "cards";
+const isHomeStack = variant === "home";
+const useCardStack = isCardStack || isHomeStack;
+const sectionClass = useCardStack ? "home-sidebar-card surface-section" : "surface-section";
 ---
 
-<aside class="surface-main sidebar-shell lg:sticky lg:top-24 lg:self-start">
-  <section class="surface-section">
-    <h2 class="mb-5 text-lg font-bold tracking-normal">About Me</h2>
+<aside
+  class:list={[
+    useCardStack
+      ? "home-sidebar-stack lg:sticky lg:top-24 lg:self-start"
+      : "surface-main sidebar-shell lg:sticky lg:top-24 lg:self-start"
+  ]}
+>
+  <section class={sectionClass}>
+    <h2 class="mb-5 text-lg font-bold tracking-normal">
+      <a class="focus-ring inline-flex items-center gap-2 hover:text-[var(--color-accent)]" href="/about/">
+        About Me
+        <ArrowRight size={15} stroke-width={1.8} />
+      </a>
+    </h2>
     <div class="flex gap-4">
       <img
         src={site.author.avatar}
@@ -28,26 +51,48 @@ const sidebarTechStack = site.techStack.slice(0, 8);
         <p class="mt-2 text-sm leading-7 text-[var(--color-muted)]">{site.author.bio}</p>
       </div>
     </div>
-    <div class="mt-5 flex flex-wrap gap-2">
-      {site.focusAreas.slice(0, 4).map((item) => <span class="chip">{item}</span>)}
+    <div class="sidebar-contact-list mt-5">
+      <span>
+        <MapPin size={16} stroke-width={1.8} />
+        {site.author.location}
+      </span>
+      {
+        contactLinks.map((link) => {
+          const Icon = iconMap[link.icon as keyof typeof iconMap];
+          return (
+            <a class="focus-ring" href={link.href}>
+              <Icon size={16} stroke-width={1.8} />
+              {link.label}
+            </a>
+          );
+        })
+      }
     </div>
   </section>
 
-  <section class="surface-section">
-    <h2 class="mb-5 text-lg font-bold tracking-normal">Tech Stack</h2>
-    <ul class="sidebar-tech-list">
-      {
-        sidebarTechStack.map((tech) => (
-          <li>
-            <span class="sidebar-tech-dot"></span>
-            <span class="truncate">{tech}</span>
-          </li>
-        ))
-      }
-    </ul>
-  </section>
+  {!isHomeStack && <section class={sectionClass}>
+    <h2 class="mb-5 text-lg font-bold tracking-normal">{useCardStack ? "Topics" : "Tech Stack"}</h2>
+    {
+      useCardStack ? (
+        <div class="flex flex-wrap gap-2">
+          {sidebarTopics.map((topic) => <span class="chip">{topic}</span>)}
+        </div>
+      ) : (
+        <ul class="sidebar-tech-list">
+          {
+            sidebarTechStack.map((tech) => (
+              <li>
+                <span class="sidebar-tech-dot"></span>
+                <span class="truncate">{tech}</span>
+              </li>
+            ))
+          }
+        </ul>
+      )
+    }
+  </section>}
 
-  <section class="surface-section">
+  {!isHomeStack && <section class={sectionClass}>
     <div class="mb-5 flex items-center justify-between gap-3">
       <h2 class="text-lg font-bold tracking-normal">Recent Projects</h2>
       <a class="focus-ring text-sm font-semibold text-[var(--color-accent)] hover:underline" href="/projects/">
@@ -68,22 +113,6 @@ const sidebarTechStack = site.techStack.slice(0, 8);
         ))
       }
     </div>
-  </section>
+  </section>}
 
-  <section class="surface-section">
-    <h2 class="mb-5 text-lg font-bold tracking-normal">Stay in Touch</h2>
-    <div class="sidebar-link-grid">
-      {
-        site.socials.map((link) => {
-          const Icon = iconMap[link.icon as keyof typeof iconMap];
-          return (
-            <a class="focus-ring" href={link.href}>
-              <Icon size={18} stroke-width={1.8} />
-              <span>{link.label}</span>
-            </a>
-          );
-        })
-      }
-    </div>
-  </section>
 </aside>

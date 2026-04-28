@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import PageHero from "@/components/PageHero.astro";
 import PostCard from "@/components/PostCard.astro";
 import Sidebar from "@/components/Sidebar.astro";
 import TagList from "@/components/TagList.astro";
@@ -12,38 +13,39 @@ const projects = await getFeaturedProjects(3);
 ---
 
 <BaseLayout title="Blog" description="LLM, Federated Learning, 논문 리뷰, 실험 로그 글 목록입니다.">
-  <div class="container-page py-8 lg:py-10">
-    <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-      <section class="surface-main">
-        <header class="surface-section">
-          <p class="chip mb-4 w-fit">Research Notes</p>
-          <h1 class="text-4xl font-black tracking-normal sm:text-5xl">Blog</h1>
-          <p class="mt-4 max-w-3xl text-[15px] leading-8 text-[var(--color-muted)]">
-            공부한 개념, 읽은 논문, 실험 결과, 구현하면서 정리한 문제 해결 기록을 모읍니다.
-          </p>
-          <div class="mt-7 grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]">
+  <div class="container-page page-wrap">
+    <div class="page-layout">
+      <section class="page-main-panel">
+        <PageHero
+          kicker="Research Notes"
+          title="Blog"
+          description="공부한 개념, 읽은 논문, 실험 결과, 구현하면서 정리한 문제 해결 기록을 모읍니다."
+        />
+
+        <div class="page-toolbar">
             <label class="block">
               <span class="sr-only">검색</span>
               <input
                 id="blog-search"
                 type="search"
                 placeholder="제목, 설명, 태그 검색"
-                class="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-soft)] px-4 py-3.5 text-sm text-[var(--color-text)] outline-none transition-colors placeholder:text-[var(--color-subtle)] focus:border-[var(--color-accent-2)]"
+                class="page-search-input"
               />
             </label>
-            <a class="focus-ring inline-flex items-center justify-center rounded-xl border border-[var(--color-border)] px-4 py-3.5 text-sm font-semibold text-[var(--color-accent)] hover:bg-[var(--color-surface-soft)]" href="/search/">
+            <a class="page-toolbar-link focus-ring" href="/search/">
               전체 검색 페이지 →
             </a>
-          </div>
-          <p id="blog-search-summary" class="mt-3 text-sm text-[var(--color-muted)]">
+        </div>
+        <p id="blog-search-summary" class="page-result-summary">
             {posts.length}개의 공개 글
-          </p>
-        </header>
+        </p>
 
-        <section class="surface-divider surface-section">
-          <h2 class="text-xl font-bold tracking-normal text-[var(--color-text)]">카테고리</h2>
-          <p class="mt-2 text-sm text-[var(--color-muted)]">관심 주제별로 바로 이동합니다.</p>
-          <div class="mt-5 flex flex-wrap gap-2">
+        <section class="filter-panel">
+          <div>
+            <h2>카테고리</h2>
+            <p>관심 주제별로 바로 이동합니다.</p>
+          </div>
+          <div class="filter-chip-grid">
             {
               categoryKeys.map((category) => (
                 <a class="chip focus-ring hover:border-[var(--color-accent-2)]" href={getCategoryUrl(category)}>
@@ -52,21 +54,16 @@ const projects = await getFeaturedProjects(3);
               ))
             }
           </div>
-          <div class="mt-5 border-t subtle-divider pt-5">
+          <div class="filter-tag-row">
             <TagList tags={tags} />
           </div>
         </section>
 
-        <section class="surface-divider">
-          <div class="surface-section pb-0">
-            <h2 class="text-xl font-bold tracking-normal text-[var(--color-text)]">전체 글</h2>
-            <p class="mt-2 text-sm text-[var(--color-muted)]">연구 노트와 구현 기록을 시간순으로 정리했습니다.</p>
-          </div>
-          <div id="blog-post-list" class="content-list">
+        <section class="content-card-list" id="blog-post-list">
             {
               posts.map((post) => (
                 <div
-                  class="surface-section py-0"
+                  class="content-row-card"
                   data-post-card
                   data-search={`${post.data.title} ${post.data.description} ${post.data.tags.join(" ")} ${post.data.category}`.toLowerCase()}
                 >
@@ -74,7 +71,6 @@ const projects = await getFeaturedProjects(3);
                 </div>
               ))
             }
-          </div>
         </section>
       </section>
 

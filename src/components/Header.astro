@@ -1,16 +1,18 @@
 ---
-import { GitFork, Rss, Search } from "@lucide/astro";
+import { GitFork, Search } from "@lucide/astro";
 import { site } from "@/config/site";
+import logoImage from "../../engineering/design/logo2.png";
 
 const pathname = Astro.url.pathname;
 const isActive = (href: string) =>
   href === "/" ? pathname === "/" : pathname.startsWith(href);
+const logoSrc = typeof logoImage === "string" ? logoImage : logoImage.src;
 ---
 
-<header class="sticky top-0 z-30 border-b border-[var(--color-border)] bg-[rgba(250,247,241,0.82)] backdrop-blur-xl">
+<header class="site-header sticky top-0 z-30 border-b backdrop-blur-xl">
   <div class="container-page flex h-16 items-center gap-7">
     <a href="/" class="focus-ring flex shrink-0 items-center gap-3" aria-label="Go to home">
-      <span class="text-2xl font-black tracking-normal text-[var(--color-accent)]">{site.shortName}</span>
+      <img class="site-logo" src={logoSrc} alt={`${site.name} logo`} />
     </a>
     <nav class="hidden h-full items-center gap-6 sm:flex" aria-label="Primary navigation">
       {
@@ -43,13 +45,6 @@ const isActive = (href: string) =>
         aria-label="GitHub"
       >
         <GitFork size={18} stroke-width={1.8} />
-      </a>
-      <a
-        class="focus-ring inline-flex items-center justify-center text-[var(--color-accent)] transition-colors hover:text-[var(--color-accent-2)]"
-        href="/rss.xml"
-        aria-label="RSS"
-      >
-        <Rss size={18} stroke-width={1.8} />
       </a>
     </div>
   </div>

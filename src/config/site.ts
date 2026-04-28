@@ -63,33 +63,20 @@ export const site = {
   socials: [
     { label: "GitHub", href: "https://github.com/JinYong-Jeong", icon: "github" },
     { label: "Email", href: "mailto:wjdwlsdyd5373@gmail.com", icon: "mail" },
-    { label: "LinkedIn", href: "https://www.linkedin.com/in/jinyongjeong", icon: "linkedin" },
-    { label: "RSS", href: "/rss.xml", icon: "rss" }
+    { label: "LinkedIn", href: "https://www.linkedin.com/in/jinyongjeong", icon: "linkedin" }
   ],
   achievements: [
     {
-      title: "Aing 운영진",
-      organization: "Aing",
-      period: "2025.06 - Present",
-      note: "커뮤니티 운영과 프로그램 기획을 담당"
+      title: "학부연구생",
+      organization: "Gachon Cognitive Computing Lab",
+      period: "2025.10 - Present",
+      note: "개인건강데이터, 프라이버시 보호, AI-Agent 시스템을 중심으로 연구를 진행 중입니다."
     },
     {
-      title: "Aing 부회장",
-      organization: "Aing",
-      period: "2026.01 - Present",
-      note: "운영 체계 정리와 대외 협업 조율"
-    },
-    {
-      title: "00상",
-      organization: "Gachon University",
-      period: "예시",
-      note: "추후 실제 수상 내역으로 교체 예정"
-    },
-    {
-      title: "논문 실적",
-      organization: "To be updated",
-      period: "예시",
-      note: "논문 제목, 저자 순서, 게재 정보 추가 예정"
+      title: "연합학습 기반 개인건강데이터 프라이버시 보호형 AI-Agent 시스템 연구",
+      organization: "한국빅데이터학회(KCI)",
+      period: "1저자",
+      note: "정진용, 송인서, 이강윤"
     }
   ]
 } as const;

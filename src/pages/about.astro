@@ -6,10 +6,10 @@ const primaryAchievements = site.achievements;
 ---
 
 <BaseLayout title="About" description={`${site.name}의 프로필과 실적입니다.`}>
-  <div class="container-page py-8 lg:py-10">
-    <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
-      <section class="surface-main">
-        <header class="surface-section grid gap-6 md:grid-cols-[112px_minmax(0,1fr)] md:items-start">
+  <div class="container-page page-wrap">
+    <div class="page-layout">
+      <section class="page-main-panel">
+        <header class="about-profile-hero">
           <img
             src={site.author.avatar}
             alt={`${site.author.displayName} avatar`}
@@ -25,8 +25,8 @@ const primaryAchievements = site.achievements;
           </div>
         </header>
 
-        <div class="surface-divider grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-          <section class="surface-section">
+        <div class="about-content-grid">
+          <section class="about-info-card">
             <h2 class="text-xl font-bold">관심 분야</h2>
             <ul class="mt-5 space-y-3 text-[15px] leading-8 text-[var(--color-muted)]">
               {site.focusAreas.map((area) => <li>· {area}</li>)}
@@ -38,7 +38,7 @@ const primaryAchievements = site.achievements;
             </div>
           </section>
 
-          <section class="surface-section border-t subtle-divider lg:border-t-0 lg:border-l">
+          <section class="about-info-card">
             <h2 class="text-xl font-bold">실적</h2>
             <div class="mt-5 content-list">
               {
@@ -58,8 +58,8 @@ const primaryAchievements = site.achievements;
         </div>
       </section>
 
-      <aside class="surface-main sidebar-shell lg:sticky lg:top-24 lg:self-start">
-        <section class="surface-section">
+      <aside class="home-sidebar-stack lg:sticky lg:top-24 lg:self-start">
+        <section class="home-sidebar-card surface-section">
           <h2 class="text-lg font-bold">Contact</h2>
           <div class="mt-5 space-y-3">
             {
@@ -71,7 +71,7 @@ const primaryAchievements = site.achievements;
             }
           </div>
         </section>
-        <section class="surface-section">
+        <section class="home-sidebar-card surface-section">
           <h2 class="text-lg font-bold">Location</h2>
           <p class="mt-4 text-sm text-[var(--color-muted)]">{site.author.location}</p>
         </section>
