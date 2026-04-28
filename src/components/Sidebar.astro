@@ -1,23 +1,16 @@
 ---
 import { ArrowRight, BriefcaseBusiness, GitFork, Mail, MapPin } from "@lucide/astro";
 import { site } from "@/config/site";
-import { getProjectUrl, type Project } from "@/lib/content";
+import type { Project } from "@/lib/content";
 
 interface Props {
   projects: Project[];
   variant?: "shell" | "cards" | "home";
 }
 
-const { projects, variant = "cards" } = Astro.props;
+const { variant = "cards" } = Astro.props;
 const iconMap = { github: GitFork, mail: Mail, linkedin: BriefcaseBusiness };
 const contactLinks = site.socials;
-const sidebarTechStack = site.techStack.slice(0, 8);
-const sidebarTopics = [
-  ...Object.values(site.categories).map((category) => category.label),
-  "LoRA",
-  "Evaluation",
-  "MLOps"
-];
 const isCardStack = variant === "cards";
 const isHomeStack = variant === "home";
 const useCardStack = isCardStack || isHomeStack;
@@ -69,50 +62,4 @@ const sectionClass = useCardStack ? "home-sidebar-card surface-section" : "surfa
       }
     </div>
   </section>
-
-  {!isHomeStack && <section class={sectionClass}>
-    <h2 class="mb-5 text-lg font-bold tracking-normal">{useCardStack ? "Topics" : "Tech Stack"}</h2>
-    {
-      useCardStack ? (
-        <div class="flex flex-wrap gap-2">
-          {sidebarTopics.map((topic) => <span class="chip">{topic}</span>)}
-        </div>
-      ) : (
-        <ul class="sidebar-tech-list">
-          {
-            sidebarTechStack.map((tech) => (
-              <li>
-                <span class="sidebar-tech-dot"></span>
-                <span class="truncate">{tech}</span>
-              </li>
-            ))
-          }
-        </ul>
-      )
-    }
-  </section>}
-
-  {!isHomeStack && <section class={sectionClass}>
-    <div class="mb-5 flex items-center justify-between gap-3">
-      <h2 class="text-lg font-bold tracking-normal">Recent Projects</h2>
-      <a class="focus-ring text-sm font-semibold text-[var(--color-accent)] hover:underline" href="/projects/">
-        All
-      </a>
-    </div>
-    <div class="content-list">
-      {
-        projects.slice(0, 3).map((project) => (
-          <a class="focus-ring flex items-start gap-3 py-3 first:pt-0 last:pb-0 hover:text-[var(--color-accent)]" href={getProjectUrl(project)}>
-            <span class="rail-label mt-0.5 shrink-0">{project.data.title.slice(0, 1)}</span>
-            <span class="min-w-0 flex-1">
-              <span class="block truncate text-sm font-semibold text-[var(--color-text)]">{project.data.title}</span>
-              <span class="mt-1 block truncate text-sm text-[var(--color-muted)]">{project.data.description}</span>
-            </span>
-            <ArrowRight class="mt-0.5 shrink-0 text-[var(--color-accent)]" size={15} />
-          </a>
-        ))
-      }
-    </div>
-  </section>}
-
 </aside>
