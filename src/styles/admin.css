@@ -798,8 +798,15 @@
   }
 
   .admin-brand small,
-  .admin-viewer span {
+  .admin-viewer {
     display: none;
+  }
+
+  .admin-nav-link {
+    width: 2.45rem;
+    padding-inline: 0;
+    gap: 0;
+    font-size: 0;
   }
 
   .post-library {

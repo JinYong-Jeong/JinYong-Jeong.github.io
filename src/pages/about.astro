@@ -1,81 +1,33 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { site } from "@/config/site";
+import AboutBlock from "@/components/AboutBlock.astro";
+import aboutSource from "../../content/about/page.json";
+import { normalizeAboutPage } from "@/lib/about-components";
 
-const primaryAchievements = site.achievements;
+const page = normalizeAboutPage(aboutSource);
+const mainBlocks = page.blocks.filter((block) => block.area === "main");
+const profileBlocks = mainBlocks.filter((block) => block.type === "profile");
+const contentBlocks = mainBlocks.filter((block) => block.type !== "profile");
+const sidebarBlocks = page.blocks.filter((block) => block.area === "sidebar");
 ---
 
-<BaseLayout title="About" description={`${site.name}의 프로필과 실적입니다.`}>
+<BaseLayout title={page.title} description={page.description}>
   <div class="container-page page-wrap">
     <div class="page-layout">
       <section class="page-main-panel">
-        <header class="about-profile-hero">
-          <img
-            src={site.author.avatar}
-            alt={`${site.author.displayName} avatar`}
-            class="size-28 rounded-[1rem] border border-[var(--color-border)] object-cover"
-            loading="lazy"
-            referrerpolicy="no-referrer"
-          />
-          <div class="min-w-0">
-            <p class="chip mb-4 w-fit">Profile</p>
-            <h1 class="text-4xl font-black tracking-normal sm:text-5xl">{site.name}</h1>
-            <p class="mt-3 text-lg font-semibold text-[var(--color-accent)]">{site.author.role}</p>
-            <p class="mt-5 max-w-4xl text-[1.02rem] leading-9 text-[var(--color-muted)]">{site.author.longBio}</p>
+        {profileBlocks.map((block) => <AboutBlock block={block} />)}
+        {contentBlocks.length > 0 && (
+          <div class="about-content-grid">
+            {contentBlocks.map((block) => <AboutBlock block={block} />)}
           </div>
-        </header>
-
-        <div class="about-content-grid">
-          <section class="about-info-card">
-            <h2 class="text-xl font-bold">관심 분야</h2>
-            <ul class="mt-5 space-y-3 text-[15px] leading-8 text-[var(--color-muted)]">
-              {site.focusAreas.map((area) => <li>· {area}</li>)}
-            </ul>
-
-            <h2 class="mt-10 text-xl font-bold">기술 스택</h2>
-            <div class="mt-5 flex flex-wrap gap-2">
-              {site.techStack.map((tech) => <span class="chip">{tech}</span>)}
-            </div>
-          </section>
-
-          <section class="about-info-card">
-            <h2 class="text-xl font-bold">실적</h2>
-            <div class="mt-5 content-list">
-              {
-                primaryAchievements.map((achievement) => (
-                  <article class="grid gap-2 py-5 md:grid-cols-[160px_minmax(0,1fr)] md:items-start">
-                    <div class="rail-label md:pt-1">{achievement.period}</div>
-                    <div class="min-w-0">
-                      <h3 class="text-lg font-semibold text-[var(--color-text)]">{achievement.title}</h3>
-                      <p class="mt-1 text-sm font-medium text-[var(--color-accent)]">{achievement.organization}</p>
-                      <p class="mt-3 text-sm leading-7 text-[var(--color-muted)]">{achievement.note}</p>
-                    </div>
-                  </article>
-                ))
-              }
-            </div>
-          </section>
-        </div>
+        )}
       </section>
 
-      <aside class="home-sidebar-stack lg:sticky lg:top-24 lg:self-start">
-        <section class="home-sidebar-card surface-section">
-          <h2 class="text-lg font-bold">Contact</h2>
-          <div class="mt-5 space-y-3">
-            {
-              site.socials.map((link) => (
-                <a class="focus-ring flex items-center gap-3 py-1 text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-accent)]" href={link.href}>
-                  <span>{link.label}</span>
-                </a>
-              ))
-            }
-          </div>
-        </section>
-        <section class="home-sidebar-card surface-section">
-          <h2 class="text-lg font-bold">Location</h2>
-          <p class="mt-4 text-sm text-[var(--color-muted)]">{site.author.location}</p>
-        </section>
-      </aside>
+      {sidebarBlocks.length > 0 && (
+        <aside class="home-sidebar-stack lg:sticky lg:top-24 lg:self-start">
+          {sidebarBlocks.map((block) => <AboutBlock block={block} />)}
+        </aside>
+      )}
     </div>
   </div>
 </BaseLayout>

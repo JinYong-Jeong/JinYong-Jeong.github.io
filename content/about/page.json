@@ -1,0 +1,73 @@
+{
+  "title": "About",
+  "description": "Jinyong Jeong의 프로필과 실적입니다.",
+  "blocks": [
+    {
+      "id": "profile",
+      "type": "profile",
+      "area": "main",
+      "label": "Profile",
+      "name": "Jinyong Jeong",
+      "subtitle": "Developer · Researcher · Builder",
+      "image": "https://avatars.githubusercontent.com/u/174023460?v=4",
+      "body": "논문을 읽고 끝내지 않고 직접 구현하고 검증하는 편입니다. 모델 성능 자체보다 왜 그런 결과가 나왔는지, 다음 실험에서 무엇을 바꿔야 하는지까지 남기는 기록을 선호합니다. 이 블로그는 그 과정을 쌓아두는 연구 노트이자 개발 아카이브입니다."
+    },
+    {
+      "id": "focus-areas",
+      "type": "list",
+      "area": "main",
+      "title": "관심 분야",
+      "items": [
+        "Federated LLM fine-tuning",
+        "LLM evaluation automation",
+        "PEFT/LoRA 실험 재현",
+        "실험 로그와 결과 시각화"
+      ]
+    },
+    {
+      "id": "tech-stack",
+      "type": "tags",
+      "area": "main",
+      "title": "기술 스택",
+      "items": ["Python", "PyTorch", "Hugging Face", "Flower", "Docker", "Linux", "Git", "VS Code"]
+    },
+    {
+      "id": "achievements",
+      "type": "timeline",
+      "area": "main",
+      "title": "실적",
+      "items": [
+        {
+          "period": "2025.10 - Present",
+          "title": "학부연구생",
+          "organization": "Gachon Cognitive Computing Lab",
+          "note": "개인건강데이터, 프라이버시 보호, AI-Agent 시스템을 중심으로 연구를 진행 중입니다."
+        },
+        {
+          "period": "1저자",
+          "title": "연합학습 기반 개인건강데이터 프라이버시 보호형 AI-Agent 시스템 연구",
+          "organization": "한국빅데이터학회(KCI)",
+          "note": "정진용, 송인서, 이강윤"
+        }
+      ]
+    },
+    {
+      "id": "contact",
+      "type": "links",
+      "area": "sidebar",
+      "title": "Contact",
+      "items": [
+        { "label": "GitHub", "href": "https://github.com/JinYong-Jeong" },
+        { "label": "Email", "href": "mailto:wjdwlsdyd5373@gmail.com" },
+        { "label": "LinkedIn", "href": "https://www.linkedin.com/in/jinyongjeong" }
+      ]
+    },
+    {
+      "id": "location",
+      "type": "text",
+      "area": "sidebar",
+      "title": "Location",
+      "body": "Seoul, Korea"
+    }
+  ]
+}

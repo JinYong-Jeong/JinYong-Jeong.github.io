@@ -1,0 +1,151 @@
+---
+import {
+  ArrowLeft,
+  ExternalLink,
+  FileText,
+  FolderKanban,
+  GitFork,
+  LogOut,
+  Plus,
+  RefreshCw,
+  Save
+} from "@lucide/astro";
+import logoImage from "../../../../engineering/design/logo2.png";
+import "@/styles/global.css";
+import "@/styles/admin.css";
+import "@/styles/admin-about.css";
+
+const logoSrc = typeof logoImage === "string" ? logoImage : logoImage.src;
+const contentSecurityPolicy = [
+  "default-src 'self'",
+  "base-uri 'none'",
+  "connect-src 'self' https://api.github.com",
+  "font-src 'self'",
+  "frame-ancestors 'none'",
+  "img-src 'self' data: https://avatars.githubusercontent.com",
+  "object-src 'none'",
+  "script-src 'self'",
+  "style-src 'self' 'unsafe-inline'"
+].join("; ");
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <meta http-equiv="Content-Security-Policy" content={contentSecurityPolicy} />
+    <title>About 구성 | Content Studio</title>
+    <meta name="description" content="About 페이지의 구성 요소와 내용을 관리합니다." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body class="admin-page about-admin-page">
+    <header class="admin-topbar">
+      <a class="admin-brand focus-ring" href="/" aria-label="블로그 홈으로 이동">
+        <img src={logoSrc} alt="" />
+        <span>
+          <strong>Content Studio</strong>
+          <small>About page builder</small>
+        </span>
+      </a>
+      <div class="admin-session" id="admin-session" hidden>
+        <a class="admin-nav-link focus-ring" href="/admin/">
+          <FileText size={16} aria-hidden="true" /> 게시글 관리
+        </a>
+        <a class="admin-nav-link focus-ring" href="/admin/projects/">
+          <FolderKanban size={16} aria-hidden="true" /> Projects 설정
+        </a>
+        <a
+          id="viewer-link"
+          class="admin-viewer focus-ring"
+          href="https://github.com/JinYong-Jeong"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <img id="viewer-avatar" alt="" />
+          <span id="viewer-login">JinYong-Jeong</span>
+        </a>
+        <button class="icon-button focus-ring" id="logout-button" type="button" title="로그아웃">
+          <LogOut size={18} aria-hidden="true" />
+          <span class="sr-only">로그아웃</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="admin-main about-admin-main">
+      <section class="admin-gate panel" id="about-auth-view" hidden>
+        <div class="gate-icon"><GitFork size={27} aria-hidden="true" /></div>
+        <p class="admin-eyebrow">Owner access only</p>
+        <h1>GitHub 로그인이 필요합니다.</h1>
+        <p>게시글 관리 화면에서 로그인한 뒤 About 구성으로 이동해 주세요.</p>
+        <p class="gate-message" id="about-auth-message" role="alert" hidden></p>
+        <a class="primary-button" href="/admin/">
+          <ArrowLeft size={16} aria-hidden="true" /> 게시글 관리에서 로그인
+        </a>
+      </section>
+
+      <section class="about-admin-panel panel" id="about-app" hidden>
+        <div class="about-admin-header">
+          <div>
+            <p class="admin-eyebrow">Page components</p>
+            <h1>About 페이지 구성</h1>
+            <p>구성 요소를 추가·수정·삭제하고 표시 위치와 순서를 직접 정할 수 있습니다.</p>
+          </div>
+          <div class="about-admin-actions">
+            <a class="secondary-button focus-ring" href="/about/" target="_blank">
+              <ExternalLink size={16} aria-hidden="true" /> 현재 페이지
+            </a>
+            <button class="secondary-button focus-ring" id="reload-about-button" type="button">
+              <RefreshCw size={16} aria-hidden="true" /> 새로고침
+            </button>
+            <button class="primary-button focus-ring" id="save-about-button" type="button">
+              <Save size={16} aria-hidden="true" /> 구성 저장
+            </button>
+          </div>
+        </div>
+
+        <div class="about-page-fields">
+          <label class="field">
+            <span>브라우저 제목</span>
+            <input id="about-page-title" type="text" maxlength="80" required />
+          </label>
+          <label class="field field-wide">
+            <span>검색 결과 설명</span>
+            <textarea id="about-page-description" rows="2" maxlength="180" required></textarea>
+          </label>
+        </div>
+
+        <div class="about-builder-toolbar">
+          <div>
+            <h2>구성 요소</h2>
+            <p id="about-block-summary">구성을 불러오는 중…</p>
+          </div>
+          <div class="about-add-controls">
+            <label class="sr-only" for="about-block-type">추가할 구성 요소 종류</label>
+            <select id="about-block-type">
+              <option value="text">텍스트</option>
+              <option value="list">목록</option>
+              <option value="tags">태그</option>
+              <option value="timeline">경력 · 실적</option>
+              <option value="links">링크</option>
+              <option value="profile">프로필</option>
+            </select>
+            <button class="secondary-button focus-ring" id="add-about-block-button" type="button">
+              <Plus size={16} aria-hidden="true" /> 추가
+            </button>
+          </div>
+        </div>
+
+        <div class="about-block-list" id="about-block-list" aria-live="polite"></div>
+        <div class="page-empty-state" id="about-block-empty" hidden>
+          구성 요소가 없습니다. 위에서 원하는 종류를 선택해 추가하세요.
+        </div>
+        <p class="about-save-note">저장하면 GitHub에 변경 기록이 남고 사이트 재배포가 자동으로 시작됩니다.</p>
+      </section>
+    </main>
+
+    <div class="admin-toast" id="admin-toast" role="status" aria-live="polite"></div>
+    <script src="../../../scripts/admin-about.ts"></script>
+  </body>
+</html>

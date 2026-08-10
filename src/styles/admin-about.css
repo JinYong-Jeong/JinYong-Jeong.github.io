@@ -1,0 +1,235 @@
+.about-admin-main {
+  width: min(100%, 1120px);
+}
+
+.about-admin-panel {
+  padding: clamp(1rem, 2.5vw, 2rem);
+}
+
+.about-admin-header,
+.about-builder-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.about-admin-header {
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 1.5rem;
+}
+
+.about-admin-header h1 {
+  margin: 0.4rem 0 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.8rem, 4vw, 2.45rem);
+}
+
+.about-admin-header p:last-child {
+  max-width: 42rem;
+  margin: 0.65rem 0 0;
+  color: var(--color-muted);
+  line-height: 1.7;
+}
+
+.about-admin-actions,
+.about-add-controls,
+.about-block-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.about-page-fields {
+  display: grid;
+  grid-template-columns: minmax(14rem, 0.7fr) minmax(18rem, 1.3fr);
+  gap: 1rem;
+  border-bottom: 1px solid var(--color-border);
+  padding: 1.35rem 0;
+}
+
+.about-page-fields .field-wide {
+  grid-column: auto;
+}
+
+.about-builder-toolbar {
+  align-items: center;
+  padding: 1.35rem 0 0.7rem;
+}
+
+.about-builder-toolbar h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.35rem;
+}
+
+.about-builder-toolbar p {
+  margin: 0.35rem 0 0;
+  color: var(--color-muted);
+  font-size: 0.8rem;
+}
+
+.about-add-controls select,
+.about-block-area {
+  min-height: 2.7rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 7px;
+  background: var(--color-surface);
+  padding: 0.55rem 2rem 0.55rem 0.75rem;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.about-block-list {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 0.65rem;
+}
+
+.about-block-card {
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+}
+
+.about-block-card:focus-within {
+  border-color: var(--color-border-strong);
+  box-shadow: 0 0 0 3px rgba(139, 90, 54, 0.07);
+}
+
+.about-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface-soft);
+  padding: 0.75rem 0.85rem;
+}
+
+.about-block-identity {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.about-block-index {
+  display: inline-flex;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--color-accent);
+  color: #fff8ed;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.about-block-identity strong,
+.about-block-identity small {
+  display: block;
+}
+
+.about-block-identity strong {
+  font-size: 0.88rem;
+}
+
+.about-block-identity small {
+  margin-top: 0.1rem;
+  color: var(--color-muted);
+  font-size: 0.67rem;
+}
+
+.about-block-actions button {
+  min-width: 2.2rem;
+  min-height: 2.2rem;
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  background: var(--color-surface);
+  padding: 0.4rem 0.55rem;
+  color: var(--color-muted);
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.about-block-actions button:hover:not(:disabled) {
+  border-color: var(--color-accent-2);
+  color: var(--color-accent);
+}
+
+.about-block-actions button[data-action="delete"] {
+  color: #7b2c21;
+}
+
+.about-block-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.about-block-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+  padding: 1rem;
+}
+
+.about-block-fields .field-wide {
+  grid-column: 1 / -1;
+}
+
+.about-block-fields textarea {
+  min-height: 7rem;
+}
+
+.about-block-fields small {
+  color: var(--color-muted);
+  line-height: 1.5;
+}
+
+.about-save-note {
+  margin: 1.25rem 0 0;
+  color: var(--color-muted);
+  font-size: 0.78rem;
+  text-align: right;
+}
+
+@media (max-width: 820px) {
+  .about-admin-header,
+  .about-builder-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .about-page-fields,
+  .about-block-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .about-block-fields .field-wide {
+    grid-column: auto;
+  }
+
+  .about-admin-actions > *,
+  .about-add-controls > * {
+    flex: 1;
+  }
+}
+
+@media (max-width: 620px) {
+  .about-block-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .about-block-actions button {
+    flex: 1;
+  }
+
+}
