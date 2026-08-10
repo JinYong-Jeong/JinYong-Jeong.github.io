@@ -1,5 +1,13 @@
 {
-  "mode": "all",
-  "selected": [],
-  "descriptions": {}
+  "mode": "selected",
+  "selected": [
+    "JinYong-Jeong.github.io",
+    "aing-website",
+    "26-Spring-ResNet-Study"
+  ],
+  "descriptions": {
+    "JinYong-Jeong.github.io": "현재 블로그 소스코드",
+    "aing-website": "A.ing Gachon University AI Society Official Website",
+    "26-Spring-ResNet-Study": "가천대학교 인공지능 학술동아리 A.ing에서 주니어 스터디 자료로 활용한 resnet 자료 소스코드입니다."
+  }
 }
