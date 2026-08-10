@@ -23,6 +23,9 @@ jobs:
 
       - name: Install, build, and upload
         uses: withastro/action@v6
+        env:
+          PUBLIC_GITHUB_CLIENT_ID: ${{ vars.PUBLIC_GITHUB_CLIENT_ID }}
+          PUBLIC_GITHUB_AUTH_API_URL: ${{ vars.PUBLIC_GITHUB_AUTH_API_URL }}
         with:
           node-version: 22
 

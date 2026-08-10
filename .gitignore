@@ -18,6 +18,8 @@ build/
 .cache/
 .astro/
 node_modules/
+.dev.vars
+.wrangler/
 
 # Environment
 .env

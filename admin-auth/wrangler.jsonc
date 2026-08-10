@@ -1,0 +1,9 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "jinyong-blog-admin-auth",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-08",
+  "vars": {
+    "ALLOWED_ORIGINS": "https://jinyong-jeong.github.io,http://localhost:4321,http://127.0.0.1:4321"
+  }
+}
