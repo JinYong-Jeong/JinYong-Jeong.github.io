@@ -5,7 +5,8 @@ import {
   LogOut,
   RefreshCw,
   Save,
-  Search
+  Search,
+  Settings
 } from "@lucide/astro";
 import logoImage from "../../../../engineering/design/logo2.png";
 import "@/styles/global.css";
@@ -47,6 +48,9 @@ const contentSecurityPolicy = [
         </span>
       </a>
       <div class="admin-session" id="admin-session" hidden>
+        <a class="admin-nav-link focus-ring" href="/admin/about/">
+          <Settings size={16} aria-hidden="true" /> About 구성
+        </a>
         <a class="admin-nav-link focus-ring" href="/admin/">
           <ArrowLeft size={16} aria-hidden="true" /> 게시글 관리
         </a>

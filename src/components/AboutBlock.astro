@@ -1,0 +1,90 @@
+---
+import type { AboutBlock } from "@/lib/about-components";
+
+interface Props {
+  block: AboutBlock;
+}
+
+const { block } = Astro.props;
+const cardClass = block.area === "sidebar" ? "home-sidebar-card surface-section" : "about-info-card";
+
+function safeHref(value: string) {
+  if (value.startsWith("/") && !value.startsWith("//")) return value;
+  try {
+    const url = new URL(value);
+    return ["http:", "https:", "mailto:"].includes(url.protocol) ? value : "#";
+  } catch {
+    return "#";
+  }
+}
+
+function safeImageSource(value: string) {
+  if (value.startsWith("/") && !value.startsWith("//")) return value;
+  try {
+    const url = new URL(value);
+    return ["http:", "https:"].includes(url.protocol) ? value : "";
+  } catch {
+    return "";
+  }
+}
+
+const profileImage = block.type === "profile" ? safeImageSource(block.image) : "";
+---
+
+{
+  block.type === "profile" ? (
+    <header class="about-profile-hero">
+      {profileImage && (
+        <img
+          src={profileImage}
+          alt={`${block.name} avatar`}
+          class="size-28 rounded-[1rem] border border-[var(--color-border)] object-cover"
+          loading="lazy"
+          referrerpolicy="no-referrer"
+        />
+      )}
+      <div class="min-w-0">
+        {block.label && <p class="chip mb-4 w-fit">{block.label}</p>}
+        <h1 class="text-4xl font-black tracking-normal sm:text-5xl">{block.name}</h1>
+        {block.subtitle && <p class="mt-3 text-lg font-semibold text-[var(--color-accent)]">{block.subtitle}</p>}
+        {block.body && <p class="mt-5 max-w-4xl whitespace-pre-line text-[1.02rem] leading-9 text-[var(--color-muted)]">{block.body}</p>}
+      </div>
+    </header>
+  ) : (
+    <section class={cardClass}>
+      <h2 class="text-xl font-bold">{block.title}</h2>
+      {block.type === "text" && <p class="mt-4 whitespace-pre-line text-sm leading-7 text-[var(--color-muted)]">{block.body}</p>}
+      {block.type === "list" && (
+        <ul class="mt-5 space-y-3 text-[15px] leading-8 text-[var(--color-muted)]">
+          {block.items.map((item) => <li>· {item}</li>)}
+        </ul>
+      )}
+      {block.type === "tags" && (
+        <div class="mt-5 flex flex-wrap gap-2">{block.items.map((item) => <span class="chip">{item}</span>)}</div>
+      )}
+      {block.type === "timeline" && (
+        <div class="mt-5 content-list">
+          {block.items.map((item) => (
+            <article class="grid gap-2 py-5 md:grid-cols-[160px_minmax(0,1fr)] md:items-start">
+              <div class="rail-label md:pt-1">{item.period}</div>
+              <div class="min-w-0">
+                <h3 class="text-lg font-semibold text-[var(--color-text)]">{item.title}</h3>
+                <p class="mt-1 text-sm font-medium text-[var(--color-accent)]">{item.organization}</p>
+                <p class="mt-3 text-sm leading-7 text-[var(--color-muted)]">{item.note}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+      {block.type === "links" && (
+        <div class="mt-5 space-y-3">
+          {block.items.map((item) => (
+            <a class="focus-ring flex items-center gap-3 py-1 text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-accent)]" href={safeHref(item.href)}>
+              <span>{item.label}</span>
+            </a>
+          ))}
+        </div>
+      )}
+    </section>
+  )
+}
