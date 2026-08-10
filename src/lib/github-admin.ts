@@ -133,7 +133,8 @@ export function savePostFile(
   branch: string,
   path: string,
   source: string,
-  sha?: string
+  sha?: string,
+  message = sha ? `Update post: ${path}` : `Add post: ${path}`
 ) {
   return githubRequest<GitHubWriteResponse>(
     token,
@@ -142,7 +143,7 @@ export function savePostFile(
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        message: sha ? `Update post: ${path}` : `Add post: ${path}`,
+        message,
         content: encodeBase64Utf8(source),
         branch,
         ...(sha ? { sha } : {})

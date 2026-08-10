@@ -78,6 +78,23 @@
   gap: 0.65rem;
 }
 
+.admin-nav-link {
+  display: inline-flex;
+  min-height: 2.2rem;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid rgba(255, 248, 237, 0.24);
+  border-radius: 7px;
+  padding: 0.45rem 0.7rem;
+  color: rgba(255, 248, 237, 0.9);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.admin-nav-link:hover {
+  background: rgba(255, 248, 237, 0.12);
+}
+
 .admin-viewer {
   gap: 0.55rem;
   color: rgba(255, 248, 237, 0.88);

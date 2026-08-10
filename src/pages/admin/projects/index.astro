@@ -1,0 +1,126 @@
+---
+import {
+  ArrowLeft,
+  GitFork,
+  LogOut,
+  RefreshCw,
+  Save,
+  Search
+} from "@lucide/astro";
+import logoImage from "../../../../engineering/design/logo2.png";
+import "@/styles/global.css";
+import "@/styles/admin.css";
+import "@/styles/admin-projects.css";
+
+const logoSrc = typeof logoImage === "string" ? logoImage : logoImage.src;
+const contentSecurityPolicy = [
+  "default-src 'self'",
+  "base-uri 'none'",
+  "connect-src 'self' https://api.github.com",
+  "font-src 'self'",
+  "frame-ancestors 'none'",
+  "img-src 'self' data: https://avatars.githubusercontent.com",
+  "object-src 'none'",
+  "script-src 'self'",
+  "style-src 'self' 'unsafe-inline'"
+].join("; ");
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <meta http-equiv="Content-Security-Policy" content={contentSecurityPolicy} />
+    <title>Projects 설정 | Content Studio</title>
+    <meta name="description" content="Projects에 표시할 GitHub 저장소와 설명을 관리합니다." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body class="admin-page projects-admin-page">
+    <header class="admin-topbar">
+      <a class="admin-brand focus-ring" href="/" aria-label="블로그 홈으로 이동">
+        <img src={logoSrc} alt="" />
+        <span>
+          <strong>Content Studio</strong>
+          <small>Projects settings</small>
+        </span>
+      </a>
+      <div class="admin-session" id="admin-session" hidden>
+        <a class="admin-nav-link focus-ring" href="/admin/">
+          <ArrowLeft size={16} aria-hidden="true" /> 게시글 관리
+        </a>
+        <a
+          id="viewer-link"
+          class="admin-viewer focus-ring"
+          href="https://github.com/JinYong-Jeong"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <img id="viewer-avatar" alt="" />
+          <span id="viewer-login">JinYong-Jeong</span>
+        </a>
+        <button class="icon-button focus-ring" id="logout-button" type="button" title="로그아웃">
+          <LogOut size={18} aria-hidden="true" />
+          <span class="sr-only">로그아웃</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="admin-main projects-admin-main">
+      <section class="admin-gate panel" id="projects-auth-view" hidden>
+        <div class="gate-icon"><GitFork size={27} aria-hidden="true" /></div>
+        <p class="admin-eyebrow">Owner access only</p>
+        <h1>GitHub 로그인이 필요합니다.</h1>
+        <p>게시글 관리 화면에서 로그인한 뒤 Projects 설정으로 이동해 주세요.</p>
+        <p class="gate-message" id="projects-auth-message" role="alert" hidden></p>
+        <a class="primary-button" href="/admin/">게시글 관리에서 로그인</a>
+      </section>
+
+      <section class="projects-admin-panel panel" id="projects-app" hidden>
+        <div class="projects-admin-header">
+          <div>
+            <p class="admin-eyebrow">GitHub repositories</p>
+            <h1>Projects 표시 설정</h1>
+            <p>
+              공개 저장소 중 사이트에 표시할 항목을 선택하고, 카드 설명을 직접 작성하세요.
+            </p>
+          </div>
+          <div class="projects-admin-actions">
+            <button class="secondary-button focus-ring" id="reload-projects-button" type="button">
+              <RefreshCw size={16} aria-hidden="true" /> 새로고침
+            </button>
+            <button class="primary-button focus-ring" id="save-projects-button" type="button">
+              <Save size={16} aria-hidden="true" /> 선택과 설명 저장
+            </button>
+          </div>
+        </div>
+
+        <div class="projects-admin-toolbar">
+          <label class="projects-admin-search">
+            <Search size={16} aria-hidden="true" />
+            <span class="sr-only">저장소 검색</span>
+            <input id="repository-search" type="search" placeholder="저장소명, 설명, 언어 검색" />
+          </label>
+          <div class="projects-selection-actions">
+            <button class="text-button focus-ring" id="select-all-button" type="button">전체 선택</button>
+            <button class="text-button focus-ring" id="clear-all-button" type="button">전체 해제</button>
+          </div>
+        </div>
+
+        <div class="projects-admin-summary">
+          <p id="repository-summary">저장소를 불러오는 중…</p>
+          <p>저장하면 설정 파일 커밋과 사이트 재배포가 자동으로 시작됩니다.</p>
+        </div>
+
+        <div class="repository-settings-list" id="repository-list" aria-live="polite"></div>
+        <div class="page-empty-state" id="repository-empty" hidden>
+          검색 조건에 맞는 저장소가 없습니다.
+        </div>
+      </section>
+    </main>
+
+    <div class="admin-toast" id="admin-toast" role="status" aria-live="polite"></div>
+    <script src="../../../scripts/admin-projects.ts"></script>
+  </body>
+</html>

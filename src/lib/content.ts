@@ -1,5 +1,6 @@
 import { getCollection, type CollectionEntry } from "astro:content";
 import { site, type CategoryKey } from "@/config/site";
+import githubSelection from "../../content/projects/github-selection.json";
 
 export type Post = CollectionEntry<"posts">;
 
@@ -35,6 +36,12 @@ interface GitHubRepository {
   stargazers_count: number;
   forks_count: number;
   pushed_at: string;
+}
+
+interface GitHubProjectSelection {
+  mode: "all" | "selected";
+  selected: string[];
+  descriptions: Record<string, string>;
 }
 
 const githubOwner = "JinYong-Jeong";
@@ -165,9 +172,15 @@ async function repositoryLanguages(repository: GitHubRepository) {
 }
 
 async function loadGitHubProjects(): Promise<Project[]> {
-  const repositories = await githubRequest<GitHubRepository[]>(
+  const allRepositories = await githubRequest<GitHubRepository[]>(
     `${githubApi}/users/${githubOwner}/repos?per_page=100&sort=updated&direction=desc&type=owner`
   );
+  const selection = githubSelection as GitHubProjectSelection;
+  const selectedNames = new Set(selection.selected);
+  const repositories =
+    selection.mode === "selected"
+      ? allRepositories.filter((repository) => selectedNames.has(repository.name))
+      : allRepositories;
   const languages = await Promise.all(
     repositories.map((repository) => repositoryLanguages(repository).catch(() => []))
   );
@@ -184,7 +197,9 @@ async function loadGitHubProjects(): Promise<Project[]> {
       data: {
         title,
         description:
-          repository.description?.trim() || `${title} GitHub 저장소입니다.`,
+          selection.descriptions[repository.name]?.trim() ||
+          repository.description?.trim() ||
+          `${title} GitHub 저장소입니다.`,
         date: new Date(repository.pushed_at),
         status: repository.archived
           ? "archived"
