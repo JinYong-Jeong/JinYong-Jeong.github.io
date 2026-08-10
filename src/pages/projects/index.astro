@@ -9,14 +9,14 @@ const projects = await getAllProjects();
 const sidebarProjects = await getFeaturedProjects(3);
 ---
 
-<BaseLayout title="Projects" description="LLM, Federated Learning, evaluation, 실험 로깅 프로젝트 목록입니다.">
+<BaseLayout title="Projects" description="GitHub에서 자동으로 동기화한 공개 프로젝트 목록입니다.">
   <div class="container-page page-wrap">
     <div class="page-layout">
       <section class="page-main-panel">
         <PageHero
           kicker="Build Log"
           title="Projects"
-          description="연구 아이디어를 실제 코드와 도구로 옮긴 작업을 정리합니다."
+          description="GitHub 공개 저장소를 최근 업데이트 순으로 자동 동기화합니다."
         />
 
         <div class="page-toolbar">
@@ -34,7 +34,7 @@ const sidebarProjects = await getFeaturedProjects(3);
           </a>
         </div>
         <p id="project-search-summary" class="page-result-summary">
-          {projects.length}개의 프로젝트 기록
+          GitHub에서 불러온 {projects.length}개의 공개 저장소
         </p>
 
         <div id="project-list" class="content-card-list">
@@ -83,7 +83,7 @@ const sidebarProjects = await getFeaturedProjects(3);
       if (summary) {
         summary.textContent = query
           ? `"${query}" 검색 결과 ${visible}개`
-          : `${rows.length}개의 프로젝트 기록`;
+          : `GitHub에서 불러온 ${rows.length}개의 공개 저장소`;
       }
 
       emptyState?.classList.toggle("hidden", visible !== 0);
