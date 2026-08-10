@@ -1,5 +1,6 @@
 ---
 import type { Project } from "@/lib/content";
+import { CodeXml } from "@lucide/astro";
 
 interface Props {
   project: Project;
@@ -88,5 +89,23 @@ const key = project.id.toLowerCase();
         </div>
       </div>
     )
+  }
+  {
+    project.data.source === "github" &&
+      !key.includes("flower") &&
+      !key.includes("evaluation") &&
+      !key.includes("logger") && (
+        <div class="flex h-full flex-col justify-between p-5">
+          <CodeXml size={25} stroke-width={1.7} class="text-[var(--color-accent)]" />
+          <div>
+            <p class="line-clamp-2 text-lg font-bold leading-snug text-[var(--color-text)]">
+              {project.data.repository}
+            </p>
+            <p class="mt-2 text-xs text-[var(--color-muted)]">
+              {project.data.techStack[0] ?? "GitHub Repository"}
+            </p>
+          </div>
+        </div>
+      )
   }
 </div>
