@@ -15,7 +15,10 @@
     "@lucide/astro": "^1.11.0",
     "@tailwindcss/vite": "^4.1.17",
     "astro": "latest",
-    "tailwindcss": "^4.1.17"
+    "dompurify": "^3.4.13",
+    "marked": "^18.0.9",
+    "tailwindcss": "^4.1.17",
+    "yaml": "^2.9.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.8",

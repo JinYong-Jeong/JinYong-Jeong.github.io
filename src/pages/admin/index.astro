@@ -1,0 +1,267 @@
+---
+import {
+  Eye,
+  FileText,
+  GitFork,
+  LogIn,
+  LogOut,
+  Plus,
+  RefreshCw,
+  Save,
+  Search,
+  Settings,
+  Trash2
+} from "@lucide/astro";
+import logoImage from "../../../engineering/design/logo2.png";
+import { adminConfig } from "@/config/admin";
+import "@/styles/global.css";
+import "@/styles/admin.css";
+
+const logoSrc = typeof logoImage === "string" ? logoImage : logoImage.src;
+const connectSources = ["'self'", "https://api.github.com"];
+
+if (adminConfig.authApiUrl) {
+  try {
+    connectSources.push(new URL(adminConfig.authApiUrl).origin);
+  } catch {
+    // The setup view explains an invalid or missing URL to the administrator.
+  }
+}
+
+const contentSecurityPolicy = [
+  "default-src 'self'",
+  "base-uri 'none'",
+  `connect-src ${connectSources.join(" ")}`,
+  "font-src 'self'",
+  "form-action 'self' https://github.com",
+  "frame-ancestors 'none'",
+  "img-src 'self' data: https://avatars.githubusercontent.com",
+  "object-src 'none'",
+  "script-src 'self'",
+  "style-src 'self' 'unsafe-inline'"
+].join("; ");
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <meta http-equiv="Content-Security-Policy" content={contentSecurityPolicy} />
+    <title>Content Studio | Jinyong Jeong</title>
+    <meta
+      name="description"
+      content="Jinyong Jeong 블로그 게시글을 작성하고 관리하는 전용 화면입니다."
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body class="admin-page">
+    <header class="admin-topbar">
+      <a class="admin-brand focus-ring" href="/" aria-label="블로그 홈으로 이동">
+        <img src={logoSrc} alt="" />
+        <span>
+          <strong>Content Studio</strong>
+          <small>Jinyong Jeong Blog</small>
+        </span>
+      </a>
+      <div class="admin-session" id="admin-session" hidden>
+        <a
+          id="viewer-link"
+          class="admin-viewer focus-ring"
+          href="https://github.com/JinYong-Jeong"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <img id="viewer-avatar" alt="" />
+          <span id="viewer-login">JinYong-Jeong</span>
+        </a>
+        <button class="icon-button focus-ring" id="logout-button" type="button" title="로그아웃">
+          <LogOut size={18} aria-hidden="true" />
+          <span class="sr-only">로그아웃</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="admin-main">
+      <section class="admin-gate panel" id="setup-view" hidden>
+        <div class="gate-icon"><Settings size={26} aria-hidden="true" /></div>
+        <p class="admin-eyebrow">One-time setup</p>
+        <h1>관리자 연결을 마무리해 주세요.</h1>
+        <p>
+          화면 구현은 완료되어 있습니다. GitHub App의 Client ID와 인증 API 주소를
+          배포 환경에 연결하면 로그인 버튼이 활성화됩니다.
+        </p>
+        <div class="setup-values" aria-label="필요한 환경 변수">
+          <code>PUBLIC_GITHUB_CLIENT_ID</code>
+          <code>PUBLIC_GITHUB_AUTH_API_URL</code>
+        </div>
+        <a class="secondary-button" href="https://github.com/JinYong-Jeong/JinYong-Jeong.github.io#관리자-화면-설정">
+          설정 안내 보기
+        </a>
+      </section>
+
+      <section class="admin-gate panel" id="auth-view" hidden>
+        <div class="gate-icon"><GitFork size={28} aria-hidden="true" /></div>
+        <p class="admin-eyebrow">Owner access only</p>
+        <h1>글을 관리하려면 로그인하세요.</h1>
+        <p>
+          저장소 소유자 계정만 접근할 수 있습니다. 로그인 정보는 현재 브라우저 탭이
+          열려 있는 동안에만 유지됩니다.
+        </p>
+        <p class="gate-message" id="auth-message" role="alert" hidden></p>
+        <button class="primary-button" id="login-button" type="button">
+          <LogIn size={18} aria-hidden="true" />
+          GitHub로 로그인
+        </button>
+      </section>
+
+      <section class="admin-workspace" id="admin-app" hidden>
+        <aside class="post-library panel" aria-label="게시글 목록">
+          <div class="library-header">
+            <div>
+              <p class="admin-eyebrow">Library</p>
+              <h1>게시글</h1>
+            </div>
+            <button class="icon-button icon-button-accent focus-ring" id="new-post-button" type="button" title="새 글">
+              <Plus size={19} aria-hidden="true" />
+              <span class="sr-only">새 글 작성</span>
+            </button>
+          </div>
+          <label class="library-search">
+            <Search size={16} aria-hidden="true" />
+            <span class="sr-only">게시글 검색</span>
+            <input id="post-search" type="search" placeholder="제목, 태그 검색" autocomplete="off" />
+          </label>
+          <div class="library-meta">
+            <span id="post-count">0 posts</span>
+            <button class="text-button focus-ring" id="refresh-button" type="button">
+              <RefreshCw size={14} aria-hidden="true" /> 새로고침
+            </button>
+          </div>
+          <div class="post-list" id="post-list" aria-live="polite"></div>
+        </aside>
+
+        <section class="editor-panel panel">
+          <form id="post-form">
+            <div class="editor-header">
+              <div>
+                <p class="admin-eyebrow" id="editor-mode">New post</p>
+                <h2 id="editor-heading">새 게시글</h2>
+                <p class="save-state" id="save-state">새 글은 초안으로 시작합니다.</p>
+              </div>
+              <div class="editor-actions">
+                <button class="danger-button focus-ring" id="delete-button" type="button" disabled>
+                  <Trash2 size={17} aria-hidden="true" /> 삭제
+                </button>
+                <button class="primary-button focus-ring" id="save-button" type="submit">
+                  <Save size={17} aria-hidden="true" /> 저장
+                </button>
+              </div>
+            </div>
+
+            <div class="editor-fields">
+              <label class="field field-wide">
+                <span>제목</span>
+                <input id="post-title" name="title" type="text" required maxlength="120" placeholder="게시글 제목" />
+              </label>
+
+              <label class="field field-wide">
+                <span>설명</span>
+                <textarea id="post-description" name="description" required rows="2" maxlength="240" placeholder="목록과 검색 결과에 표시할 한두 문장"></textarea>
+              </label>
+
+              <label class="field">
+                <span>날짜</span>
+                <input id="post-date" name="date" type="date" required />
+              </label>
+
+              <label class="field">
+                <span>카테고리</span>
+                <select id="post-category" name="category" required>
+                  <option value="llm">LLM</option>
+                  <option value="federated-learning">Federated Learning</option>
+                  <option value="paper-review">Paper Review</option>
+                  <option value="experiment-log">Experiment Log</option>
+                  <option value="development">Development</option>
+                </select>
+              </label>
+
+              <label class="field field-wide">
+                <span>Slug</span>
+                <div class="slug-field">
+                  <span>/blog/</span>
+                  <input id="post-slug" name="slug" type="text" required pattern="[a-z0-9가-힣-]+" placeholder="post-url" />
+                  <span>/</span>
+                </div>
+              </label>
+
+              <label class="field field-wide">
+                <span>태그</span>
+                <input id="post-tags" name="tags" type="text" placeholder="llm, experiment, note" />
+                <small>쉼표로 구분하세요.</small>
+              </label>
+
+              <label class="field field-wide">
+                <span>커버 이미지 경로</span>
+                <input id="post-cover" name="cover" type="text" placeholder="/images/posts/example.webp" />
+              </label>
+
+              <div class="toggle-row field-wide">
+                <label class="toggle-field">
+                  <input id="post-draft" name="draft" type="checkbox" />
+                  <span class="toggle-control" aria-hidden="true"></span>
+                  <span><strong>초안</strong><small>사이트에서 숨깁니다.</small></span>
+                </label>
+                <label class="toggle-field">
+                  <input id="post-featured" name="featured" type="checkbox" />
+                  <span class="toggle-control" aria-hidden="true"></span>
+                  <span><strong>추천 글</strong><small>홈 화면에 우선 노출합니다.</small></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="content-editor">
+              <div class="content-tabs" role="tablist" aria-label="본문 편집 모드">
+                <button class="content-tab is-active" id="write-tab" type="button" role="tab" aria-selected="true" aria-controls="write-panel">
+                  <FileText size={16} aria-hidden="true" /> 작성
+                </button>
+                <button class="content-tab" id="preview-tab" type="button" role="tab" aria-selected="false" aria-controls="preview-panel">
+                  <Eye size={16} aria-hidden="true" /> 미리보기
+                </button>
+              </div>
+              <div class="markdown-toolbar" id="markdown-toolbar" aria-label="Markdown 도구">
+                <button type="button" data-format="bold" title="굵게"><strong>B</strong></button>
+                <button type="button" data-format="heading" title="제목">H2</button>
+                <button type="button" data-format="link" title="링크">Link</button>
+                <button type="button" data-format="quote" title="인용">Quote</button>
+                <button type="button" data-format="code" title="코드 블록">Code</button>
+              </div>
+              <div id="write-panel" role="tabpanel" aria-labelledby="write-tab">
+                <label class="sr-only" for="post-body">게시글 본문</label>
+                <textarea id="post-body" name="body" spellcheck="true" placeholder="## 시작하기&#10;&#10;Markdown 또는 MDX로 내용을 작성하세요."></textarea>
+              </div>
+              <div class="markdown-preview prose-blog" id="preview-panel" role="tabpanel" aria-labelledby="preview-tab" hidden></div>
+            </div>
+          </form>
+        </section>
+      </section>
+    </main>
+
+    <div class="admin-toast" id="admin-toast" role="status" aria-live="polite"></div>
+
+    <dialog class="delete-dialog" id="delete-dialog">
+      <div class="dialog-content">
+        <div class="gate-icon gate-icon-danger"><Trash2 size={22} aria-hidden="true" /></div>
+        <h2>게시글을 삭제할까요?</h2>
+        <p id="delete-message">이 작업은 저장소에 삭제 커밋을 생성합니다.</p>
+        <div class="dialog-actions">
+          <button class="secondary-button" id="cancel-delete-button" type="button">취소</button>
+          <button class="danger-button danger-button-solid" id="confirm-delete-button" type="button">삭제하기</button>
+        </div>
+      </div>
+    </dialog>
+
+    <script src="../../scripts/admin.ts"></script>
+  </body>
+</html>
