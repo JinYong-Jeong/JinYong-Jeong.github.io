@@ -160,6 +160,23 @@ export const cv = {
       linkLabel: "연구 소개",
     },
     {
+      id: "cumulative-token-alignment",
+      year: "2026",
+      type: "Conference",
+      status: "게재",
+      role: "제1저자",
+      title:
+        "Research on Cumulative Token-Usage Alignment for LLM Fine-Tuning in Federated Learning",
+      korean:
+        "연합학습 환경의 LLM 파인튜닝을 위한 누적 토큰 학습량 정합화 기반 학습 방법 연구",
+      venue: "한국데이터사이언스학회 하계종합학술대회 논문집 · 273–276쪽",
+      award: "장려논문상",
+      description:
+        "연합학습에서 통신 라운드가 늘어도 총 학습량을 일정하게 유지하도록 각 클라이언트의 학습 샘플을 라운드별로 나누었습니다. 의료·금융 데이터를 따로 학습할 때와 함께 학습할 때, 누적 토큰 학습량을 맞춘 조건에서 중앙집중식 LLM 파인튜닝과 비교했습니다.",
+      href: "https://www.koreadatascience.org/uploads/proceedings/pdfs/1781785188298-504800265.pdf#page=273",
+      linkLabel: "논문 읽기",
+    },
+    {
       id: "health-agent",
       year: "2025",
       type: "Journal · KCI",

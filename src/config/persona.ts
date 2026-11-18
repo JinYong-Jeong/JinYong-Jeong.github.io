@@ -180,6 +180,14 @@ export const personaRecords: PersonaRecord[] = [
             "메모리 이관",
           ],
           "inference-caching": ["캐싱", "캐시", "caching", "병리", "중복 추론"],
+          "cumulative-token-alignment": [
+            "누적 토큰",
+            "토큰 학습량",
+            "학습량 정합화",
+            "글로벌 에폭",
+            "cumulative token",
+            "token-usage alignment",
+          ],
           "health-agent": [
             "개인건강",
             "건강",
