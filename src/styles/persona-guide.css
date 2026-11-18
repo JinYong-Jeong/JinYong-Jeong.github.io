@@ -3,14 +3,18 @@
   --persona-paper: var(--color-paper);
   --persona-ink: var(--color-primary);
   --persona-line: var(--color-border);
+  --launcher-size: 3.75rem;
+  --launcher-bottom: calc(1.4rem + env(safe-area-inset-bottom));
+  --launcher-right: max(1.5rem, env(safe-area-inset-right));
+  --panel-bottom: calc(var(--launcher-bottom) + var(--launcher-size) + 0.75rem);
   font-family: var(--font-sans);
 }
 .persona-guide {
   position: fixed;
-  inset: auto max(1.5rem, env(safe-area-inset-right)) calc(5.3rem + env(safe-area-inset-bottom)) auto;
+  inset: auto var(--launcher-right) var(--panel-bottom) auto;
   z-index: 80;
   width: min(420px, calc(100vw - 3rem));
-  height: min(660px, calc(100dvh - 7rem - env(safe-area-inset-bottom)));
+  height: min(660px, calc(100dvh - var(--panel-bottom) - max(0.75rem, env(safe-area-inset-top))));
   max-width: none;
   max-height: none;
   margin: 0;
@@ -62,12 +66,6 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-}
-.persona-eyebrow {
-  margin: 0 0 0.2rem;
-  color: var(--color-muted);
-  font: 500 0.55rem/1.4 var(--font-mono);
-  letter-spacing: 0.12em;
 }
 .persona-heading h2 {
   margin: 0;
@@ -510,21 +508,22 @@
 }
 .persona-launcher {
   position: fixed;
-  right: max(1.5rem, env(safe-area-inset-right));
-  bottom: calc(1.4rem + env(safe-area-inset-bottom));
+  right: var(--launcher-right);
+  bottom: var(--launcher-bottom);
   z-index: 81;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  min-height: 48px;
-  padding: 0.75rem 1.05rem;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: var(--launcher-size);
+  height: var(--launcher-size);
+  padding: 0;
   border: 1px solid color-mix(in srgb, var(--color-bronze) 55%, var(--color-primary));
-  border-radius: 6px;
+  border-radius: 50%;
   color: var(--color-on-primary);
   background: var(--color-primary);
   box-shadow: 0 4px 20px color-mix(in srgb, var(--color-primary) 16%, transparent);
-  font-size: 0.75rem;
-  line-height: 1.4;
+  font: 600 0.68rem/1.2 var(--font-sans);
+  white-space: nowrap;
   cursor: pointer;
   transition: background var(--duration-fast), box-shadow var(--duration-fast);
 }
@@ -532,18 +531,19 @@
   background: var(--color-primary-hover);
   box-shadow: 0 6px 24px color-mix(in srgb, var(--color-primary) 22%, transparent);
 }
-.persona-launcher-icon {
-  display: grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
+.persona-launcher-open {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
 }
 .persona-launcher-close,
 .persona-launcher[aria-expanded="true"] .persona-launcher-open {
   display: none;
 }
 .persona-launcher[aria-expanded="true"] .persona-launcher-close {
-  display: block;
+  display: grid;
+  place-items: center;
 }
 .persona-guide :where(button, a, summary, select):focus-visible,
 .persona-launcher:focus-visible {
@@ -578,11 +578,14 @@
   to { opacity: 1; transform: none; }
 }
 @media (max-width: 600px) {
+  .persona-guide,
+  .persona-launcher {
+    --launcher-size: 3.5rem;
+    --launcher-bottom: calc(0.9rem + env(safe-area-inset-bottom));
+    --launcher-right: max(0.75rem, env(safe-area-inset-right));
+  }
   .persona-guide {
-    right: max(0.75rem, env(safe-area-inset-right));
-    bottom: calc(4.7rem + env(safe-area-inset-bottom));
     width: calc(100vw - 1.5rem - env(safe-area-inset-left) - env(safe-area-inset-right));
-    height: min(660px, calc(100dvh - 5.5rem - env(safe-area-inset-bottom)));
     border-radius: 6px;
   }
   .persona-header {
@@ -603,13 +606,6 @@
   }
   .persona-model {
     padding-block: 0.4rem;
-  }
-  .persona-launcher {
-    right: max(0.75rem, env(safe-area-inset-right));
-    bottom: calc(0.9rem + env(safe-area-inset-bottom));
-    min-height: 46px;
-    padding: 0.7rem 0.85rem;
-    font-size: 0.72rem;
   }
   .persona-load,
   .persona-load-cancel,

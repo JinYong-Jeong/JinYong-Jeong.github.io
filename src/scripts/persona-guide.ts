@@ -563,9 +563,6 @@ function initPersona(dialog: HTMLDialogElement) {
     toggles.forEach((toggle) => {
       toggle.hidden = false;
       toggle.setAttribute("aria-expanded", String(dialog.open));
-      const label = toggle.querySelector("[data-persona-toggle-label]");
-      if (label)
-        label.textContent = dialog.open ? "대화 접기" : "진용에게 질문하기";
     });
   }
   updateToggles();
