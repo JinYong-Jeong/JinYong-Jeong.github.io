@@ -9,7 +9,7 @@ import {
   getFeaturedProjects,
   getPostUrl,
   getProjectUrl,
-  getPublishedPosts
+  getPublishedPosts,
 } from "@/lib/content";
 
 const posts = await getPublishedPosts();
@@ -23,7 +23,12 @@ const searchItems = [
     description: post.data.description,
     href: getPostUrl(post),
     meta: `${site.categories[post.data.category].label} · ${formatDate(post.data.date)}`,
-    tokens: [post.data.title, post.data.description, post.data.category, ...post.data.tags].join(" ")
+    tokens: [
+      post.data.title,
+      post.data.description,
+      post.data.category,
+      ...post.data.tags,
+    ].join(" "),
   })),
   ...projects.map((project) => ({
     type: "project",
@@ -31,8 +36,12 @@ const searchItems = [
     description: project.data.description,
     href: getProjectUrl(project),
     meta: `Project · ${formatDate(project.data.date)}`,
-    tokens: [project.data.title, project.data.description, ...project.data.techStack].join(" ")
-  }))
+    tokens: [
+      project.data.title,
+      project.data.description,
+      ...project.data.techStack,
+    ].join(" "),
+  })),
 ];
 ---
 
@@ -61,23 +70,29 @@ const searchItems = [
         </p>
 
         <section id="site-search-results" class="content-card-list">
-            {
-              searchItems.map((item) => (
-                <a
-                  href={item.href}
-                  class="content-row-card focus-ring block py-6"
-                  data-search-item
-                  data-search-text={item.tokens.toLowerCase()}
-                >
-                  <div class="flex flex-wrap items-center gap-2 text-xs text-[var(--color-muted)]">
-                    <span class="chip">{item.type === "post" ? "Post" : "Project"}</span>
-                    <span>{item.meta}</span>
-                  </div>
-                  <h2 class="mt-4 text-[1.55rem] font-bold leading-[1.25] tracking-normal text-[var(--color-text)]">{item.title}</h2>
-                  <p class="mt-3 max-w-3xl text-sm leading-7 text-[var(--color-muted)]">{item.description}</p>
-                </a>
-              ))
-            }
+          {
+            searchItems.map((item) => (
+              <a
+                href={item.href}
+                class="content-row-card focus-ring block py-6"
+                data-search-item
+                data-search-text={item.tokens.toLowerCase()}
+              >
+                <div class="flex flex-wrap items-center gap-2 text-xs text-[var(--color-muted)]">
+                  <span class="chip">
+                    {item.type === "post" ? "Post" : "Project"}
+                  </span>
+                  <span>{item.meta}</span>
+                </div>
+                <h2 class="mt-4 text-[1.55rem] font-bold leading-[1.25] tracking-normal text-[var(--color-text)]">
+                  {item.title}
+                </h2>
+                <p class="mt-3 max-w-3xl text-sm leading-7 text-[var(--color-muted)]">
+                  {item.description}
+                </p>
+              </a>
+            ))
+          }
         </section>
         <div id="site-search-empty" class="hidden page-empty-state">
           일치하는 결과가 없습니다. 다른 키워드로 다시 검색해보세요.
@@ -88,37 +103,46 @@ const searchItems = [
     </div>
   </div>
 
-  <script is:inline>
-    const params = new URLSearchParams(window.location.search);
-    const initialQuery = params.get("q") || "";
-    const input = document.querySelector("#site-search-input");
-    const summary = document.querySelector("#site-search-summary");
-    const emptyState = document.querySelector("#site-search-empty");
-    const items = Array.from(document.querySelectorAll("[data-search-item]"));
+  <script>
+    function mountSiteSearch() {
+      const params = new URLSearchParams(window.location.search);
+      const initialQuery = params.get("q") || "";
+      const input =
+        document.querySelector<HTMLInputElement>("#site-search-input");
+      if (!input || input.dataset.searchReady) return;
+      input.dataset.searchReady = "true";
+      const summary = document.querySelector("#site-search-summary");
+      const emptyState = document.querySelector("#site-search-empty");
+      const items = Array.from(document.querySelectorAll("[data-search-item]"));
 
-    if (input) input.value = initialQuery;
+      if (input) input.value = initialQuery;
 
-    const update = () => {
-      const query = String(input?.value || "").trim().toLowerCase();
-      let visible = 0;
+      const update = () => {
+        const query = String(input?.value || "")
+          .trim()
+          .toLowerCase();
+        let visible = 0;
 
-      for (const item of items) {
-        const text = item.getAttribute("data-search-text") || "";
-        const match = !query || text.includes(query);
-        item.toggleAttribute("hidden", !match);
-        if (match) visible += 1;
-      }
+        for (const item of items) {
+          const text = item.getAttribute("data-search-text") || "";
+          const match = !query || text.includes(query);
+          item.toggleAttribute("hidden", !match);
+          if (match) visible += 1;
+        }
 
-      if (summary) {
-        summary.textContent = query
-          ? `"${query}" 검색 결과 ${visible}개`
-          : `총 ${items.length}개의 항목`;
-      }
+        if (summary) {
+          summary.textContent = query
+            ? `"${query}" 검색 결과 ${visible}개`
+            : `총 ${items.length}개의 항목`;
+        }
 
-      emptyState?.classList.toggle("hidden", visible !== 0);
-    };
+        emptyState?.classList.toggle("hidden", visible !== 0);
+      };
 
-    input?.addEventListener("input", update);
-    update();
+      input?.addEventListener("input", update);
+      update();
+    }
+    mountSiteSearch();
+    document.addEventListener("astro:page-load", mountSiteSearch);
   </script>
 </BaseLayout>

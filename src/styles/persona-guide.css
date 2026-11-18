@@ -76,6 +76,18 @@
   color: var(--color-secondary);
   font-style: normal;
 }
+.persona-heading-text {
+  min-width: 0;
+}
+.persona-current-page {
+  overflow: hidden;
+  margin: 0.2rem 0 0;
+  color: var(--color-muted);
+  font-size: 0.7rem;
+  line-height: 1.5;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .persona-icon-button {
   display: grid;
   place-items: center;

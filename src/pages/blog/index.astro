@@ -145,32 +145,42 @@ const posts = await getPublishedPosts();
     </div>
     <footer class="archive-note">
       <span>Ideas in progress, knowledge in practice.</span><a href="/projects/"
-        >Explore the work <ArrowUpRight size={15} /></a>
+        >Explore the work <ArrowUpRight size={15} /></a
+      >
     </footer>
   </div>
   <script>
-    const input = document.querySelector<HTMLInputElement>("#blog-search");
-    const summary = document.querySelector<HTMLElement>("#blog-search-summary");
-    const empty = document.querySelector<HTMLElement>("#blog-empty");
-    const rows = [
-      ...document.querySelectorAll<HTMLElement>("[data-post-card]"),
-    ];
-    const update = () => {
-      const query = (input?.value ?? "").trim().toLocaleLowerCase();
-      let visible = 0;
-      for (const row of rows) {
-        row.hidden = !!query && !(row.dataset.search ?? "").includes(query);
-        if (!row.hidden) visible += 1;
-      }
-      if (summary)
-        summary.textContent = query
-          ? `“${input?.value.trim()}” 검색 결과 ${visible}개`
-          : `${rows.length}개의 글`;
-      if (empty) empty.hidden = visible > 0;
-    };
-    if (input)
-      input.value = new URLSearchParams(window.location.search).get("q") ?? "";
-    input?.addEventListener("input", update);
-    update();
+    function mountBlogSearch() {
+      const input = document.querySelector<HTMLInputElement>("#blog-search");
+      if (!input || input.dataset.searchReady) return;
+      input.dataset.searchReady = "true";
+      const summary = document.querySelector<HTMLElement>(
+        "#blog-search-summary",
+      );
+      const empty = document.querySelector<HTMLElement>("#blog-empty");
+      const rows = [
+        ...document.querySelectorAll<HTMLElement>("[data-post-card]"),
+      ];
+      const update = () => {
+        const query = (input?.value ?? "").trim().toLocaleLowerCase();
+        let visible = 0;
+        for (const row of rows) {
+          row.hidden = !!query && !(row.dataset.search ?? "").includes(query);
+          if (!row.hidden) visible += 1;
+        }
+        if (summary)
+          summary.textContent = query
+            ? `“${input?.value.trim()}” 검색 결과 ${visible}개`
+            : `${rows.length}개의 글`;
+        if (empty) empty.hidden = visible > 0;
+      };
+      if (input)
+        input.value =
+          new URLSearchParams(window.location.search).get("q") ?? "";
+      input?.addEventListener("input", update);
+      update();
+    }
+    mountBlogSearch();
+    document.addEventListener("astro:page-load", mountBlogSearch);
   </script>
 </BaseLayout>

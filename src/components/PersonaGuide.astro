@@ -1,15 +1,24 @@
 ---
-import { ArrowUpRight, ArrowUp, BotMessageSquare, X, RotateCcw } from "@lucide/astro";
+import {
+  ArrowUpRight,
+  ArrowUp,
+  BotMessageSquare,
+  X,
+  RotateCcw,
+} from "@lucide/astro";
 import { personaStarters } from "@/config/persona";
 import "@/styles/persona-guide.css";
 
-interface Props { emblemSrc: string; }
+interface Props {
+  emblemSrc: string;
+}
 const { emblemSrc } = Astro.props;
 ---
 
 <dialog
   class="persona-guide"
   id="persona-guide"
+  transition:persist="persona-guide"
   aria-labelledby="persona-title"
   aria-describedby="persona-description"
 >
@@ -19,71 +28,165 @@ const { emblemSrc } = Astro.props;
         <span class="persona-emblem" aria-hidden="true">
           <img src={emblemSrc} width="40" height="40" alt="" />
         </span>
-        <h2 id="persona-title">진용의 <em>AI 챗봇</em></h2>
+        <div class="persona-heading-text">
+          <h2 id="persona-title">진용의 <em>AI 챗봇</em></h2>
+          <p class="persona-current-page" data-persona-current-page></p>
+        </div>
       </div>
-      <button class="persona-icon-button" type="button" data-persona-close aria-label="대화 접기">
+      <button
+        class="persona-icon-button"
+        type="button"
+        data-persona-close
+        aria-label="대화 접기"
+      >
         <X size={20} stroke-width={1.5} aria-hidden="true" />
       </button>
     </header>
 
     <div class="persona-introduction">
-      <p id="persona-description">정진용의 공개 기록을 안내하는 AI 페르소나예요.<br />실제 본인의 실시간 답변은 아니에요.</p>
-      <div class="persona-engine" data-persona-engine-panel data-engine-state="idle">
+      <p id="persona-description">
+        정진용의 공개 기록을 안내하는 AI 페르소나예요.<br />실제 본인의 실시간
+        답변은 아니에요.
+      </p>
+      <div
+        class="persona-engine"
+        data-persona-engine-panel
+        data-engine-state="idle"
+      >
         <div class="persona-engine-heading">
           <span class="persona-mode" data-persona-mode>
-            <i aria-hidden="true"></i><span data-persona-mode-label>공개 기록으로 답변</span>
+            <i aria-hidden="true"></i><span data-persona-mode-label
+              >공개 기록으로 답변</span
+            >
           </span>
-          <button class="persona-retry" type="button" data-persona-retry hidden>다시 시도</button>
+          <button class="persona-retry" type="button" data-persona-retry hidden
+            >다시 시도</button
+          >
         </div>
-        <progress class="persona-load-progress" data-persona-load-progress max="1" aria-label="AI 준비 진행률" hidden></progress>
+        <progress
+          class="persona-load-progress"
+          data-persona-load-progress
+          max="1"
+          aria-label="AI 준비 진행률"
+          hidden></progress>
         <p class="persona-load-detail" data-persona-load-detail hidden></p>
-        <p class="persona-sr-only" data-persona-engine-status role="status" aria-atomic="true"></p>
+        <p
+          class="persona-sr-only"
+          data-persona-engine-status
+          role="status"
+          aria-atomic="true"
+        >
+        </p>
       </div>
     </div>
 
     <div class="persona-conversation" data-persona-scroll>
       <div class="persona-welcome" data-persona-welcome>
         <p>어떤 이야기가 <em>궁금하세요?</em></p>
-        <span class="persona-welcome-caption">연구, 프로젝트, 함께해 온 일들에 관해 물어보세요.</span>
+        <span class="persona-welcome-caption"
+          >연구, 프로젝트, 함께해 온 일들에 관해 물어보세요.</span
+        >
         <div class="persona-starters">
-          {personaStarters.map((question) => (
-            <button type="button" data-persona-question={question}>
-              <span>{question}</span><ArrowUpRight size={15} aria-hidden="true" />
-            </button>
-          ))}
+          {
+            personaStarters.map((question, index) => (
+              <button type="button" data-persona-question={question} data-page-starter={index === 0 ? "" : undefined}>
+                <span>{question}</span>
+                <ArrowUpRight size={15} aria-hidden="true" />
+              </button>
+            ))
+          }
         </div>
       </div>
-      <ol class="persona-transcript" data-persona-transcript aria-label="대화 내용" aria-live="polite" aria-relevant="additions text"></ol>
-      <div class="persona-followups" data-persona-followups aria-label="이어서 물어보기" hidden></div>
+      <ol
+        class="persona-transcript"
+        data-persona-transcript
+        aria-label="대화 내용"
+        aria-live="polite"
+        aria-relevant="additions text"
+      >
+      </ol>
+      <div
+        class="persona-followups"
+        data-persona-followups
+        aria-label="이어서 물어보기"
+        hidden
+      >
+      </div>
     </div>
 
     <footer class="persona-footer">
-      <form class="persona-form" data-persona-form>
-        <label class="persona-sr-only" for="persona-question">진용의 공개 기록에 대해 질문하기</label>
-        <textarea id="persona-question" name="question" rows="1" maxlength="600" placeholder="궁금한 점을 물어보세요" required enterkeyhint="send" data-persona-input></textarea>
-        <button class="persona-send" type="submit" data-persona-send aria-label="질문 보내기"><ArrowUp size={20} aria-hidden="true" /></button>
-        <button class="persona-stop" type="button" data-persona-stop hidden>중지</button>
+      <form class="persona-form" data-persona-form data-astro-reload>
+        <label class="persona-sr-only" for="persona-question"
+          >진용의 공개 기록에 대해 질문하기</label
+        >
+        <textarea
+          id="persona-question"
+          name="question"
+          rows="1"
+          maxlength="600"
+          placeholder="궁금한 점을 물어보세요"
+          required
+          enterkeyhint="send"
+          data-persona-input></textarea>
+        <button
+          class="persona-send"
+          type="submit"
+          data-persona-send
+          aria-label="질문 보내기"
+          ><ArrowUp size={20} aria-hidden="true" /></button
+        >
+        <button class="persona-stop" type="button" data-persona-stop hidden
+          >중지</button
+        >
       </form>
       <p class="persona-form-status" data-persona-status role="status"></p>
       <div class="persona-footer-meta">
         <details class="persona-method">
           <summary>답변에 관하여 <span aria-hidden="true">+</span></summary>
           <div>
-            <p>정진용의 공개 CV로 구성한 디지털 페르소나입니다. 실제 본인의 실시간 답변은 아니에요.</p>
-            <p data-persona-explanation>공개 기록을 바탕으로 답변합니다. AI가 준비되면 이 기기에서 같은 기록과 최근 대화로 답변을 작성합니다.</p>
-            <p>창을 접었다 열면 모델과 대화가 이어집니다. 페이지를 떠나면 모델을 메모리에서 해제하고, 다음 방문에 챗봇을 열면 다시 내려받습니다.</p>
+            <p>
+              정진용의 공개 CV로 구성한 디지털 페르소나입니다. 실제 본인의
+              실시간 답변은 아니에요.
+            </p>
+            <p data-persona-explanation>
+              공개 기록을 바탕으로 답변합니다. AI가 준비되면 이 기기에서 같은
+              기록과 최근 대화로 답변을 작성합니다.
+            </p>
+            <p>
+              사이트에 들어오면 AI 모델을 자동으로 내려받습니다. 같은 탭에서
+              메뉴나 글을 오가거나 창을 접어도 모델과 대화가 이어집니다.
+              새로고침하거나 외부 사이트로 이동하거나 탭을 닫으면 AI 메모리를
+              해제합니다. 모델 파일을 다음 방문을 위해 저장하지 않습니다.
+            </p>
           </div>
         </details>
-        <button class="persona-reset" type="button" data-persona-reset><RotateCcw size={13} aria-hidden="true" />새 대화</button>
+        <button class="persona-reset" type="button" data-persona-reset
+          ><RotateCcw size={13} aria-hidden="true" />새 대화</button
+        >
       </div>
     </footer>
   </div>
 </dialog>
 
-<button class="persona-launcher" type="button" data-persona-toggle aria-controls="persona-guide" aria-expanded="false" aria-haspopup="dialog" hidden>
+<button
+  class="persona-launcher"
+  type="button"
+  data-persona-toggle
+  aria-controls="persona-guide"
+  aria-expanded="false"
+  aria-haspopup="dialog"
+  transition:persist="persona-launcher"
+  hidden
+>
   <span class="persona-launcher-open">
     <BotMessageSquare size={26} stroke-width={1.65} aria-hidden="true" />
-    <span><span class="persona-sr-only">진용의 </span>AI 챗봇<span class="persona-sr-only"> 열기</span></span>
+    <span
+      ><span class="persona-sr-only">진용의 </span>AI 챗봇<span
+        class="persona-sr-only"
+      >
+        열기</span
+      ></span
+    >
   </span>
   <span class="persona-launcher-close">
     <X size={25} stroke-width={1.65} aria-hidden="true" />

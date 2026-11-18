@@ -17,6 +17,7 @@ npm run dev
 
 ```bash
 npm run check
+node --test tests/*.test.mjs
 npm run build
 ```
 
@@ -24,9 +25,11 @@ npm run build
 
 ## 방문자 브라우저에서 실행하는 챗봇
 
-GitHub Pages는 정적 사이트를 제공합니다. WebGPU를 지원하는 브라우저에서 **AI 챗봇**을 처음 열면 WebLLM이 Qwen3 1.7B를 자동으로 내려받습니다(약 1GB). 준비 중에도 공개 CV 기록에 대해 질문할 수 있습니다.
+GitHub Pages는 정적 사이트를 제공합니다. WebGPU를 지원하는 브라우저에서 **공개 페이지에 들어오면** 대화창을 열지 않아도 WebLLM이 4비트로 양자화된 Qwen3 1.7B를 자동으로 내려받습니다(약 1GB). GPU가 `shader-f16`을 지원하면 `q4f16_1`, 그 밖에는 `q4f32_1`을 사용합니다. 준비 중에도 현재 페이지나 공개 CV 기록에 대해 질문할 수 있습니다.
 
-준비가 끝나면 방문자의 GPU에서 관련 CV 기록과 최근 대화를 바탕으로 답변을 생성합니다. 같은 페이지에서 대화창을 접었다 펴면 모델과 대화가 이어집니다. 모델 파일은 해당 페이지의 메모리에서만 사용합니다. 페이지를 떠나거나 새로고침하면 AI 실행을 종료하며, 다음 페이지에서 챗봇을 열면 모델을 다시 받습니다. WebGPU 미지원 환경에서는 공개 기록 검색과 근거 링크를 이용할 수 있습니다.
+준비가 끝나면 방문자의 GPU에서 관련 CV 기록과 최근 대화를 바탕으로 답변을 생성합니다. Astro의 `ClientRouter`가 같은 사이트의 메뉴와 글 이동을 처리하고, `transition:persist`로 대화창과 모델을 유지하므로 내부 이동마다 모델을 다시 받지 않습니다. 질문의 페이지 근거는 이동한 페이지에서 새로 읽습니다. 뒤로·앞으로 이동과 대화창을 접었다 펴는 동작에서도 대화와 입력 초안이 유지됩니다.
+
+모델 파일은 해당 탭의 메모리에서만 사용합니다. 새로고침·외부 사이트 이동·탭 종료처럼 실제 문서를 떠나는 `pagehide`에서는 AI 실행을 종료합니다. 브라우저의 뒤로 가기 캐시에서 문서가 복원되면 모델을 다시 준비합니다. 관리자 화면은 기존 독립 문서 방식으로 이동합니다. WebGPU 미지원 환경에서는 공개 기록 검색과 근거 링크를 이용할 수 있습니다.
 
 로컬에서는 `npm run dev`로 같은 기능을 확인할 수 있습니다. 빌드 후 `dist/`를 HTTPS 정적 호스팅 또는 localhost에서 제공해도 동작합니다.
 
@@ -39,8 +42,10 @@ GitHub Pages는 정적 사이트를 제공합니다. WebGPU를 지원하는 브�
 | Primary/secondary 색상, 글꼴, 간격, 모션 토큰 | `src/styles/tokens.css` |
 | 홈 섹션 구성과 스타일 | `src/pages/index.astro`, `src/styles/cv.css` |
 | 홈 목차·프로젝트 파일·이메일 복사·CV 인쇄 | `src/scripts/cv.ts` |
+| 공개 페이지 이동·챗봇 유지·앵커 복원 | `src/layouts/BaseLayout.astro`, `src/scripts/public-navigation.ts`, `src/components/PersonaGuide.astro` |
 | 인터랙티브 기록집 | `src/components/RecordDesk.astro`, `src/scripts/record-desk.ts` |
 | 페르소나의 공개 근거와 대화 | `src/config/persona.ts`, `src/lib/persona.ts`, `src/components/PersonaGuide.astro` |
+| 현재 페이지 질문과 본문 근거 선택 | `src/lib/persona-page.ts`, `src/scripts/persona-guide.ts` |
 | Writing / Work 목록과 공통 스타일 | `src/pages/blog/index.astro`, `src/pages/projects/index.astro`, `src/styles/archive.css` |
 | 별도 About 페이지 | `content/about/page.json` (`/admin/about/`에서 편집 가능) |
 

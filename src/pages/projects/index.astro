@@ -127,34 +127,42 @@ const statusLabels = {
     </div>
     <footer class="archive-note">
       <span>Built, tested, and always learning.</span><a href="/blog/"
-        >Read the notes <ArrowUpRight size={15} /></a>
+        >Read the notes <ArrowUpRight size={15} /></a
+      >
     </footer>
   </div>
   <script>
-    const input = document.querySelector<HTMLInputElement>("#project-search");
-    const summary = document.querySelector<HTMLElement>(
-      "#project-search-summary",
-    );
-    const empty = document.querySelector<HTMLElement>("#project-empty");
-    const rows = [
-      ...document.querySelectorAll<HTMLElement>("[data-project-row]"),
-    ];
-    const update = () => {
-      const query = (input?.value ?? "").trim().toLocaleLowerCase();
-      let visible = 0;
-      for (const row of rows) {
-        row.hidden = !!query && !(row.dataset.search ?? "").includes(query);
-        if (!row.hidden) visible += 1;
-      }
-      if (summary)
-        summary.textContent = query
-          ? `“${input?.value.trim()}” 검색 결과 ${visible}개`
-          : `${rows.length}개의 프로젝트`;
-      if (empty) empty.hidden = visible > 0;
-    };
-    if (input)
-      input.value = new URLSearchParams(window.location.search).get("q") ?? "";
-    input?.addEventListener("input", update);
-    update();
+    function mountProjectSearch() {
+      const input = document.querySelector<HTMLInputElement>("#project-search");
+      if (!input || input.dataset.searchReady) return;
+      input.dataset.searchReady = "true";
+      const summary = document.querySelector<HTMLElement>(
+        "#project-search-summary",
+      );
+      const empty = document.querySelector<HTMLElement>("#project-empty");
+      const rows = [
+        ...document.querySelectorAll<HTMLElement>("[data-project-row]"),
+      ];
+      const update = () => {
+        const query = (input?.value ?? "").trim().toLocaleLowerCase();
+        let visible = 0;
+        for (const row of rows) {
+          row.hidden = !!query && !(row.dataset.search ?? "").includes(query);
+          if (!row.hidden) visible += 1;
+        }
+        if (summary)
+          summary.textContent = query
+            ? `“${input?.value.trim()}” 검색 결과 ${visible}개`
+            : `${rows.length}개의 프로젝트`;
+        if (empty) empty.hidden = visible > 0;
+      };
+      if (input)
+        input.value =
+          new URLSearchParams(window.location.search).get("q") ?? "";
+      input?.addEventListener("input", update);
+      update();
+    }
+    mountProjectSearch();
+    document.addEventListener("astro:page-load", mountProjectSearch);
   </script>
 </BaseLayout>

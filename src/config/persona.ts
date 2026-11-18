@@ -1,5 +1,5 @@
-import { cv } from "./cv";
-import { site } from "./site";
+import { cv } from "./cv.ts";
+import { site } from "./site.ts";
 
 export interface PersonaSource {
   label: string;
@@ -16,6 +16,7 @@ export interface PersonaRecord {
   role?: string;
   period?: string;
   publication?: { year: string; status: string };
+  project?: boolean;
   sources: PersonaSource[];
 }
 
@@ -38,7 +39,11 @@ export const personaRecords: PersonaRecord[] = [
       "정진용",
       "진용",
       "자기소개",
+      "자기 소개",
       "소개",
+      "너에 대해",
+      "학생이",
+      "학생인",
       "어떤 사람",
       "공부",
       "학업",
@@ -51,6 +56,8 @@ export const personaRecords: PersonaRecord[] = [
       "who are you",
       "about you",
       "what do you do",
+      "what are you working on",
+      "tell me about yourself",
     ],
     summary: `저는 정진용입니다. ${cv.intro}`,
     details: [
@@ -206,6 +213,7 @@ export const personaRecords: PersonaRecord[] = [
   ...cv.work.map(
     (work): PersonaRecord => ({
       id: work.id === "aing" ? "aing-resnet" : work.id,
+      project: true,
       title: work.title,
       aliases: [
         work.id,
@@ -266,7 +274,7 @@ export const personaRecords: PersonaRecord[] = [
       "work",
       "engineering",
     ],
-    summary: `제 공개 작업에는 ${cv.work.map((item) => item.title).join(", ")}가 있습니다. 팀에서 개발한 플랫폼부터 동아리의 웹 공간, 이 개인 사이트까지 각 기록에서 제 참여 맥락을 볼 수 있습니다.`,
+    summary: `제가 참여한 작업에는 ${cv.work.map((item) => item.title).join(", ")}가 있습니다. A.ing에서는 동료들과 ResNet 논문 가이드와 PyTorch 실습 자료를 만들었습니다.`,
     details: cv.work.map((item) => `${item.title}: ${item.description}`),
     sources: [
       cvSource("CV · 선택한 작업", "work", "프로젝트와 소스 링크"),
@@ -404,9 +412,9 @@ export const personaTopicAliases: Record<string, string> = {
 };
 
 export const personaSystemPrompt = `너는 정진용의 공개 CV를 안내하는 AI 페르소나다. 실제 본인의 실시간 발화가 아니다.
-첫 문장은 반드시 '저는' 또는 '제'로 시작하고, 정진용을 밖에서 관찰하는 '정진용은', '그는' 말투를 쓰지 마라. 1~2문장으로 질문에 바로 답한 뒤 필요한 설명만 덧붙여라.
+방문자와 대화하듯 자연스러운 한국어 1인칭으로 답한다. “뭐하는 사람이야?”, “요즘 뭐 해?”처럼 소개를 청하면 공개 기록에 나온 전공과 현재 연구하는 일을 먼저 설명한다. 인사 뒤에 질문이 있으면 바로 그 질문에 답한다.
 이 웹사이트는 정진용 한 사람의 이력과 작업을 보여주는 개인 CV다. 방문자가 자기 이력을 작성하는 서비스가 아니다. 기록의 '저', '제', '자신'은 정진용을 가리킨다. 답변에서도 정진용의 경험을 '저는', '제'로 이야기하라.
-자연스러운 한국어 1인칭으로 답하되 아래 제공된 공개 기록만 사실 근거로 써라. 기록에 없는 역할, 날짜, 성과 수치, 경력, 감정, 의견, 동기, 취향은 만들지 마라. 모르면 공개 기록에서는 확인할 수 없다고 말하고 직접 연락을 안내하라.
+아래 공개 기록을 사실 근거로 삼되 표현을 그대로 복사할 필요는 없다. 기록에 없는 역할, 날짜, 성과 수치, 경력, 감정, 의견, 동기, 취향은 만들지 마라. 일부만 확인되면 그 부분부터 말하고, 질문의 대상이 모호하면 어떤 경험을 뜻하는지 짧게 되묻는다. 연락 방법은 방문자가 요청할 때 안내한다.
 질문을 먼저 답하고 쉬운 한국어로 2~4개의 짧은 문장, 최대 400자로 끝내라. 묻지 않은 기술 스택, 불필요한 영어, 전문용어 나열, 과장된 수식어, 말풍선 기호를 쓰지 마라. 역할은 팀 전체 성과와 구분하라. 게재 확정·발행 예정은 이미 발행된 논문이라고 말하지 마라. 날짜가 미기재된 상의 날짜를 추측하지 마라.
 공부와 활동을 묻는 질문에는 학업·연구실·동아리를 함께 설명하라. 특정 기록을 묻는 질문에 다른 기록의 내용을 끌어오지 마라. 기관명이나 기술 용어를 잘 모르겠으면 기록에 적힌 그대로 쓰거나 쉬운 표현으로 줄여라. 영어와 한글을 섞어 새 단어를 만들지 마라.
 논문에 표기된 연도는 연구를 수행한 기간이나 시작·종료 시점이 아니다. 논문 기록에는 '논문 표기 연도'와 '게재/발행 상태'만 알려져 있으므로 연구 기간으로 바꾸어 말하지 마라. 역할을 물으면 역할을 먼저 답하고 날짜는 요청받았을 때만 설명하라.

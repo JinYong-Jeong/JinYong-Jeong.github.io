@@ -1,5 +1,6 @@
 import {
   personaRecords,
+  personaStarters,
   personaSystemPrompt,
   personaTopicAliases,
   type PersonaSource,
@@ -14,6 +15,13 @@ import {
   type PersonaAnswer,
   type PersonaContext,
 } from "../lib/persona";
+import {
+  answerFromPage,
+  isPageRecord,
+  makePageGrounding,
+  PAGE_REFERENCE_INSTRUCTIONS,
+  readCurrentPage,
+} from "../lib/persona-page";
 import {
   PersonaBrowserEngine,
   type PersonaEngineSnapshot,
@@ -79,6 +87,8 @@ function initPersona(dialog: HTMLDialogElement) {
   );
   let context: PersonaContext = { recordIds: [] };
   let history: ConversationMessage[] = [];
+  let lastPageAnswer: PersonaAnswer | null = null;
+  let conversationPage = location.pathname + location.search;
   let opener: HTMLElement | null = null;
   let restoreFocusOnClose = true;
   let activeRequest: AbortController | null = null;
@@ -131,7 +141,7 @@ function initPersona(dialog: HTMLDialogElement) {
       ? "AI가 준비됐어요. 이제 AI와 대화할 수 있어요."
       : loading
         ? "AI를 준비하고 있어요. 공개 기록으로 먼저 답변할 수 있어요."
-        : loadDetail?.textContent ?? "";
+        : (loadDetail?.textContent ?? "");
     if (engineStatus && engineStatus.textContent !== announcement)
       engineStatus.textContent = announcement;
   }
@@ -206,6 +216,7 @@ function initPersona(dialog: HTMLDialogElement) {
   }
 
   function addSources(item: HTMLElement, sources: PersonaSource[]) {
+    if (!sources.length) return;
     const group = document.createElement("nav");
     group.className = "persona-sources";
     group.setAttribute("aria-label", "이 답변의 공개 근거");
@@ -249,6 +260,7 @@ function initPersona(dialog: HTMLDialogElement) {
     onProgress: (characters: number) => void,
   ) {
     const relevant = answer.records;
+    const pageAnswer = relevant.some(isPageRecord);
     const sameTopic = answer.recordIds.some((id) =>
       context.recordIds.includes(id),
     );
@@ -256,20 +268,27 @@ function initPersona(dialog: HTMLDialogElement) {
       [
         {
           role: "system",
-          content: `${personaSystemPrompt}\n\n<공개기록>\n${makeGrounding(relevant)}\n</공개기록>`,
+          content: pageAnswer
+            ? PAGE_REFERENCE_INSTRUCTIONS
+            : `${personaSystemPrompt}\n\n<공개기록>\n${makeGrounding(relevant)}\n</공개기록>`,
         },
         ...(sameTopic ? history.slice(-4) : []).map((message) => ({
           ...message,
           content: message.content.slice(0, 500),
         })),
-        { role: "user", content: question },
+        {
+          role: "user",
+          content: pageAnswer
+            ? makePageGrounding(relevant, question)
+            : question,
+        },
       ],
       signal,
       onProgress,
     );
     const text = cleanPersonaCompletion(raw);
     if (!text) throw new Error("Empty response");
-    if (!validatePersonaCompletion(text, relevant))
+    if (!validatePersonaCompletion(text, relevant, question))
       throw new Error("UNGROUNDED_RESPONSE");
     return text
       .slice(0, 1800)
@@ -281,12 +300,21 @@ function initPersona(dialog: HTMLDialogElement) {
     const question = value.trim().slice(0, 600);
     if (!question || busy) return;
     const currentRevision = ++revision;
-    const answer = answerFromRecords(
+    const coreAnswer = answerFromRecords(
       question,
       personaRecords,
-      context,
+      { recordIds: context.recordIds.filter((id) => !id.startsWith("page:")) },
       preferredRecordId,
     );
+    const answer =
+      !preferredRecordId &&
+      coreAnswer.kind !== "private" &&
+      coreAnswer.kind !== "greeting"
+        ? (answerFromPage(question, readCurrentPage(document, location.href), {
+            previous: lastPageAnswer,
+            core: coreAnswer,
+          }) ?? coreAnswer)
+        : coreAnswer;
     welcome.hidden = true;
     input.value = "";
     resizeInput();
@@ -351,15 +379,26 @@ function initPersona(dialog: HTMLDialogElement) {
       const item = addMessage(
         "assistant",
         paragraphs,
-        usedAI ? "브라우저 AI 답변" : "기록 검색 답변",
+        usedAI
+          ? "브라우저 AI 답변"
+          : answer.kind === "page"
+            ? "현재 페이지 답변"
+            : answer.sources.length
+              ? "기록 검색 답변"
+              : "챗봇 답변",
       );
       addSources(item, answer.sources);
-      context = { recordIds: answer.recordIds };
-      history.push(
-        { role: "user", content: question },
-        { role: "assistant", content: paragraphs.join("\n\n") },
-      );
-      history = history.slice(-16);
+      if (answer.supported && answer.recordIds.length) {
+        if (!answer.recordIds.some((id) => context.recordIds.includes(id)))
+          history = [];
+        context = { recordIds: answer.recordIds };
+        lastPageAnswer = answer.kind === "page" ? answer : null;
+        history.push(
+          { role: "user", content: question },
+          { role: "assistant", content: paragraphs.join("\n\n") },
+        );
+        history = history.slice(-16);
+      }
       showFollowups(answer);
       status.textContent =
         fallback === "grounding"
@@ -372,7 +411,11 @@ function initPersona(dialog: HTMLDialogElement) {
                 ? "관련 자료가 모델의 입력 범위를 넘어 공개 기록으로 답변했어요."
                 : usedAI
                   ? "AI가 작성한 답변입니다. 연결된 근거를 함께 확인해 주세요."
-                  : "공개 기록을 바탕으로 구성한 답변입니다.";
+                  : answer.kind === "page" && answer.supported
+                    ? "현재 페이지 본문을 바탕으로 구성한 답변입니다."
+                    : answer.sources.length
+                      ? "공개 기록을 바탕으로 구성한 답변입니다."
+                      : "";
       scrollToLatest();
     } finally {
       clearTimeout(timeout);
@@ -429,6 +472,7 @@ function initPersona(dialog: HTMLDialogElement) {
     cancelGeneration();
     context = { recordIds: [] };
     history = [];
+    lastPageAnswer = null;
     transcript.replaceChildren();
     followups.replaceChildren();
     followups.hidden = true;
@@ -447,6 +491,55 @@ function initPersona(dialog: HTMLDialogElement) {
   window.addEventListener("resize", () => {
     if (dialog.open) resizeInput();
   });
+  function showCurrentPage() {
+    const path = location.pathname.replace(/\/+$/, "");
+    const article =
+      document
+        .querySelector('meta[property="og:type"]')
+        ?.getAttribute("content") === "article";
+    const title = path
+      ? document
+          .querySelector("main h1")
+          ?.textContent?.replace(/\s+/g, " ")
+          .trim() || document.title
+      : "정진용의 CV";
+    const caption = dialog.querySelector<HTMLElement>(
+      "[data-persona-current-page]",
+    );
+    if (caption) {
+      caption.textContent = `현재 ${article ? "글" : "페이지"} · ${title}`;
+      caption.title = title;
+    }
+    const starter = dialog.querySelector<HTMLButtonElement>(
+      "[data-page-starter]",
+    );
+    const label = starter?.querySelector("span");
+    if (starter && label) {
+      const question = article
+        ? "이 글 요약해 줘"
+        : path === "/projects"
+          ? "여기에 어떤 프로젝트가 있어?"
+          : path
+            ? "이 페이지에는 어떤 내용이 있어?"
+            : personaStarters[0];
+      starter.dataset.personaQuestion = question;
+      label.textContent = question;
+    }
+  }
+  document.addEventListener("astro:page-load", () => {
+    showCurrentPage();
+    const nextPage = location.pathname + location.search;
+    if (nextPage !== conversationPage) {
+      cancelGeneration(false);
+      if (context.recordIds.some((id) => id.startsWith("page:"))) {
+        context = { recordIds: [] };
+        history = [];
+      }
+      lastPageAnswer = null;
+      conversationPage = nextPage;
+    }
+    openFromUrl();
+  });
   input.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
       event.preventDefault();
@@ -459,7 +552,7 @@ function initPersona(dialog: HTMLDialogElement) {
     preparationAttempted = false;
   });
   window.addEventListener("pageshow", (event) => {
-    if (event.persisted && dialog.open) prepareAI();
+    if (event.persisted) prepareAI();
   });
   dialog
     .querySelector("[data-persona-close]")
@@ -591,5 +684,7 @@ function initPersona(dialog: HTMLDialogElement) {
     if (personaEntryRequested(location.href)) openGuide();
   };
   window.addEventListener("hashchange", openFromUrl);
+  showCurrentPage();
+  prepareAI();
   openFromUrl();
 }
