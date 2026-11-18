@@ -1,13 +1,15 @@
-# Jinyong Jeong Dev Blog
+# Jinyong Jeong — Interactive CV
 
-LLM, Federated Learning, 논문 리뷰, 실험 로그를 기록하는 Astro 기반 개발 블로그입니다.
+정진용의 학업과 연구, 개발, 동아리 활동을 담은 Astro 기반 인터랙티브 CV입니다. 책상 위 기록집에서 관심 있는 페이지를 펼치고, 그 경험에 관해 페르소나 챗봇과 대화하거나 연결된 이력과 원문을 읽을 수 있습니다.
 
 사이트: <https://jinyong-jeong.github.io>
 
 ## 개발 실행
 
+Node.js 22를 사용합니다 (`.nvmrc`). 잠금 파일에 맞춰 의존성을 설치합니다.
+
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
@@ -17,6 +19,32 @@ npm run dev
 npm run check
 npm run build
 ```
+
+개발 서버는 기본적으로 `http://localhost:4321`에서 실행됩니다. 디자인과 인터랙션, 파일별 수정 위치는 [디자인 시스템 문서](docs/DESIGN_SYSTEM.md)에 정리되어 있습니다.
+
+## 방문자 브라우저에서 실행하는 챗봇
+
+GitHub Pages는 정적 사이트를 제공합니다. 방문자가 오른쪽 아래 **진용에게 질문하기**를 열고 브라우저 AI를 준비하면 WebLLM이 Qwen3 모델 파일을 내려받습니다. 첫 준비에 네트워크와 저장 공간이 필요합니다. 같은 브라우저에 캐시가 남아 있으면 모델 파일을 재사용합니다.
+
+질문에 관련된 공개 CV 기록과 최근 대화를 바탕으로 방문자의 WebGPU에서 답을 생성합니다. 대화창을 접었다 펴면 이전 대화가 이어지고 새로고침하면 대화가 초기화됩니다. 모델을 받기 전이나 WebGPU를 사용할 수 없는 기기에서는 공개 기록 검색과 근거 링크를 이용할 수 있습니다.
+
+로컬에서는 `npm run dev`로 같은 기능을 확인할 수 있습니다. 빌드 후 `dist/`를 HTTPS 정적 호스팅 또는 localhost에서 제공해도 동작합니다.
+
+## 수정할 파일 찾기
+
+| 수정 내용 | 파일 |
+| --- | --- |
+| 홈 CV의 경력·학력·논문·수상·대표 프로젝트 | `src/config/cv.ts` |
+| 사이트 제목·설명·내비게이션·공통 링크 | `src/config/site.ts` |
+| Primary/secondary 색상, 글꼴, 간격, 모션 토큰 | `src/styles/tokens.css` |
+| 홈 섹션 구성과 스타일 | `src/pages/index.astro`, `src/styles/cv.css` |
+| 홈 목차·프로젝트 파일·이메일 복사·CV 인쇄 | `src/scripts/cv.ts` |
+| 인터랙티브 기록집 | `src/components/RecordDesk.astro`, `src/scripts/record-desk.ts` |
+| 페르소나의 공개 근거와 대화 | `src/config/persona.ts`, `src/lib/persona.ts`, `src/components/PersonaGuide.astro` |
+| Writing / Work 목록과 공통 스타일 | `src/pages/blog/index.astro`, `src/pages/projects/index.astro`, `src/styles/archive.css` |
+| 별도 About 페이지 | `content/about/page.json` (`/admin/about/`에서 편집 가능) |
+
+CV와 About은 별도의 콘텐츠입니다. About 관리자에서 저장한 내용이 홈 CV에 자동 반영되지는 않습니다. 홈의 논문은 게재와 게재 확정·발행 예정을 구분하며, 확인되지 않은 수상 날짜는 임의로 입력하지 않습니다.
 
 ## 새 글 작성
 
@@ -40,7 +68,7 @@ npm run build
 
 ## 프로필 수정
 
-프로필, 링크, 기술 스택, 사이드바 노출 항목은 `src/config/site.ts`에서 수정합니다.
+홈의 주요 이력은 `src/config/cv.ts`에서 수정합니다. 공통 프로필, 링크, 기술 스택, 기존 상세 페이지의 사이드바 노출 항목은 `src/config/site.ts`에서 수정합니다.
 
 수정할 가능성이 높은 값:
 
@@ -51,9 +79,9 @@ npm run build
 
 ## 프로젝트 작성
 
-프로젝트는 `content/projects/{slug}.mdx`에 작성합니다.
+홈의 대표 작업은 `src/config/cv.ts`의 `work`에서 관리합니다. `/projects/`의 전체 목록은 `content/projects/github-selection.json`에 지정한 GitHub 저장소를 빌드 시 불러옵니다. `/admin/projects/`에서 저장소 선택과 설명을 편집할 수 있습니다.
 
-`featured: true`인 프로젝트는 홈과 사이드바에 우선 노출됩니다.
+`content/projects/{slug}.mdx`는 GitHub 목록을 사용할 수 없을 때의 로컬 대체 콘텐츠입니다. 이 파일의 `featured`는 해당 목록을 사용하는 기존 구성요소에 적용되며, 홈의 대표 작업 선정은 `cv.work`를 따릅니다.
 
 ## 배포
 
@@ -65,6 +93,8 @@ npm run build
 - GitHub Settings > Pages > Source는 `GitHub Actions`로 설정합니다.
 
 `main` 브랜치에 push하면 `.github/workflows/deploy.yml`이 실행되어 자동 배포됩니다.
+
+2026-11-17 CV 중심 개편은 로컬 작업으로 준비했습니다. 이 작업에서 운영 사이트에 대한 push나 배포는 수행하지 않았습니다.
 
 기존 정적 HTML 사이트는 `archive/pre-astro-blog-20260426` 브랜치에 백업되어 있습니다.
 

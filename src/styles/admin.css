@@ -1,8 +1,8 @@
 .admin-page {
   min-height: 100vh;
   background:
-    radial-gradient(circle at 12% 10%, rgba(139, 90, 54, 0.16), transparent 28rem),
-    radial-gradient(circle at 88% 88%, rgba(85, 109, 90, 0.12), transparent 30rem),
+    radial-gradient(circle at 12% 10%, color-mix(in srgb, var(--color-bronze) 16%, transparent), transparent 28rem),
+    radial-gradient(circle at 88% 88%, color-mix(in srgb, var(--color-secondary) 12%, transparent), transparent 30rem),
     var(--color-bg);
 }
 
@@ -31,11 +31,11 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  border-bottom: 1px solid rgba(255, 249, 240, 0.16);
-  background: rgba(67, 32, 12, 0.96);
-  box-shadow: 0 12px 30px rgba(37, 23, 15, 0.16);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-surface) 16%, transparent);
+  background: color-mix(in srgb, var(--color-primary) 96%, transparent);
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--color-ink) 16%, transparent);
   padding: 0.65rem clamp(1rem, 3vw, 2.5rem);
-  color: #fff8ed;
+  color: var(--color-on-primary);
   backdrop-filter: blur(18px);
 }
 
@@ -68,7 +68,7 @@
 
 .admin-brand small {
   margin-top: 0.18rem;
-  color: rgba(255, 248, 237, 0.66);
+  color: color-mix(in srgb, var(--color-on-primary) 66%, transparent);
   font-size: 0.67rem;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -83,21 +83,21 @@
   min-height: 2.2rem;
   align-items: center;
   gap: 0.4rem;
-  border: 1px solid rgba(255, 248, 237, 0.24);
+  border: 1px solid color-mix(in srgb, var(--color-on-primary) 24%, transparent);
   border-radius: 7px;
   padding: 0.45rem 0.7rem;
-  color: rgba(255, 248, 237, 0.9);
+  color: color-mix(in srgb, var(--color-on-primary) 90%, transparent);
   font-size: 0.76rem;
   font-weight: 800;
 }
 
 .admin-nav-link:hover {
-  background: rgba(255, 248, 237, 0.12);
+  background: color-mix(in srgb, var(--color-on-primary) 12%, transparent);
 }
 
 .admin-viewer {
   gap: 0.55rem;
-  color: rgba(255, 248, 237, 0.88);
+  color: color-mix(in srgb, var(--color-on-primary) 88%, transparent);
   font-size: 0.82rem;
   font-weight: 700;
 }
@@ -105,7 +105,7 @@
 .admin-viewer img {
   width: 1.8rem;
   height: 1.8rem;
-  border: 1px solid rgba(255, 248, 237, 0.48);
+  border: 1px solid color-mix(in srgb, var(--color-on-primary) 48%, transparent);
   border-radius: 999px;
   background: var(--color-surface-soft);
 }
@@ -221,11 +221,11 @@
 .primary-button {
   border: 1px solid var(--color-accent);
   background: var(--color-accent);
-  color: #fff8ed;
+  color: var(--color-on-primary);
 }
 
 .primary-button:hover:not(:disabled) {
-  background: #351806;
+  background: var(--color-primary-hover);
   transform: translateY(-1px);
 }
 
@@ -253,7 +253,7 @@
 .danger-button:hover:not(:disabled),
 .danger-button-solid {
   background: #7b2c21;
-  color: #fff8ed;
+  color: var(--color-on-primary);
 }
 
 .primary-button:disabled,
@@ -268,19 +268,19 @@
 .icon-button {
   width: 2.45rem;
   height: 2.45rem;
-  border: 1px solid rgba(255, 248, 237, 0.26);
-  background: rgba(255, 248, 237, 0.06);
-  color: #fff8ed;
+  border: 1px solid color-mix(in srgb, var(--color-on-primary) 26%, transparent);
+  background: color-mix(in srgb, var(--color-on-primary) 6%, transparent);
+  color: var(--color-on-primary);
 }
 
 .icon-button:hover:not(:disabled) {
-  background: rgba(255, 248, 237, 0.16);
+  background: color-mix(in srgb, var(--color-on-primary) 16%, transparent);
 }
 
 .icon-button-accent {
   border-color: var(--color-accent);
   background: var(--color-accent);
-  color: #fff8ed;
+  color: var(--color-on-primary);
 }
 
 .text-button {
@@ -345,14 +345,14 @@
   margin: 0 1rem;
   border: 1px solid var(--color-border);
   border-radius: 7px;
-  background: rgba(255, 249, 240, 0.78);
+  background: color-mix(in srgb, var(--color-surface) 78%, transparent);
   padding: 0 0.75rem;
   color: var(--color-subtle);
 }
 
 .library-search:focus-within {
   border-color: var(--color-accent-2);
-  box-shadow: 0 0 0 3px rgba(139, 90, 54, 0.1);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-bronze) 10%, transparent);
 }
 
 .library-search input {
@@ -385,7 +385,7 @@
   width: 100%;
   gap: 0.4rem;
   border: 0;
-  border-top: 1px solid rgba(199, 168, 141, 0.48);
+  border-top: 1px solid color-mix(in srgb, var(--color-border-strong) 48%, transparent);
   background: transparent;
   padding: 0.85rem 0.65rem;
   color: var(--color-text);
@@ -400,7 +400,7 @@
 .post-list-item:hover,
 .post-list-item.is-active {
   border-radius: 7px;
-  background: rgba(244, 230, 213, 0.72);
+  background: color-mix(in srgb, var(--color-surface-soft) 72%, transparent);
 }
 
 .post-list-item.is-active::before {
@@ -431,7 +431,7 @@
   right: 0.65rem;
   bottom: 0.88rem;
   border-radius: 5px;
-  background: rgba(85, 109, 90, 0.1);
+  background: color-mix(in srgb, var(--color-secondary) 10%, transparent);
   padding: 0.16rem 0.34rem;
   color: var(--color-sage);
   font-size: 0.6rem;
@@ -439,7 +439,7 @@
 }
 
 .post-status.is-draft {
-  background: rgba(139, 90, 54, 0.1);
+  background: color-mix(in srgb, var(--color-bronze) 10%, transparent);
   color: var(--color-accent-2);
 }
 
@@ -510,7 +510,7 @@
   min-height: 2.7rem;
   border: 1px solid var(--color-border);
   border-radius: 7px;
-  background: rgba(255, 249, 240, 0.72);
+  background: color-mix(in srgb, var(--color-surface) 72%, transparent);
   color: var(--color-text);
   outline: 0;
   padding: 0.68rem 0.78rem;
@@ -528,7 +528,7 @@
 .slug-field:focus-within {
   border-color: var(--color-accent-2);
   background: var(--color-surface);
-  box-shadow: 0 0 0 3px rgba(139, 90, 54, 0.1);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-bronze) 10%, transparent);
 }
 
 .slug-field {
@@ -559,7 +559,7 @@
   align-items: center;
   border: 1px solid var(--color-border);
   border-radius: 7px;
-  background: rgba(255, 249, 240, 0.55);
+  background: color-mix(in srgb, var(--color-surface) 55%, transparent);
   padding: 0.75rem;
   cursor: pointer;
 }
@@ -588,7 +588,7 @@
   height: 0.8rem;
   border-radius: 999px;
   background: var(--color-surface);
-  box-shadow: 0 1px 4px rgba(37, 23, 15, 0.24);
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--color-ink) 24%, transparent);
   content: "";
   transition: 160ms ease;
 }
@@ -616,14 +616,14 @@
   overflow: hidden;
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: rgba(255, 249, 240, 0.62);
+  background: color-mix(in srgb, var(--color-surface) 62%, transparent);
 }
 
 .content-tabs {
   display: flex;
   gap: 0.2rem;
   border-bottom: 1px solid var(--color-border);
-  background: rgba(244, 230, 213, 0.52);
+  background: color-mix(in srgb, var(--color-surface-soft) 52%, transparent);
   padding: 0.45rem 0.55rem 0;
 }
 
@@ -677,7 +677,7 @@
   resize: vertical;
   border: 0;
   outline: 0;
-  background: rgba(255, 249, 240, 0.68);
+  background: color-mix(in srgb, var(--color-surface) 68%, transparent);
   padding: 1rem;
   color: var(--color-text);
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
@@ -704,9 +704,9 @@
   border: 1px solid var(--color-border-strong);
   border-radius: 8px;
   background: var(--color-accent);
-  box-shadow: 0 18px 50px rgba(37, 23, 15, 0.24);
+  box-shadow: 0 18px 50px color-mix(in srgb, var(--color-ink) 24%, transparent);
   padding: 0.8rem 1rem;
-  color: #fff8ed;
+  color: var(--color-on-primary);
   font-size: 0.82rem;
   font-weight: 700;
   opacity: 0;
@@ -725,7 +725,7 @@
 }
 
 .admin-toast[data-tone="success"] {
-  background: #415b48;
+  background: var(--color-secondary);
 }
 
 .delete-dialog {
@@ -734,12 +734,12 @@
   border-radius: 9px;
   background: var(--color-surface);
   color: var(--color-text);
-  box-shadow: 0 28px 80px rgba(37, 23, 15, 0.28);
+  box-shadow: 0 28px 80px color-mix(in srgb, var(--color-ink) 28%, transparent);
   padding: 0;
 }
 
 .delete-dialog::backdrop {
-  background: rgba(37, 23, 15, 0.54);
+  background: color-mix(in srgb, var(--color-ink) 54%, transparent);
   backdrop-filter: blur(3px);
 }
 

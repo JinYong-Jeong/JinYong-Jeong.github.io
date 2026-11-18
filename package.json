@@ -13,6 +13,7 @@
     "@astrojs/mdx": "latest",
     "@astrojs/sitemap": "latest",
     "@lucide/astro": "^1.11.0",
+    "@mlc-ai/web-llm": "0.2.89",
     "@tailwindcss/vite": "^4.1.17",
     "astro": "latest",
     "dompurify": "^3.4.13",

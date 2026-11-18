@@ -5,6 +5,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   site: "https://jinyong-jeong.github.io",
+  devToolbar: { enabled: false },
   integrations: [mdx(), sitemap()],
   markdown: {
     shikiConfig: {
@@ -13,6 +14,7 @@ export default defineConfig({
     }
   },
   vite: {
+    ssr: { external: ["sharp"] },
     plugins: [tailwindcss()]
   }
 });

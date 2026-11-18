@@ -1,26 +1,25 @@
 export const site = {
   name: "Jinyong Jeong",
   shortName: "JJ",
-  title: "Jinyong Jeong | AI Research & Development Blog",
+  title: "Jinyong Jeong | Interactive CV",
   description:
-    "LLM, Federated Learning, 논문 리뷰, 실험 로그를 기록하는 개인 개발 블로그입니다.",
+    "정진용의 인터랙티브 CV. 책장을 넘기며 가천대학교에서의 학업과 연구, 개발 프로젝트, 동아리 활동을 살펴보고 공개 기록을 바탕으로 대화할 수 있습니다.",
   url: "https://jinyong-jeong.github.io",
   locale: "ko_KR",
   author: {
     name: "Jinyong Jeong",
     displayName: "Jinyong",
-    role: "Developer · Researcher · Builder",
+    role: "Undergraduate Researcher",
     location: "Seoul, Korea",
     avatar: "https://avatars.githubusercontent.com/u/174023460?v=4",
-    bio: "LLM과 Federated Learning을 중심으로 연구하고, 실험하고, 구현하면서 배운 내용을 재현 가능한 기록으로 남깁니다.",
+    bio: "가천대학교에서 LLM과 AI 에이전트를 공부하고 연구합니다.",
     longBio:
-      "논문을 읽고 끝내지 않고 직접 구현하고 검증하는 편입니다. 모델 성능 자체보다 왜 그런 결과가 나왔는지, 다음 실험에서 무엇을 바꿔야 하는지까지 남기는 기록을 선호합니다. 이 블로그는 그 과정을 쌓아두는 연구 노트이자 개발 아카이브입니다."
+      "LLM과 AI 에이전트를 연구하며, 모델이 도구를 사용해 답을 찾는 과정을 직접 구현합니다. 연구와 개발 이력, 실험에서 배운 내용을 이곳에 기록합니다."
   },
   nav: [
-    { label: "Home", href: "/" },
-    { label: "Blog", href: "/blog/" },
-    { label: "Projects", href: "/projects/" },
-    { label: "About", href: "/about/" }
+    { label: "CV", href: "/" },
+    { label: "Work", href: "/projects/" },
+    { label: "Writing", href: "/blog/" }
   ],
   categories: {
     llm: {

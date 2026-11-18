@@ -1,94 +1,159 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import PageHero from "@/components/PageHero.astro";
-import ProjectCard from "@/components/ProjectCard.astro";
-import Sidebar from "@/components/Sidebar.astro";
-import { getAllProjects, getFeaturedProjects } from "@/lib/content";
-
+import { ArrowUpRight, ArrowLeft, Search } from "@lucide/astro";
+import { formatDate, getAllProjects } from "@/lib/content";
+import "@/styles/archive.css";
 const projects = await getAllProjects();
-const sidebarProjects = await getFeaturedProjects(3);
+const statusLabels = {
+  active: "Active",
+  paused: "Paused",
+  archived: "Archived",
+  idea: "Idea",
+  fork: "Fork",
+};
 ---
 
-<BaseLayout title="Projects" description="GitHub에서 자동으로 동기화한 공개 프로젝트 목록입니다.">
-  <div class="container-page page-wrap">
-    <div class="page-layout">
-      <section class="page-main-panel">
-        <PageHero
-          kicker="Build Log"
-          title="Projects"
-          description="GitHub 공개 저장소를 최근 업데이트 순으로 자동 동기화합니다."
+<BaseLayout
+  title="Selected work"
+  description="정진용의 프로젝트와 공개 작업. 연구 아이디어를 코드와 시스템으로 구현한 기록입니다."
+  bodyClass="archive-page"
+>
+  <div class="archive-shell">
+    <header class="archive-header">
+      <a class="archive-back" href="/"
+        ><ArrowLeft size={14} /> Back to profile</a
+      >
+      <p class="archive-eyebrow">From idea to implementation</p>
+      <div class="archive-title-row">
+        <h1>Selected work</h1>
+        <span class="archive-edition"
+          >Research &amp; engineering<br />A collection of practice</span
+        >
+      </div>
+      <p class="archive-intro">
+        아이디어를 코드로, 실험을 시스템으로.<br />직접 만들고 탐구해 온
+        프로젝트를 모았습니다.
+      </p>
+    </header>
+    <div class="archive-toolbar archive-toolbar-projects">
+      <p
+        id="project-search-summary"
+        class="archive-summary"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {projects.length}개의 프로젝트
+      </p>
+      <label class="archive-search" for="project-search">
+        <Search size={16} aria-hidden="true" /><span class="sr-only"
+          >이름, 설명, 기술 스택으로 프로젝트 검색</span
+        >
+        <input
+          id="project-search"
+          type="search"
+          placeholder="Search projects, stack…"
+          autocomplete="off"
+          aria-controls="project-list"
         />
-
-        <div class="page-toolbar">
-          <label class="block">
-            <span class="sr-only">프로젝트 검색</span>
-            <input
-              id="project-search"
-              type="search"
-              placeholder="제목, 설명, 기술 스택 검색"
-              class="page-search-input"
-            />
-          </label>
-          <a class="page-toolbar-link focus-ring" href="/search/">
-            전체 검색 페이지 →
-          </a>
-        </div>
-        <p id="project-search-summary" class="page-result-summary">
-          GitHub에서 불러온 {projects.length}개의 공개 저장소
-        </p>
-
-        <div id="project-list" class="content-card-list">
-        {
-          projects.map((project) => (
-            <div
-              class="content-row-card"
-              data-project-row
-              data-search={`${project.data.title} ${project.data.description} ${project.data.status} ${project.data.techStack.join(" ")}`.toLowerCase()}
-            >
-              <ProjectCard project={project} variant="row" />
-            </div>
-          ))
-        }
-        </div>
-        <div id="project-empty" class="hidden page-empty-state">
-          일치하는 프로젝트가 없습니다. 다른 키워드로 다시 검색해보세요.
-        </div>
-      </section>
-
-      <Sidebar projects={sidebarProjects} />
+      </label>
     </div>
+    <section id="project-list" class="archive-list" aria-label="프로젝트 목록">
+      {
+        projects.map((project, index) => (
+          <article
+            id={project.id}
+            class="archive-entry archive-project"
+            data-project-row
+            data-search={`${project.data.title} ${project.data.description} ${project.data.status} ${project.data.techStack.join(" ")}`.toLocaleLowerCase()}
+          >
+            <div class="archive-entry-meta">
+              <span class="archive-entry-number">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <span class="archive-status" data-status={project.data.status}>
+                {statusLabels[project.data.status]}
+              </span>
+              <time datetime={project.data.date.toISOString()}>
+                {project.data.source === "github" ? "Updated " : ""}
+                {formatDate(project.data.date)}
+              </time>
+            </div>
+            <div class="archive-entry-body">
+              <>
+                <h2>{project.data.title}</h2>
+                <p>{project.data.description}</p>
+              </>
+              <ul class="archive-stack" aria-label="기술 스택">
+                {project.data.techStack.map((tech) => (
+                  <li>{tech}</li>
+                ))}
+              </ul>
+              <div class="archive-project-links">
+                {project.data.links.map((link) => (
+                  <a href={link.href} target="_blank" rel="noopener noreferrer">
+                    {link.label}
+                    <ArrowUpRight size={15} />
+                    <span class="sr-only"> (새 탭)</span>
+                  </a>
+                ))}
+                {project.data.source === "github" &&
+                  (project.data.stars ?? 0) > 0 && (
+                    <span class="archive-project-stars">
+                      {project.data.stars} GitHub stars
+                    </span>
+                  )}
+              </div>
+            </div>
+          </article>
+        ))
+      }
+    </section>
+    <div id="project-empty" class="archive-empty" hidden={projects.length > 0}>
+      <p>
+        {
+          projects.length
+            ? "일치하는 프로젝트가 없습니다."
+            : "등록된 프로젝트가 없습니다."
+        }
+      </p>
+      <span
+        >{
+          projects.length
+            ? "다른 기술 스택을 검색하거나 검색어를 지워보세요."
+            : "새로운 작업이 이곳에 추가됩니다."
+        }</span
+      >
+    </div>
+    <footer class="archive-note">
+      <span>Built, tested, and always learning.</span><a href="/blog/"
+        >Read the notes <ArrowUpRight size={15} /></a>
+    </footer>
   </div>
-
-  <script is:inline>
-    const params = new URLSearchParams(window.location.search);
-    const initialQuery = params.get("q") || "";
-    const input = document.querySelector("#project-search");
-    const summary = document.querySelector("#project-search-summary");
-    const emptyState = document.querySelector("#project-empty");
-    const rows = Array.from(document.querySelectorAll("[data-project-row]"));
-
-    if (input) input.value = initialQuery;
-
+  <script>
+    const input = document.querySelector<HTMLInputElement>("#project-search");
+    const summary = document.querySelector<HTMLElement>(
+      "#project-search-summary",
+    );
+    const empty = document.querySelector<HTMLElement>("#project-empty");
+    const rows = [
+      ...document.querySelectorAll<HTMLElement>("[data-project-row]"),
+    ];
     const update = () => {
-      const query = String(input?.value || "").trim().toLowerCase();
+      const query = (input?.value ?? "").trim().toLocaleLowerCase();
       let visible = 0;
-
       for (const row of rows) {
-        const text = row.getAttribute("data-search") || "";
-        const match = !query || text.includes(query);
-        row.toggleAttribute("hidden", !match);
-        if (match) visible += 1;
+        row.hidden = !!query && !(row.dataset.search ?? "").includes(query);
+        if (!row.hidden) visible += 1;
       }
-
-      if (summary) {
+      if (summary)
         summary.textContent = query
-          ? `"${query}" 검색 결과 ${visible}개`
-          : `GitHub에서 불러온 ${rows.length}개의 공개 저장소`;
-      }
-
-      emptyState?.classList.toggle("hidden", visible !== 0);
+          ? `“${input?.value.trim()}” 검색 결과 ${visible}개`
+          : `${rows.length}개의 프로젝트`;
+      if (empty) empty.hidden = visible > 0;
     };
-
+    if (input)
+      input.value = new URLSearchParams(window.location.search).get("q") ?? "";
     input?.addEventListener("input", update);
     update();
   </script>

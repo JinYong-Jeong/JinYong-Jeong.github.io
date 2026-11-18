@@ -1,0 +1,276 @@
+---
+import { Image, getImage } from "astro:assets";
+import { cv } from "@/config/cv";
+import dragon from "../../engineering/design/logo2.png";
+import study from "../../engineering/design/bg.png";
+import "@/styles/record-desk.css";
+
+const wood = await getImage({
+  src: study,
+  width: 1200,
+  format: "webp",
+  quality: 78,
+});
+const community = cv.experience.find((item) => item.organization === "A.ing")!;
+const portfolio = cv.work.find((item) => item.id === "portfolio")!;
+const paper = cv.publications.find((item) => item.id === "health-agent")!;
+const facets = [
+  {
+    id: "learning",
+    topic: "profile",
+    label: "Learn",
+    english: "A beginning",
+    note: "01 / LEARNING",
+    title: "배우는 사람",
+    subtitle: cv.education.school,
+    description:
+      "LLM과 AI 에이전트가 도구와 데이터를 어떻게 활용하는지 공부합니다.",
+    detail: cv.education.degree,
+    date: cv.education.period,
+    href: "#education",
+    link: "학력과 활동 보기",
+    source: "EDUCATION & EXPERIENCE",
+    question: "어떤 공부와 활동을 하고 있나요?",
+  },
+  {
+    id: "research",
+    topic: "health-agent",
+    label: "Ask",
+    english: "A question",
+    note: "02 / RESEARCH",
+    title: "질문을 좇는 사람",
+    subtitle: "Cognitive Computing Lab",
+    description: "궁금한 것을 연구로 옮기고, 논문과 구현으로 남깁니다.",
+    detail: "개인건강데이터와 AI Agent 시스템 연구",
+    date: `${paper.year} · ${paper.type} · ${paper.role}`,
+    href: paper.href,
+    link: "실제 논문 읽기",
+    source: "A PUBLISHED RECORD",
+    question: "개인건강데이터 연구에서 무엇을 했나요?",
+  },
+  {
+    id: "building",
+    topic: "portfolio",
+    label: "Build",
+    english: "Ideas, made",
+    note: "03 / BUILDING",
+    title: "직접 만드는 사람",
+    subtitle: "From an idea to something real",
+    description:
+      "연구 시스템부터 이 웹사이트까지, 아이디어를 작동하는 형태로 만듭니다.",
+    detail: "이 사이트의 구조와 구현을 공개합니다.",
+    date: portfolio.tags.join(" · "),
+    href: portfolio.href,
+    link: "이 사이트의 소스 보기",
+    source: "OPEN WORK",
+    question: "이 웹사이트를 어떤 문제의식으로 설계했나요?",
+  },
+  {
+    id: "together",
+    topic: "aing-resnet",
+    label: "Connect",
+    english: "Learning together",
+    note: "04 / COMMUNITY",
+    title: "함께 배우는 사람",
+    subtitle: "A.ing · Gachon University",
+    description:
+      "A.ing에서 동료들과 ResNet 교육자료를 만들고, 논문 읽기와 모델 구현을 연결했습니다.",
+    detail: "ResNet 논문 읽기 · PyTorch 구현 · CIFAR-10 실험",
+    date: community.period,
+    href: community.href,
+    link: "ResNet 교육자료 보기",
+    source: "LEARNING IN COMPANY",
+    question: "A.ing의 ResNet 주니어 스터디에서는 무엇을 배울 수 있나요?",
+  },
+];
+---
+
+<section
+  class="record-desk"
+  data-record-desk
+  data-open="false"
+  tabindex="-1"
+  aria-label="정진용의 기록집"
+  style={`--rd-study: url('${wood.src}')`}
+>
+  <div class="rd-scene">
+    <div class="rd-room-light" aria-hidden="true"></div>
+    <div class="rd-table" aria-hidden="true"></div>
+    <div class="rd-window-shadow" aria-hidden="true"></div>
+    <div class="rd-pencil" aria-hidden="true"><i></i></div>
+    <span class="rd-desk-caption" aria-hidden="true">THE PERSONAL ARCHIVE</span>
+    <button
+      type="button"
+      class="rd-close"
+      data-book-close
+      hidden
+      aria-label="기록집 덮기"><span aria-hidden="true">×</span> 덮기</button
+    >
+
+    <div class="rd-book">
+      <div class="rd-cast-shadow" aria-hidden="true"></div>
+      <div class="rd-back-board" aria-hidden="true"></div>
+      <div class="rd-page-block" aria-hidden="true"></div>
+      <div class="rd-ribbon" aria-hidden="true"></div>
+
+      <div
+        class="rd-spread"
+        id="personal-record-pages"
+        aria-hidden="true"
+        inert
+      >
+        <div
+          class="rd-bookmarks"
+          role="tablist"
+          aria-label="어떤 기록을 펼칠까요?"
+        >
+          {
+            facets.map((facet, index) => (
+              <button
+                type="button"
+                role="tab"
+                id={`rd-tab-${facet.id}`}
+                aria-controls={`rd-page-${facet.id}`}
+                aria-selected={index === 0 ? "true" : "false"}
+                tabindex={index === 0 ? 0 : -1}
+                data-book-tab={index}
+              >
+                {facet.label}
+              </button>
+            ))
+          }
+        </div>
+        <div class="rd-paper">
+          <div class="rd-paper-grain" aria-hidden="true"></div>
+          {
+            facets.map((facet, index) => (
+              <article
+                class="rd-page"
+                id={`rd-page-${facet.id}`}
+                role="tabpanel"
+                aria-labelledby={`rd-tab-${facet.id}`}
+                data-book-page={index}
+                hidden={index !== 0}
+              >
+                <p class="rd-page-kicker">{facet.note}</p>
+                <h3 tabindex="-1">{facet.english}</h3>
+                <p class="rd-page-title">{facet.title}</p>
+                <span class="rd-small-rule" aria-hidden="true" />
+                <p class="rd-page-description">{facet.description}</p>
+                <div class="rd-evidence">
+                  <span>{facet.source}</span>
+                  <strong>{facet.subtitle}</strong>
+                  <p>{facet.detail}</p>
+                  <small>{facet.date}</small>
+                </div>
+                <a
+                  class="rd-evidence-link"
+                  href={facet.href}
+                  target={facet.href.startsWith("https") ? "_blank" : undefined}
+                  rel={
+                    facet.href.startsWith("https")
+                      ? "noopener noreferrer"
+                      : undefined
+                  }
+                >
+                  {facet.link}
+                  <span aria-hidden="true">↗</span>
+                </a>
+                <button
+                  type="button"
+                  class="rd-question"
+                  data-book-question={facet.question}
+                  data-book-topic={facet.topic}
+                >
+                  이 이야기가 궁금하다면 <span aria-hidden="true">↗</span>
+                </button>
+              </article>
+            ))
+          }
+          <nav class="rd-page-nav" aria-label="기록집 페이지">
+            <button type="button" data-book-prev aria-label="이전 기록"
+              ><span aria-hidden="true">←</span></button
+            >
+            <span class="rd-page-count" aria-hidden="true"
+              ><span data-book-number>01</span><i>/</i>04</span
+            >
+            <button type="button" data-book-next aria-label="다음 기록"
+              ><span aria-hidden="true">→</span></button
+            >
+          </nav>
+          <span class="rd-binding" aria-hidden="true"></span>
+        </div>
+        <div class="rd-turn-sheet" aria-hidden="true"><span>J / J</span></div>
+      </div>
+
+      <div class="rd-cover">
+        <div class="rd-cover-front">
+          <div class="rd-cover-grain" aria-hidden="true"></div>
+          <span class="rd-cover-edition">A PERSONAL RECORD · VOL 01</span>
+          <span class="rd-seal" aria-hidden="true"
+            ><Image
+              src={dragon}
+              alt=""
+              width={220}
+              height={220}
+              format="webp"
+              loading="eager"
+            /></span
+          >
+          <span class="rd-cover-name">Jinyong<br />Jeong</span>
+          <span class="rd-cover-subtitle">배우고, 만들고, 함께한 기록</span>
+          <span class="rd-cover-line" aria-hidden="true"></span>
+          <span class="rd-cover-year">정진용 · PERSONAL ARCHIVE</span>
+          <button
+            type="button"
+            class="rd-open"
+            data-book-open
+            aria-expanded="false"
+            aria-controls="personal-record-pages"
+            hidden
+            ><span>나의 기록 펼치기</span><span aria-hidden="true">↗</span
+            ></button
+          >
+          <noscript
+            ><a class="rd-nojs" href="#experience">학력과 활동 읽기 ↗</a
+            ></noscript
+          >
+        </div>
+        <div class="rd-cover-inside" aria-hidden="true">
+          <span class="rd-inside-eyebrow">THIS BOOK BELONGS TO</span>
+          <span class="rd-inside-name">Jinyong<br />Jeong</span>
+          <span class="rd-inside-rule"></span>
+          <p>하나의 직함보다,<br />여러 개의 기록으로</p>
+          <ol>{facets.map((facet) => <li>{facet.title}</li>)}</ol>
+          <Image
+            src={dragon}
+            alt=""
+            width={120}
+            height={120}
+            format="webp"
+            loading="lazy"
+          />
+          <span class="rd-inside-colophon"
+            >GACHON UNIVERSITY<br />LEARNING / MAKING / SHARING</span
+          >
+        </div>
+      </div>
+      <div class="rd-spine" aria-hidden="true"><span>JINYONG JEONG</span></div>
+    </div>
+    <p class="rd-scene-note">
+      <span data-book-hint>책 한 권에 담긴 몇 가지 모습</span>
+    </p>
+  </div>
+  <p
+    class="rd-live"
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+    data-book-status
+  >
+  </p>
+</section>
+
+<script>
+  import "@/scripts/record-desk";
+</script>

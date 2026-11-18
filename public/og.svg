@@ -1,9 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="Jinyong Jeong Dev Blog">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="Jinyong Jeong Interactive CV">
   <rect width="1200" height="630" fill="#faf7f1"/>
   <rect x="72" y="72" width="1056" height="486" rx="34" fill="#fffdf8" stroke="#e7d9cc"/>
   <text x="118" y="164" fill="#6b3f26" font-family="Inter, Arial, sans-serif" font-size="36" font-weight="700">JJ</text>
-  <text x="118" y="280" fill="#2b1c14" font-family="Inter, Arial, sans-serif" font-size="66" font-weight="800">Jinyong Jeong Dev Blog</text>
-  <text x="118" y="356" fill="#6f5c4c" font-family="Inter, Arial, sans-serif" font-size="34">LLM · Federated Learning · Paper Review · Experiment Log</text>
+  <text x="118" y="280" fill="#2b1c14" font-family="Georgia, Times New Roman, serif" font-size="66" font-weight="800">Jinyong Jeong</text>
+  <text x="118" y="356" fill="#6f5c4c" font-family="Inter, Arial, sans-serif" font-size="34">AI Agents · LLMs · Interactive CV</text>
   <g transform="translate(790 162)" stroke="#9a6241" fill="none" stroke-width="3">
     <circle cx="96" cy="42" r="10" fill="#9a6241"/>
     <circle cx="178" cy="88" r="10" fill="#9a6241"/>

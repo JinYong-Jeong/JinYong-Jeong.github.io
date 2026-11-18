@@ -1,0 +1,103 @@
+---
+import { ArrowUpRight, ArrowUp, ChevronDown, MessageCircle, X, RotateCcw } from "@lucide/astro";
+import { personaStarters } from "@/config/persona";
+import "@/styles/persona-guide.css";
+
+interface Props { emblemSrc: string; }
+const { emblemSrc } = Astro.props;
+---
+
+<dialog
+  class="persona-guide"
+  id="persona-guide"
+  aria-labelledby="persona-title"
+  aria-describedby="persona-description"
+>
+  <div class="persona-sheet">
+    <header class="persona-header">
+      <div class="persona-heading">
+        <span class="persona-emblem" aria-hidden="true">
+          <img src={emblemSrc} width="40" height="40" alt="" />
+        </span>
+        <div>
+          <p class="persona-eyebrow">FROM MY RECORDS</p>
+          <h2 id="persona-title">진용에게 <em>묻기</em></h2>
+        </div>
+      </div>
+      <button class="persona-icon-button" type="button" data-persona-close aria-label="대화 접기">
+        <X size={20} stroke-width={1.5} aria-hidden="true" />
+      </button>
+    </header>
+
+    <div class="persona-introduction">
+      <p id="persona-description">정진용의 공개 기록을 안내하는 AI 페르소나예요.<br />실제 본인의 실시간 답변은 아니에요.</p>
+      <span class="persona-mode" data-persona-mode role="status">
+        <i aria-hidden="true"></i><span data-persona-mode-label>공개 기록 검색</span>
+      </span>
+    </div>
+
+    <div class="persona-conversation" data-persona-scroll>
+      <section class="persona-engine" data-persona-engine-panel data-engine-state="idle" aria-label="브라우저 AI 준비">
+        <div class="persona-engine-heading">
+          <span class="persona-engine-title">브라우저 AI</span>
+          <button class="persona-load" type="button" data-persona-load>AI 준비하기</button>
+          <button class="persona-load-cancel" type="button" data-persona-load-cancel hidden>준비 취소</button>
+        </div>
+        <select class="persona-model" data-persona-model aria-label="브라우저 AI 모델">
+          <option value="standard">Qwen3 1.7B · 약 1GB</option>
+          <option value="compact">Qwen3 0.6B · 약 350MB</option>
+        </select>
+        <p class="persona-load-detail" data-persona-load-detail role="status">선택하면 모델을 내려받습니다. 준비 전에도 공개 기록으로 대화할 수 있어요.</p>
+        <progress class="persona-load-progress" data-persona-load-progress max="1" aria-label="AI 모델 준비 진행률" hidden></progress>
+        <p class="persona-cache-note" data-persona-cache-note>첫 준비에는 시간이 걸릴 수 있으며, 모델은 브라우저에 캐시됩니다.</p>
+      </section>
+
+      <div class="persona-welcome" data-persona-welcome>
+        <p>어떤 이야기가 <em>궁금하세요?</em></p>
+        <span class="persona-welcome-caption">연구, 프로젝트, 함께해 온 일들에 관해 물어보세요.</span>
+        <div class="persona-starters">
+          {personaStarters.map((question) => (
+            <button type="button" data-persona-question={question}>
+              <span>{question}</span><ArrowUpRight size={15} aria-hidden="true" />
+            </button>
+          ))}
+        </div>
+      </div>
+      <ol class="persona-transcript" data-persona-transcript aria-label="대화 내용" aria-live="polite" aria-relevant="additions text"></ol>
+      <div class="persona-followups" data-persona-followups aria-label="이어서 물어보기" hidden></div>
+    </div>
+
+    <footer class="persona-footer">
+      <form class="persona-form" data-persona-form>
+        <label class="persona-sr-only" for="persona-question">진용의 공개 기록에 대해 질문하기</label>
+        <textarea id="persona-question" name="question" rows="1" maxlength="600" placeholder="궁금한 점을 물어보세요" required enterkeyhint="send" data-persona-input></textarea>
+        <button class="persona-send" type="submit" data-persona-send aria-label="질문 보내기"><ArrowUp size={20} aria-hidden="true" /></button>
+        <button class="persona-stop" type="button" data-persona-stop hidden>중지</button>
+      </form>
+      <p class="persona-form-status" data-persona-status role="status"></p>
+      <div class="persona-footer-meta">
+        <details class="persona-method">
+          <summary>답변에 관하여 <span aria-hidden="true">+</span></summary>
+          <div>
+            <p>정진용의 공개 CV로 구성한 디지털 페르소나입니다. 실제 본인의 실시간 답변은 아니에요.</p>
+            <p data-persona-explanation>질문과 관련된 공개 기록을 찾아 답변합니다. AI를 준비하면 같은 기록을 바탕으로 이 기기에서 답변을 생성합니다.</p>
+            <p>창을 접어도 대화는 이어집니다. 대화 내용은 새로고침하면 초기화됩니다. 모델을 내려받은 뒤 질문과 답변 생성은 이 브라우저 안에서 처리합니다.</p>
+          </div>
+        </details>
+        <button class="persona-reset" type="button" data-persona-reset><RotateCcw size={13} aria-hidden="true" />새 대화</button>
+      </div>
+    </footer>
+  </div>
+</dialog>
+
+<button class="persona-launcher" type="button" data-persona-toggle aria-controls="persona-guide" aria-expanded="false" aria-haspopup="dialog" hidden>
+  <span class="persona-launcher-icon" aria-hidden="true">
+    <MessageCircle class="persona-launcher-open" size={19} stroke-width={1.5} />
+    <ChevronDown class="persona-launcher-close" size={20} stroke-width={1.5} />
+  </span>
+  <span data-persona-toggle-label>진용에게 질문하기</span>
+</button>
+
+<script>
+  import "@/scripts/persona-guide";
+</script>

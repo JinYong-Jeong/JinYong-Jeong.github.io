@@ -1,115 +1,363 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import PostCard from "@/components/PostCard.astro";
-import ProjectCard from "@/components/ProjectCard.astro";
-import Sidebar from "@/components/Sidebar.astro";
-import { site } from "@/config/site";
-import { getFeaturedProjects, getPublishedPosts } from "@/lib/content";
+import RecordDesk from "@/components/RecordDesk.astro";
+import { cv } from "@/config/cv";
+import { getPublishedPosts, getPostUrl, formatDate } from "@/lib/content";
 import {
+  ArrowDown,
   ArrowRight,
-  BookOpenText,
-  BrainCircuit,
-  Cpu,
-  FolderKanban,
-  Network,
-  PenLine
+  ArrowUpRight,
+  BookOpen,
+  Copy,
+  MessageCircle,
+  Printer,
 } from "@lucide/astro";
-import bgImage from "../../engineering/design/bg.png";
+import "@/styles/cv.css";
 
-const posts = await getPublishedPosts();
-const recentPosts = posts.slice(0, 3);
-const featuredProjects = await getFeaturedProjects(3);
-const heroImage = typeof bgImage === "string" ? bgImage : bgImage.src;
-const topics = [
-  { label: "LLM", icon: BrainCircuit },
-  { label: "Federated Learning", icon: Network },
-  { label: "NLP", icon: BookOpenText },
-  { label: "Deep Learning", icon: Cpu },
-  { label: "MLOps", icon: PenLine }
+const posts = (await getPublishedPosts()).slice(0, 2);
+const sections = [
+  { id: "experience", label: "경력과 학력" },
+  { id: "work", label: "프로젝트" },
+  { id: "research", label: "논문" },
+  { id: "awards", label: "수상" },
+  { id: "writing", label: "글" },
+  { id: "contact", label: "연락처" },
 ];
+const projectOrder = ["aing", "fedops", "portfolio"];
+const work = [...cv.work].sort(
+  (a, b) => projectOrder.indexOf(a.id) - projectOrder.indexOf(b.id),
+);
 ---
 
-<BaseLayout bodyClass="home-page" mainClass="home-main">
-  <div class="container-page home-wrap">
-    <div class="home-layout">
-      <section class="home-content-panel">
-        <header class="home-hero" style={`--hero-bg: url(${heroImage});`}>
-          <div class="home-hero-content">
-            <p class="home-eyebrow">{site.author.role}</p>
-            <h1 class="home-title">
-              Research. Build.
-              <br />
-              Learn. Share.
-            </h1>
-            <p class="home-copy">
-              LLM과 Federated Learning을 중심으로 연구하고, 실험을 기록하며,
-              배운 것을 재현 가능한 노트로 공유합니다.
-            </p>
-            <div class="home-actions">
-              <a class="home-button home-button-primary focus-ring" href="/blog/">
-                최근 글 보기
-                <ArrowRight size={18} stroke-width={1.8} />
+<BaseLayout bodyClass="cv-page" mainClass="cv-main">
+  <div class="cv-shell">
+    <section
+      id="overview"
+      class="cv-hero"
+      aria-labelledby="cv-name"
+      data-cv-section
+    >
+      <div class="cv-hero-copy">
+        <p class="cv-eyebrow hero-kicker">
+          <span aria-hidden="true"></span> A PERSONAL CV
+        </p>
+        <h1 id="cv-name">Jinyong<br /><em>Jeong</em></h1>
+        <p class="cv-byline">
+          <strong>{cv.koreanName}</strong><span aria-hidden="true">/</span
+          >컴퓨터공학도 · 학부연구생
+        </p>
+        <p class="cv-intro">{cv.intro}</p>
+        <div class="cv-hero-actions">
+          <button type="button" class="cv-button" data-open-record-desk hidden
+            ><BookOpen size={16} /> 기록집 펼치기</button
+          >
+          <a class="cv-read" href="#curriculum"
+            >이력 바로 읽기 <ArrowDown size={15} /></a
+          >
+        </div>
+        <div class="cv-social-links" aria-label="외부 프로필">
+          <a href="https://github.com/JinYong-Jeong"
+            >GitHub <ArrowUpRight size={12} /></a
+          >
+          <a href="https://www.linkedin.com/in/jinyongjeong/"
+            >LinkedIn <ArrowUpRight size={12} /></a
+          >
+        </div>
+      </div>
+      <RecordDesk />
+    </section>
+    <div id="curriculum" class="cv-docket">
+      <div>
+        <BookOpen size={23} stroke-width={1.45} /><h2>Curriculum vitae</h2>
+      </div>
+      <button type="button" data-print-cv hidden
+        ><Printer size={15} /> 인쇄 · PDF</button
+      >
+    </div>
+    <div class="cv-document">
+      <aside class="cv-index">
+        <nav aria-label="CV 목차">
+          {
+            sections.map((s) => (
+              <a href={`#${s.id}`} data-section-link={s.id}>
+                {s.label}
               </a>
-              <a class="home-button home-button-secondary focus-ring" href="/projects/">
-                프로젝트 보기
-              </a>
+            ))
+          }
+        </nav>
+      </aside>
+      <div class="cv-sections">
+        <section
+          id="experience"
+          class="cv-section"
+          data-cv-section
+          aria-labelledby="experience-title"
+        >
+          <header class="cv-section-heading">
+            <div>
+              <span class="cv-eyebrow">경력과 학력</span><h2
+                id="experience-title"
+              >
+                Experience <em>& education</em>
+              </h2>
             </div>
-            <div class="home-topic-row" aria-label="Focus topics">
+          </header>
+          <div class="cv-timeline">
+            {
+              cv.experience.map((item, i) => (
+                <details
+                  class="cv-experience"
+                  id={i === 0 ? "ccl" : "aing-experience"}
+                >
+                  <summary>
+                    <>
+                      <span class="cv-date">{item.period}</span>
+                      <span class="cv-experience-main">
+                        <>
+                          <strong>{item.organization}</strong>
+                          <span>{item.role}</span>
+                          <small>{item.summary}</small>
+                        </>
+                      </span>
+                      <span class="cv-expand" aria-hidden="true">
+                        +
+                      </span>
+                    </>
+                  </summary>
+                  <div class="cv-experience-details">
+                    {item.details.map((detail) => (
+                      <p>{detail}</p>
+                    ))}
+                    <a class="cv-text-link" href={item.href}>
+                      활동 기록 <ArrowUpRight size={13} />
+                    </a>
+                  </div>
+                </details>
+              ))
+            }
+          </div>
+          <div id="education" class="cv-education">
+            <span class="cv-date">{cv.education.period}</span><div>
+              <h3>{cv.education.school}</h3><p>{cv.education.degree}</p>
+            </div>
+          </div>
+        </section>
+        <section
+          id="work"
+          class="cv-section"
+          data-cv-section
+          aria-labelledby="work-title"
+        >
+          <header class="cv-section-heading">
+            <div>
+              <span class="cv-eyebrow">프로젝트</span><h2 id="work-title">
+                Selected <em>work</em>
+              </h2>
+            </div><a class="cv-text-link" href="/projects/"
+              >전체 보기 <ArrowRight size={14} /></a
+            >
+          </header>
+          <div class="work-files" data-files>
+            <div class="file-tabs" aria-label="프로젝트 선택" hidden>
               {
-                topics.map((topic) => {
-                  const Icon = topic.icon;
-                  return (
-                    <span class="home-topic-pill">
-                      <Icon size={16} stroke-width={1.8} />
-                      {topic.label}
-                    </span>
-                  );
-                })
+                work.map((item) => (
+                  <button
+                    id={`tab-${item.id}`}
+                    type="button"
+                    data-file={item.id}
+                  >
+                    {item.title}
+                  </button>
+                ))
               }
             </div>
-          </div>
-        </header>
-
-        <section class="home-section-block">
-          <div class="home-section-heading">
-            <div class="home-section-title">
-              <BookOpenText size={20} stroke-width={1.8} />
-              <h2>Latest Posts</h2>
-            </div>
-            <a class="home-inline-link focus-ring" href="/blog/">모든 글 보기 <ArrowRight size={16} /></a>
-          </div>
-          <div class="home-card-grid">
             {
-              recentPosts.map((post) => (
-                <div class="home-card">
-                  <PostCard post={post} />
-                </div>
+              work.map((item) => (
+                <article class="file-sheet" id={item.id} data-file-page>
+                  <div class="file-top">
+                    <>
+                      <span>{item.categoryLabel}</span>
+                      <span>{item.tags.join(" · ")}</span>
+                    </>
+                  </div>
+                  <>
+                    <h3>{item.title}</h3>
+                    <p class="file-subtitle">{item.subtitle}</p>
+                    <p>{item.description}</p>
+                  </>
+                  <div class="file-actions">
+                    <>
+                      <a href={item.href}>
+                        {item.linkLabel} <ArrowUpRight size={14} />
+                      </a>
+                      <button
+                        type="button"
+                        data-ask-record={
+                          item.id === "aing" ? "aing-resnet" : item.id
+                        }
+                        data-question={`${item.title}에서 어떤 작업을 했나요?`}
+                      >
+                        이 작업에 대해 묻기 <MessageCircle size={14} />
+                      </button>
+                    </>
+                  </div>
+                </article>
               ))
             }
           </div>
         </section>
-
-        <section class="home-section-block home-section-tight">
-          <div class="home-section-heading">
-            <div class="home-section-title">
-              <FolderKanban size={20} stroke-width={1.8} />
-              <h2>Featured Projects</h2>
+        <section
+          id="research"
+          class="cv-section"
+          data-cv-section
+          aria-labelledby="research-title"
+        >
+          <header class="cv-section-heading">
+            <div>
+              <span class="cv-eyebrow">논문</span><h2 id="research-title">
+                Publications
+              </h2>
             </div>
-            <a class="home-inline-link focus-ring" href="/projects/">모든 프로젝트 보기 <ArrowRight size={16} /></a>
-          </div>
-          <div class="home-project-grid">
+          </header>
+          <div class="cv-publications">
             {
-              featuredProjects.map((project) => (
-                <div class="home-card home-project-card">
-                  <ProjectCard project={project} />
-                </div>
+              cv.publications.map((paper) => (
+                <article class="cv-paper" id={paper.id}>
+                  <span class="cv-paper-year">
+                    {paper.year}
+                    <small>{paper.type}</small>
+                  </span>
+                  <div>
+                    <div class="cv-paper-meta">
+                      <span>{paper.role}</span>
+                      {paper.award && (
+                        <span class="cv-award-tag">{paper.award}</span>
+                      )}
+                    </div>
+                    <>
+                      <h3>{paper.title}</h3>
+                      <p class="cv-paper-korean">{paper.korean}</p>
+                      <p class="cv-paper-venue">{paper.venue}</p>
+                    </>
+                    <div class="cv-paper-bottom">
+                      <>
+                        <span class="cv-paper-status">{paper.status}</span>
+                        <a class="cv-text-link" href={paper.href}>
+                          {paper.linkLabel}
+                          <ArrowUpRight size={13} />
+                        </a>
+                      </>
+                    </div>
+                    <details class="cv-abstract">
+                      <>
+                        <summary>
+                          연구 요약 <span aria-hidden="true">+</span>
+                        </summary>
+                        <p>{paper.description}</p>
+                      </>
+                    </details>
+                  </div>
+                </article>
               ))
             }
           </div>
         </section>
-      </section>
-
-      <Sidebar projects={featuredProjects} variant="home" />
+        <section
+          id="awards"
+          class="cv-section"
+          data-cv-section
+          aria-labelledby="awards-title"
+        >
+          <header class="cv-section-heading">
+            <div>
+              <span class="cv-eyebrow">수상</span><h2 id="awards-title">
+                Honors <em>& awards</em>
+              </h2>
+            </div>
+          </header>
+          <div class="cv-award-list">
+            {
+              cv.awards.map((award) => (
+                <article>
+                  <>
+                    <span class="cv-date">{award.date}</span>
+                    <div>
+                      <>
+                        <h3>{award.title}</h3>
+                        <p>{award.organization}</p>
+                        <small>{award.detail}</small>
+                      </>
+                    </div>
+                  </>
+                </article>
+              ))
+            }
+          </div>
+        </section>
+        <section
+          id="writing"
+          class="cv-section"
+          data-cv-section
+          aria-labelledby="writing-title"
+        >
+          <header class="cv-section-heading">
+            <div>
+              <span class="cv-eyebrow">글</span><h2 id="writing-title">
+                Field <em>notes</em>
+              </h2>
+            </div><a class="cv-text-link" href="/blog/"
+              >모든 글 <ArrowRight size={14} /></a
+            >
+          </header>
+          <div class="cv-notes">
+            {
+              posts.map((post) => (
+                <a href={getPostUrl(post)}>
+                  <>
+                    <span class="cv-date">{formatDate(post.data.date)}</span>
+                    <div>
+                      <>
+                        <h3>{post.data.title}</h3>
+                        <p>{post.data.description}</p>
+                      </>
+                    </div>
+                    <ArrowUpRight size={18} />
+                  </>
+                </a>
+              ))
+            }
+          </div>
+        </section>
+        <section
+          id="contact"
+          class="cv-section cv-contact"
+          data-cv-section
+          aria-labelledby="contact-title"
+        >
+          <span class="cv-eyebrow">연락처</span><h2 id="contact-title">
+            Get in <em>touch</em>
+          </h2>
+          <div class="cv-contact-actions">
+            <a href={`mailto:${cv.email}`}
+              >{cv.email}<ArrowUpRight size={20} /></a
+            ><button
+              type="button"
+              data-copy-email={cv.email}
+              aria-label="이메일 주소 복사"
+              hidden><Copy size={16} /></button
+            >
+          </div>
+          <span class="cv-copy-status" aria-live="polite" data-copy-status
+          ></span>
+          <div class="cv-contact-bottom">
+            <a href="https://www.linkedin.com/in/jinyongjeong/">LinkedIn ↗</a
+            ><a href="#overview">맨 위로 ↑</a>
+          </div>
+        </section>
+      </div>
     </div>
   </div>
+  <script>
+    import "@/scripts/cv";
+  </script>
 </BaseLayout>

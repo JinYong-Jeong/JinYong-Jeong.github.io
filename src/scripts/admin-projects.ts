@@ -244,8 +244,14 @@ async function loadProjectSettings() {
         configPath
       )
     ]);
-    repositories = loadedRepositories;
     config = parseConfig(configFile.source);
+    const sharedRepositories = await Promise.all(
+      config.selected.filter((name) => name.includes("/")).map(async (fullName) => {
+        const repo = await githubRequest<GitHubRepository>(`/repos/${fullName}`);
+        return { ...repo, name: fullName };
+      })
+    );
+    repositories = [...loadedRepositories, ...sharedRepositories];
     configSha = configFile.sha;
     renderRepositories();
   } catch (error) {

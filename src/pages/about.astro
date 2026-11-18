@@ -3,6 +3,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import AboutBlock from "@/components/AboutBlock.astro";
 import aboutSource from "../../content/about/page.json";
 import { normalizeAboutPage } from "@/lib/about-components";
+import { ArrowLeft } from "@lucide/astro";
 
 const page = normalizeAboutPage(aboutSource);
 const mainBlocks = page.blocks.filter((block) => block.area === "main");
@@ -13,21 +14,46 @@ const sidebarBlocks = page.blocks.filter((block) => block.area === "sidebar");
 
 <BaseLayout title={page.title} description={page.description}>
   <div class="container-page page-wrap">
+    <a class="profile-back" href="/">
+      <ArrowLeft size={14} aria-hidden="true" /> Back to profile
+    </a>
     <div class="page-layout">
       <section class="page-main-panel">
         {profileBlocks.map((block) => <AboutBlock block={block} />)}
-        {contentBlocks.length > 0 && (
-          <div class="about-content-grid">
-            {contentBlocks.map((block) => <AboutBlock block={block} />)}
-          </div>
-        )}
+        {
+          contentBlocks.length > 0 && (
+            <div class="about-content-grid">
+              {contentBlocks.map((block) => (
+                <AboutBlock block={block} />
+              ))}
+            </div>
+          )
+        }
       </section>
 
-      {sidebarBlocks.length > 0 && (
-        <aside class="home-sidebar-stack lg:sticky lg:top-24 lg:self-start">
-          {sidebarBlocks.map((block) => <AboutBlock block={block} />)}
-        </aside>
-      )}
+      {
+        sidebarBlocks.length > 0 && (
+          <aside class="home-sidebar-stack lg:sticky lg:top-24 lg:self-start">
+            {sidebarBlocks.map((block) => (
+              <AboutBlock block={block} />
+            ))}
+          </aside>
+        )
+      }
     </div>
   </div>
 </BaseLayout>
+
+<style>
+  .profile-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-block: 0.75rem 1.75rem;
+    color: var(--color-muted);
+    font-size: 0.78rem;
+  }
+  .profile-back:hover {
+    color: var(--color-primary);
+  }
+</style>

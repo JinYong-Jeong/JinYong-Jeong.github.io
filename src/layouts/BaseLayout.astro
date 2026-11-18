@@ -1,6 +1,9 @@
 ---
+import PersonaGuide from "@/components/PersonaGuide.astro";
 import Header from "@/components/Header.astro";
+import { getImage } from "astro:assets";
 import { site } from "@/config/site";
+import dragon from "../../engineering/design/logo2.png";
 import "@/styles/global.css";
 
 interface Props {
@@ -20,9 +23,10 @@ const {
   type = "website",
   bodyClass,
   mainClass,
-  hideFooter = false
+  hideFooter = false,
 } = Astro.props;
 const pageTitle = title ? `${title} | ${site.name}` : site.title;
+const emblem = await getImage({ src: dragon, width: 96, format: "png" });
 const siteUrl = Astro.site ?? new URL(site.url);
 const canonicalUrl = new URL(Astro.url.pathname, siteUrl).toString();
 const imageUrl = new URL(image, siteUrl).toString();
@@ -34,13 +38,16 @@ const imageUrl = new URL(image, siteUrl).toString();
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta
+      http-equiv="Cache-Control"
+      content="no-cache, no-store, must-revalidate"
+    />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href={emblem.src} />
     <meta property="og:type" content={type} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
@@ -60,18 +67,22 @@ const imageUrl = new URL(image, siteUrl).toString();
         });
       }
     </script>
-    <Header />
-    <main class={mainClass}>
+    <a class="skip-link" href="#main-content">본문으로 바로 가기</a>
+    <Header emblemSrc={emblem.src} />
+    <main id="main-content" class={mainClass}>
       <slot />
     </main>
     {
       !hideFooter && (
         <footer class="site-footer container-page py-8 text-sm text-[var(--color-muted)]">
           <div class="border-t border-[var(--color-border)] pt-5">
-            <p>© {new Date().getFullYear()} {site.name}</p>
+            <p>
+              © {new Date().getFullYear()} {site.name}
+            </p>
           </div>
         </footer>
       )
     }
+    <PersonaGuide emblemSrc={emblem.src} />
   </body>
 </html>

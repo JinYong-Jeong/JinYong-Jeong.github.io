@@ -25,6 +25,8 @@ export interface Project {
 
 interface GitHubRepository {
   name: string;
+  full_name: string;
+  private: boolean;
   description: string | null;
   html_url: string;
   homepage: string | null;
@@ -172,15 +174,20 @@ async function repositoryLanguages(repository: GitHubRepository) {
 }
 
 async function loadGitHubProjects(): Promise<Project[]> {
-  const allRepositories = await githubRequest<GitHubRepository[]>(
-    `${githubApi}/users/${githubOwner}/repos?per_page=100&sort=updated&direction=desc&type=owner`
-  );
   const selection = githubSelection as GitHubProjectSelection;
-  const selectedNames = new Set(selection.selected);
-  const repositories =
-    selection.mode === "selected"
-      ? allRepositories.filter((repository) => selectedNames.has(repository.name))
-      : allRepositories;
+  let requested: GitHubRepository[];
+  if (selection.mode === "selected") {
+    const names = new Set(selection.selected.map((name) => name.includes("/") ? name : `${githubOwner}/${name}`));
+    const results = await Promise.allSettled(
+      Array.from(names, (fullName) => githubRequest<GitHubRepository>(`${githubApi}/repos/${fullName}`))
+    );
+    requested = results.flatMap((result) => result.status === "fulfilled" ? [result.value] : []);
+  } else {
+    requested = await githubRequest<GitHubRepository[]>(
+      `${githubApi}/users/${githubOwner}/repos?per_page=100&sort=updated&direction=desc&type=owner`
+    );
+  }
+  const repositories = requested.filter((repo) => !repo.private);
   const languages = await Promise.all(
     repositories.map((repository) => repositoryLanguages(repository).catch(() => []))
   );
@@ -193,10 +200,13 @@ async function loadGitHubProjects(): Promise<Project[]> {
     }
 
     return {
-      id: repository.name.toLowerCase(),
+      id: repository.full_name.startsWith(`${githubOwner}/`)
+        ? repository.name.toLowerCase()
+        : repository.full_name.toLowerCase().replace("/", "--"),
       data: {
         title,
         description:
+          selection.descriptions[repository.full_name]?.trim() ||
           selection.descriptions[repository.name]?.trim() ||
           repository.description?.trim() ||
           `${title} GitHub 저장소입니다.`,

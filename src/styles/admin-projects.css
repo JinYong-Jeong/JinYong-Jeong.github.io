@@ -182,7 +182,7 @@
 
 .repository-description-field textarea:focus {
   border-color: var(--color-accent-2);
-  outline: 3px solid rgba(154, 98, 65, 0.12);
+  outline: 3px solid color-mix(in srgb, var(--color-bronze) 12%, transparent);
 }
 
 @media (max-width: 760px) {

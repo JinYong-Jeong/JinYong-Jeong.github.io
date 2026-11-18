@@ -1,68 +1,225 @@
 ---
-import { GitFork, Search } from "@lucide/astro";
+import { Search } from "@lucide/astro";
 import { site } from "@/config/site";
-import logoImage from "../../engineering/design/logo2.png";
+interface Props { emblemSrc: string; }
+const { emblemSrc } = Astro.props;
 
-const pathname = Astro.url.pathname;
-const isActive = (href: string) =>
-  href === "/" ? pathname === "/" : pathname.startsWith(href);
-const logoSrc = typeof logoImage === "string" ? logoImage : logoImage.src;
+const pathname = Astro.url.pathname.replace(/\/+$/, "") || "/";
+const isHome = pathname === "/";
+const isActive = (href: string) => {
+  const destination = href.replace(/\/+$/, "") || "/";
+  return destination === "/"
+    ? isHome || pathname === "/about"
+    : pathname === destination || pathname.startsWith(`${destination}/`);
+};
+const currentState = (href: string) => {
+  if (!isActive(href)) return undefined;
+  return (href.replace(/\/+$/, "") || "/") === pathname ? "page" : "true";
+};
 ---
 
-<header class="site-header sticky top-0 z-30 border-b backdrop-blur-xl">
-  <div class="container-page flex h-16 items-center gap-7">
-    <a href="/" class="focus-ring flex shrink-0 items-center gap-3" aria-label="Go to home">
-      <img class="site-logo" src={logoSrc} alt={`${site.name} logo`} />
+<header class="masthead">
+  <div class="masthead-inner">
+    <a href="/" class="wordmark" aria-label={`${site.name} — CV 홈`}>
+      <span class="wordmark-emblem" aria-hidden="true">
+        <img src={emblemSrc} width="44" height="44" alt="" />
+      </span>
+      <span class="wordmark-copy">
+        <span class="wordmark-name">{site.name}</span>
+        <span class="wordmark-caption">Curriculum vitae</span>
+      </span>
     </a>
-    <nav class="hidden h-full items-center gap-6 sm:flex" aria-label="Primary navigation">
+
+    <nav class="masthead-nav" aria-label="주요 메뉴">
       {
         site.nav.map((item) => (
-          <a
-            href={item.href}
-            class:list={[
-              "focus-ring inline-flex h-full items-center border-b-2 border-transparent px-1 text-sm font-medium transition-colors",
-              isActive(item.href)
-                ? "border-[var(--color-accent)] text-[var(--color-accent)]"
-                : "text-[var(--color-muted)] hover:text-[var(--color-accent)]"
-            ]}
-          >
-            {item.label}
+          <a href={item.href} aria-current={currentState(item.href)}>
+            <span>{item.label}</span>
           </a>
         ))
       }
+      <a class="search-link" href="/search/" aria-label="글 검색">
+        <Search size={17} stroke-width={1.6} aria-hidden="true" />
+      </a>
     </nav>
-    <div class="ml-auto flex items-center gap-3">
-      <a
-        class="focus-ring inline-flex items-center justify-center text-[var(--color-accent)] transition-colors hover:text-[var(--color-accent-2)]"
-        href="/search/"
-        aria-label="Search"
-      >
-        <Search size={18} stroke-width={1.8} />
-      </a>
-      <a
-        class="focus-ring inline-flex items-center justify-center text-[var(--color-accent)] transition-colors hover:text-[var(--color-accent-2)]"
-        href="https://github.com/JinYong-Jeong"
-        aria-label="GitHub"
-      >
-        <GitFork size={18} stroke-width={1.8} />
-      </a>
-    </div>
+
   </div>
-  <nav class="container-page flex gap-2 overflow-x-auto pb-3 sm:hidden" aria-label="Mobile navigation">
-    {
-      site.nav.map((item) => (
-        <a
-          href={item.href}
-          class:list={[
-            "focus-ring rounded-full px-3 py-1.5 text-sm font-medium",
-            isActive(item.href)
-              ? "bg-[var(--color-surface-soft)] text-[var(--color-accent)]"
-              : "text-[var(--color-muted)]"
-          ]}
-        >
-          {item.label}
-        </a>
-      ))
-    }
-  </nav>
 </header>
+
+<style>
+  .masthead {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-paper);
+    background: color-mix(in srgb, var(--color-paper) 96%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  .masthead-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: clamp(1.25rem, 3.3vw, 3rem);
+    width: min(var(--content-width), calc(100% - 5rem));
+    min-height: var(--header-height);
+    margin-inline: auto;
+  }
+  .wordmark {
+    display: inline-flex;
+    justify-self: start;
+    align-items: center;
+    gap: 0.8rem;
+    min-width: 0;
+    min-height: 44px;
+    border-radius: var(--radius-sm);
+  }
+  .wordmark-emblem {
+    display: grid;
+    place-items: center;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--color-bronze) 46%, var(--color-primary));
+    border-radius: 7px;
+    background: var(--color-primary);
+  }
+  .wordmark-emblem img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .wordmark-copy {
+    display: grid;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+  .wordmark-name {
+    color: var(--color-primary);
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+  .wordmark-caption {
+    color: var(--color-muted);
+    font-family: var(--font-sans);
+    font-size: 0.6rem;
+    line-height: 1.4;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+  }
+  .masthead-nav {
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+    gap: clamp(0.85rem, 2.2vw, 2rem);
+    font-family: var(--font-sans);
+  }
+  .masthead-nav a {
+    display: inline-flex;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    color: var(--color-muted);
+    font-size: 0.83rem;
+    line-height: 1.4;
+    transition: color var(--duration-fast);
+  }
+  .masthead-nav a:not(.search-link)::after {
+    position: absolute;
+    right: 0.4rem;
+    bottom: 5px;
+    left: 0.4rem;
+    height: 1px;
+    background: var(--color-primary);
+    content: "";
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--duration-normal) var(--ease-out);
+  }
+  .masthead-nav a:hover,
+  .masthead-nav a[aria-current] {
+    color: var(--color-primary);
+  }
+  .masthead-nav a:hover::after,
+  .masthead-nav a:focus-visible::after,
+  .masthead-nav a[aria-current]::after {
+    transform: scaleX(1);
+  }
+  .masthead-nav .search-link {
+    width: 44px;
+    border-radius: 50%;
+    transition: background var(--duration-fast), color var(--duration-fast);
+  }
+  .search-link:hover {
+    background: var(--color-surface-soft);
+  }
+  .masthead a:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 4px;
+  }
+  @media (max-width: 900px) {
+    .masthead-inner {
+      width: calc(100% - 2.5rem);
+      gap: 1rem;
+    }
+    .masthead-nav {
+      gap: 0.75rem;
+    }
+  }
+  @media (max-width: 640px) {
+    .masthead-inner {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0 0.75rem;
+      width: calc(100% - 2rem);
+      padding-top: 0.65rem;
+    }
+    .wordmark {
+      gap: 0.65rem;
+    }
+    .wordmark-emblem {
+      flex-basis: 36px;
+      width: 36px;
+      height: 36px;
+      border-radius: 5px;
+    }
+    .wordmark-name {
+      font-size: 1rem;
+    }
+    .wordmark-caption {
+      font-size: 0.54rem;
+      letter-spacing: 0.1em;
+    }
+    .masthead-nav {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-top: 0.4rem;
+    }
+    .masthead-nav a {
+      min-height: 44px;
+      font-size: 0.8rem;
+    }
+    .masthead-nav a:not(.search-link)::after {
+      bottom: 6px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .masthead a,
+    .masthead a::after {
+      transition: none;
+    }
+  }
+  @media print {
+    .masthead {
+      display: none;
+    }
+  }
+</style>

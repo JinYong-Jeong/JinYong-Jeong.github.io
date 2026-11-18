@@ -97,7 +97,7 @@
 
 .about-block-card:focus-within {
   border-color: var(--color-border-strong);
-  box-shadow: 0 0 0 3px rgba(139, 90, 54, 0.07);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-bronze) 7%, transparent);
 }
 
 .about-block-header {
@@ -126,7 +126,7 @@
   justify-content: center;
   border-radius: 999px;
   background: var(--color-accent);
-  color: #fff8ed;
+  color: var(--color-on-primary);
   font-size: 0.72rem;
   font-weight: 900;
 }
