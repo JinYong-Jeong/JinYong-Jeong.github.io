@@ -107,7 +107,6 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding-top: 0.4rem;
   color: var(--color-secondary);
   font: 0.65rem/1.5 var(--font-sans);
 }
@@ -131,24 +130,16 @@
   scroll-behavior: smooth;
 }
 .persona-engine {
-  margin: 0 0 1.2rem;
-  padding: 0.75rem;
-  border: 1px solid var(--persona-line);
-  border-radius: 4px;
-  background: var(--color-surface);
+  margin-top: 0.65rem;
 }
 .persona-engine-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  min-height: 22px;
   gap: 0.5rem;
 }
-.persona-engine-title {
-  font-size: 0.71rem;
-  font-weight: 500;
-}
-.persona-load,
-.persona-load-cancel {
+.persona-retry {
   min-height: 36px;
   padding: 0.45rem 0.6rem;
   border: 1px solid var(--color-border-strong);
@@ -159,44 +150,22 @@
   white-space: nowrap;
   cursor: pointer;
 }
-.persona-load:hover:not(:disabled),
-.persona-load-cancel:hover {
+.persona-retry:hover {
   border-color: var(--color-secondary);
   background: var(--color-secondary-soft);
 }
-.persona-load:disabled {
-  cursor: default;
-  opacity: 0.65;
-}
-.persona-model {
-  width: 100%;
-  min-height: 36px;
-  margin-top: 0.5rem;
-  padding: 0.4rem 0.55rem;
-  border: 1px solid var(--persona-line);
-  border-radius: 3px;
-  color: var(--persona-ink);
-  background: var(--color-paper);
-  font: 0.7rem/1.4 var(--font-sans);
-}
 .persona-load-detail {
-  margin: 0.5rem 0 0;
-  color: var(--color-muted);
-  font-size: 0.69rem;
-  line-height: 1.65;
-  overflow-wrap: anywhere;
-}
-.persona-cache-note {
   margin: 0.4rem 0 0;
   color: var(--color-muted);
-  font-size: 0.62rem;
-  line-height: 1.6;
+  font-size: 0.65rem;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
 }
 .persona-load-progress {
   display: block;
   width: 100%;
-  height: 5px;
-  margin-top: 0.65rem;
+  height: 3px;
+  margin-top: 0.45rem;
   border: 0;
   border-radius: 5px;
   accent-color: var(--color-secondary);
@@ -215,11 +184,8 @@
   border-radius: 5px;
   background: var(--color-secondary);
 }
-.persona-engine:is([data-engine-state="unsupported"], [data-engine-state="error"]) {
-  border-color: var(--color-bronze);
-}
-.persona-engine[data-engine-state="ready"] {
-  border-color: color-mix(in srgb, var(--color-secondary) 50%, var(--persona-line));
+.persona-engine[data-engine-state="error"] .persona-mode {
+  color: var(--color-bronze);
 }
 .persona-welcome {
   padding: 0.2rem 0 0.6rem;
@@ -600,15 +566,10 @@
   .persona-footer {
     padding: 0.7rem 0.85rem 0.4rem;
   }
-  .persona-form textarea,
-  .persona-model {
+  .persona-form textarea {
     font-size: 16px;
   }
-  .persona-model {
-    padding-block: 0.4rem;
-  }
-  .persona-load,
-  .persona-load-cancel,
+  .persona-retry,
   .persona-followups button,
   .persona-reset,
   .persona-method summary {

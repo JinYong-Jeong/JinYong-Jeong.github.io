@@ -28,27 +28,20 @@ const { emblemSrc } = Astro.props;
 
     <div class="persona-introduction">
       <p id="persona-description">정진용의 공개 기록을 안내하는 AI 페르소나예요.<br />실제 본인의 실시간 답변은 아니에요.</p>
-      <span class="persona-mode" data-persona-mode role="status">
-        <i aria-hidden="true"></i><span data-persona-mode-label>공개 기록 검색</span>
-      </span>
+      <div class="persona-engine" data-persona-engine-panel data-engine-state="idle">
+        <div class="persona-engine-heading">
+          <span class="persona-mode" data-persona-mode>
+            <i aria-hidden="true"></i><span data-persona-mode-label>공개 기록으로 답변</span>
+          </span>
+          <button class="persona-retry" type="button" data-persona-retry hidden>다시 시도</button>
+        </div>
+        <progress class="persona-load-progress" data-persona-load-progress max="1" aria-label="AI 준비 진행률" hidden></progress>
+        <p class="persona-load-detail" data-persona-load-detail hidden></p>
+        <p class="persona-sr-only" data-persona-engine-status role="status" aria-atomic="true"></p>
+      </div>
     </div>
 
     <div class="persona-conversation" data-persona-scroll>
-      <section class="persona-engine" data-persona-engine-panel data-engine-state="idle" aria-label="브라우저 AI 준비">
-        <div class="persona-engine-heading">
-          <span class="persona-engine-title">브라우저 AI</span>
-          <button class="persona-load" type="button" data-persona-load>AI 준비하기</button>
-          <button class="persona-load-cancel" type="button" data-persona-load-cancel hidden>준비 취소</button>
-        </div>
-        <select class="persona-model" data-persona-model aria-label="브라우저 AI 모델">
-          <option value="standard">Qwen3 1.7B · 약 1GB</option>
-          <option value="compact">Qwen3 0.6B · 약 350MB</option>
-        </select>
-        <p class="persona-load-detail" data-persona-load-detail role="status">선택하면 모델을 내려받습니다. 준비 전에도 공개 기록으로 대화할 수 있어요.</p>
-        <progress class="persona-load-progress" data-persona-load-progress max="1" aria-label="AI 모델 준비 진행률" hidden></progress>
-        <p class="persona-cache-note" data-persona-cache-note>첫 준비에는 시간이 걸릴 수 있으며, 모델은 브라우저에 캐시됩니다.</p>
-      </section>
-
       <div class="persona-welcome" data-persona-welcome>
         <p>어떤 이야기가 <em>궁금하세요?</em></p>
         <span class="persona-welcome-caption">연구, 프로젝트, 함께해 온 일들에 관해 물어보세요.</span>
@@ -77,8 +70,8 @@ const { emblemSrc } = Astro.props;
           <summary>답변에 관하여 <span aria-hidden="true">+</span></summary>
           <div>
             <p>정진용의 공개 CV로 구성한 디지털 페르소나입니다. 실제 본인의 실시간 답변은 아니에요.</p>
-            <p data-persona-explanation>질문과 관련된 공개 기록을 찾아 답변합니다. AI를 준비하면 같은 기록을 바탕으로 이 기기에서 답변을 생성합니다.</p>
-            <p>창을 접어도 대화는 이어집니다. 대화 내용은 새로고침하면 초기화됩니다. 모델을 내려받은 뒤 질문과 답변 생성은 이 브라우저 안에서 처리합니다.</p>
+            <p data-persona-explanation>공개 기록을 바탕으로 답변합니다. AI가 준비되면 이 기기에서 같은 기록과 최근 대화로 답변을 작성합니다.</p>
+            <p>창을 접었다 열면 모델과 대화가 이어집니다. 페이지를 떠나면 모델을 메모리에서 해제하고, 다음 방문에 챗봇을 열면 다시 내려받습니다.</p>
           </div>
         </details>
         <button class="persona-reset" type="button" data-persona-reset><RotateCcw size={13} aria-hidden="true" />새 대화</button>

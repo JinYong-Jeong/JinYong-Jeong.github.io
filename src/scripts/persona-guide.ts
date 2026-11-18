@@ -17,7 +17,6 @@ import {
 import {
   PersonaBrowserEngine,
   type PersonaEngineSnapshot,
-  type PersonaModelSize,
 } from "./persona-engine";
 
 type ConversationMessage = { role: "user" | "assistant"; content: string };
@@ -63,11 +62,8 @@ function initPersona(dialog: HTMLDialogElement) {
   const enginePanel = dialog.querySelector<HTMLElement>(
     "[data-persona-engine-panel]",
   );
-  const loadButton = dialog.querySelector<HTMLButtonElement>(
-    "[data-persona-load]",
-  );
-  const loadCancel = dialog.querySelector<HTMLButtonElement>(
-    "[data-persona-load-cancel]",
+  const retryButton = dialog.querySelector<HTMLButtonElement>(
+    "[data-persona-retry]",
   );
   const loadProgress = dialog.querySelector<HTMLProgressElement>(
     "[data-persona-load-progress]",
@@ -75,16 +71,12 @@ function initPersona(dialog: HTMLDialogElement) {
   const loadDetail = dialog.querySelector<HTMLElement>(
     "[data-persona-load-detail]",
   );
-  const cacheNote = dialog.querySelector<HTMLElement>(
-    "[data-persona-cache-note]",
-  );
-  const modelSelect = dialog.querySelector<HTMLSelectElement>(
-    "[data-persona-model]",
+  const engineStatus = dialog.querySelector<HTMLElement>(
+    "[data-persona-engine-status]",
   );
   const toggles = document.querySelectorAll<HTMLButtonElement>(
     "[data-persona-toggle]",
   );
-  const browserEngine = new PersonaBrowserEngine(renderEngine);
   let context: PersonaContext = { recordIds: [] };
   let history: ConversationMessage[] = [];
   let opener: HTMLElement | null = null;
@@ -92,54 +84,72 @@ function initPersona(dialog: HTMLDialogElement) {
   let activeRequest: AbortController | null = null;
   let revision = 0;
   let busy = false;
+  let preparationAttempted = false;
+  let engineState: PersonaEngineSnapshot["state"] = "idle";
+  const browserEngine = new PersonaBrowserEngine(renderEngine);
 
   function renderEngine(snapshot: PersonaEngineSnapshot) {
     const loading =
       snapshot.state === "checking" || snapshot.state === "loading";
     const ready = snapshot.state === "ready";
+    const failed = snapshot.state === "error";
+    const progress =
+      snapshot.progress !== undefined && Number.isFinite(snapshot.progress)
+        ? Math.max(0, Math.min(1, snapshot.progress))
+        : undefined;
+    engineState = snapshot.state;
     if (enginePanel) enginePanel.dataset.engineState = snapshot.state;
     mode.dataset.state = snapshot.state;
     modeLabel.textContent = ready
-      ? "브라우저 AI 준비됨"
+      ? "AI 준비됨"
       : loading
-        ? "AI 준비 중 · 기록 검색 가능"
-        : "공개 기록 검색";
+        ? `${snapshot.phase === "initializing" ? "AI 시작 중" : "AI 준비 중"}${progress === undefined ? "" : ` · ${Math.floor(progress * 100)}%`}`
+        : "공개 기록으로 답변";
     explanation.textContent = ready
-      ? `이 브라우저의 ${snapshot.modelSize === "compact" ? "Qwen3 0.6B" : "Qwen3 1.7B"} 모델이 공개 기록과 최근 대화로 답변을 작성합니다. 질문은 답변 서버로 전송하지 않습니다. AI 답변은 부정확할 수 있으니 연결된 근거도 확인해 주세요.`
-      : "현재는 질문과 관련된 공개 기록을 찾아 답변을 구성합니다. AI를 켜면 이 브라우저에서 모델이 답변을 작성하며, 기록에 없는 내용은 답하지 않습니다.";
-    if (loadButton) {
-      loadButton.hidden = loading || ready || snapshot.state === "unsupported";
-      loadButton.textContent =
-        snapshot.state === "error" || snapshot.state === "cancelled"
-          ? "AI 준비 다시 시도"
-          : "모델을 내려받고 AI 켜기";
-    }
-    if (loadCancel) loadCancel.hidden = !loading;
-    if (modelSelect) modelSelect.disabled = loading || ready;
+      ? "AI가 이 브라우저에서 공개 기록과 최근 대화로 답변을 작성합니다. 질문은 서버로 전송하지 않습니다. AI 답변은 부정확할 수 있으니 연결된 근거도 확인해 주세요."
+      : "질문과 관련된 공개 기록을 찾아 답변합니다. AI가 준비되면 같은 기록과 최근 대화로 답변을 작성하며, 기록에 없는 내용은 답하지 않습니다.";
+    if (retryButton) retryButton.hidden = !failed;
     if (loadProgress) {
       loadProgress.hidden = !loading;
-      if (snapshot.progress === undefined)
-        loadProgress.removeAttribute("value");
-      else loadProgress.value = snapshot.progress;
+      if (progress === undefined) loadProgress.removeAttribute("value");
+      else loadProgress.value = progress;
     }
-    if (loadDetail) loadDetail.textContent = snapshot.detail;
-    if (cacheNote)
-      cacheNote.textContent = snapshot.cached
-        ? "이 브라우저에서 모델 캐시를 찾았습니다. 필요한 파일을 확인해 재사용합니다."
-        : "모델 파일은 브라우저에 캐시됩니다. 저장 공간이 정리되면 다시 내려받을 수 있어요. 대화는 이 페이지 메모리에만 남습니다.";
+    if (loadDetail) {
+      const detail = loading
+        ? snapshot.phase === "download"
+          ? "약 1GB의 모델을 받는 동안에도 공개 기록으로 바로 답변해요."
+          : "준비하는 동안에도 공개 기록으로 바로 답변해요."
+        : snapshot.state === "unsupported"
+          ? "이 환경에서는 AI 대신 공개 기록으로 답변해요."
+          : failed
+            ? "AI를 준비하지 못했어요. 공개 기록으로 계속 답변해요."
+            : "";
+      loadDetail.hidden = !detail;
+      if (loadDetail.textContent !== detail) loadDetail.textContent = detail;
+    }
+    const announcement = ready
+      ? "AI가 준비됐어요. 이제 AI와 대화할 수 있어요."
+      : loading
+        ? "AI를 준비하고 있어요. 공개 기록으로 먼저 답변할 수 있어요."
+        : loadDetail?.textContent ?? "";
+    if (engineStatus && engineStatus.textContent !== announcement)
+      engineStatus.textContent = announcement;
   }
 
   renderEngine({
     state: "idle",
-    modelSize: "standard",
-    detail: "AI를 켜기 전에도 공개 기록에 질문할 수 있어요.",
+    detail: "공개 기록으로 답변합니다.",
   });
-  loadButton?.addEventListener("click", () => {
-    const size: PersonaModelSize =
-      modelSelect?.value === "compact" ? "compact" : "standard";
-    void browserEngine.load(size);
+  function prepareAI(retry = false) {
+    if (preparationAttempted && !retry) return;
+    if (retry && engineState !== "error") return;
+    preparationAttempted = true;
+    void browserEngine.load();
+  }
+  retryButton?.addEventListener("click", () => {
+    prepareAI(true);
+    input.focus({ preventScroll: true });
   });
-  loadCancel?.addEventListener("click", () => browserEngine.cancelLoad());
 
   function resizeInput() {
     input.style.height = "auto";
@@ -375,7 +385,7 @@ function initPersona(dialog: HTMLDialogElement) {
     }
   }
 
-  function cancelGeneration() {
+  function cancelGeneration(focusInput = true) {
     if (!busy) return;
     revision++;
     activeRequest?.abort("cancelled");
@@ -384,7 +394,7 @@ function initPersona(dialog: HTMLDialogElement) {
     setBusy(false);
     status.textContent =
       "답변을 중지했어요. 질문을 바꾸거나 다시 물어볼 수 있습니다.";
-    input.focus({ preventScroll: true });
+    if (focusInput && dialog.open) input.focus({ preventScroll: true });
   }
 
   function openGuide(detail: AskDetail = {}) {
@@ -398,6 +408,7 @@ function initPersona(dialog: HTMLDialogElement) {
       updateToggles();
       resizeInput();
     }
+    prepareAI();
     const topic = detail.topic
       ? (personaTopicAliases[detail.topic] ?? detail.topic)
       : undefined;
@@ -442,7 +453,14 @@ function initPersona(dialog: HTMLDialogElement) {
       void submitQuestion(input.value);
     }
   });
-  stopButton.addEventListener("click", cancelGeneration);
+  stopButton.addEventListener("click", () => cancelGeneration());
+  window.addEventListener("pagehide", () => {
+    cancelGeneration(false);
+    preparationAttempted = false;
+  });
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted && dialog.open) prepareAI();
+  });
   dialog
     .querySelector("[data-persona-close]")
     ?.addEventListener("click", () => dialog.close());

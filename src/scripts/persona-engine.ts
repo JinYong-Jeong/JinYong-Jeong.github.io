@@ -2,30 +2,28 @@ import type {
   ChatCompletionMessageParam,
   WebWorkerMLCEngine,
 } from "@mlc-ai/web-llm";
+import { removeLegacyPersonaAssets } from "./persona-legacy-cache";
 
-export type PersonaModelSize = "standard" | "compact";
 export type PersonaEngineState =
   | "idle"
   | "checking"
   | "loading"
   | "ready"
   | "unsupported"
-  | "error"
-  | "cancelled";
+  | "error";
 export interface PersonaEngineSnapshot {
   state: PersonaEngineState;
-  modelSize: PersonaModelSize;
   modelId?: string;
   progress?: number;
+  phase?: "download" | "initializing";
   detail: string;
-  cached?: boolean;
 }
 
 export const PERSONA_CONTEXT_WINDOW = 2048;
 const OUTPUT_TOKENS = 320;
 const MODEL_IDS = {
-  standard: { f16: "Qwen3-1.7B-q4f16_1-MLC", f32: "Qwen3-1.7B-q4f32_1-MLC" },
-  compact: { f16: "Qwen3-0.6B-q4f16_1-MLC", f32: "Qwen3-0.6B-q4f32_1-MLC" },
+  f16: "Qwen3-1.7B-q4f16_1-MLC",
+  f32: "Qwen3-1.7B-q4f32_1-MLC",
 } as const;
 
 function aborted(signal: AbortSignal) {
@@ -43,7 +41,7 @@ function withAbort<T>(operation: Promise<T>, signal: AbortSignal): Promise<T> {
   });
 }
 
-/** A dedicated worker is only created after the visitor explicitly chooses to load a model. */
+/** One tab's worker owns the model. No downloaded artifacts survive worker termination. */
 export class PersonaBrowserEngine {
   private worker: Worker | null = null;
   private engine: WebWorkerMLCEngine | null = null;
@@ -53,13 +51,15 @@ export class PersonaBrowserEngine {
   private revision = 0;
   private snapshot: PersonaEngineSnapshot = {
     state: "idle",
-    modelSize: "standard",
     detail: "AI를 켜기 전에도 공개 기록에 질문할 수 있어요.",
   };
 
   constructor(
     private readonly onChange: (snapshot: PersonaEngineSnapshot) => void,
-  ) {}
+  ) {
+    void removeLegacyPersonaAssets();
+    window.addEventListener("pagehide", () => this.dispose("pagehide"));
+  }
 
   get ready() {
     return this.snapshot.state === "ready" && this.engine !== null;
@@ -78,17 +78,16 @@ export class PersonaBrowserEngine {
     this.lifetime = null;
   }
 
-  async load(modelSize: PersonaModelSize = "standard") {
+  async load() {
     if (this.loading || this.ready) return;
     const revision = ++this.revision;
     const controller = new AbortController();
     this.loading = controller;
     this.update({
       state: "checking",
-      modelSize,
       modelId: undefined,
       progress: undefined,
-      cached: undefined,
+      phase: undefined,
       detail: "이 브라우저의 WebGPU 지원을 확인하고 있어요.",
     });
     try {
@@ -113,31 +112,22 @@ export class PersonaBrowserEngine {
         return;
       }
       const modelId =
-        MODEL_IDS[modelSize][
-          adapter.features.has("shader-f16") ? "f16" : "f32"
-        ];
+        MODEL_IDS[adapter.features.has("shader-f16") ? "f16" : "f32"];
       const webllm = await withAbort(
         import("@mlc-ai/web-llm"),
         controller.signal,
       );
-      if (
-        !webllm.prebuiltAppConfig.model_list.some(
-          (record) => record.model_id === modelId,
-        )
-      )
-        throw new Error("MODEL_NOT_REGISTERED");
-      const cached = await withAbort(
-        webllm.hasModelInCache(modelId).catch(() => false),
-        controller.signal,
+      const modelRecord = webllm.prebuiltAppConfig.model_list.find(
+        (record) => record.model_id === modelId,
       );
+      if (!modelRecord) throw new Error("MODEL_NOT_REGISTERED");
       if (controller.signal.aborted) return;
       this.update({
         state: "loading",
         modelId,
-        cached,
-        detail: cached
-          ? "저장된 모델 캐시를 확인하고 GPU에 준비하고 있어요."
-          : "선택한 모델을 내려받고 있어요. 이 창을 접어도 준비는 계속됩니다.",
+        phase: "download",
+        detail:
+          "이 탭의 메모리로 모델을 내려받고 있어요. 대화창을 접어도 준비는 계속됩니다.",
       });
       const worker = new Worker(
         new URL("./persona-webllm.worker.ts", import.meta.url),
@@ -158,13 +148,25 @@ export class PersonaBrowserEngine {
       });
       const engine = new webllm.WebWorkerMLCEngine(worker, {
         logLevel: "ERROR",
+        appConfig: { model_list: [modelRecord], cacheBackend: "cache" },
         initProgressCallback: (report) => {
           if (revision !== this.revision || controller.signal.aborted) return;
+          const phase = /Fetching param|Start to fetch/i.test(report.text)
+            ? "download"
+            : /Loading model|Finish loading/i.test(report.text)
+              ? "initializing"
+              : undefined;
           this.update({
             progress: Number.isFinite(report.progress)
               ? Math.max(0, Math.min(1, report.progress))
               : undefined,
-            detail: report.text,
+            phase,
+            detail:
+              phase === "download"
+                ? "모델을 이 탭의 메모리로 내려받고 있어요."
+                : phase === "initializing"
+                  ? "내려받은 모델을 GPU에 준비하고 있어요."
+                  : "브라우저 AI를 준비하고 있어요.",
           });
         },
       });
@@ -177,6 +179,7 @@ export class PersonaBrowserEngine {
       this.update({
         state: "ready",
         progress: 1,
+        phase: undefined,
         detail:
           "모델 준비가 끝났어요. 이제 이 브라우저에서 AI 답변을 작성합니다.",
       });
@@ -193,8 +196,8 @@ export class PersonaBrowserEngine {
         state: "error",
         progress: undefined,
         detail: memory
-          ? "그래픽 메모리가 부족하거나 GPU 연결이 끊겼어요. 공개 기록 검색을 계속 쓰거나 가벼운 모델을 선택해 다시 시도할 수 있어요."
-          : "모델을 준비하지 못했어요. 인터넷 연결과 브라우저 저장 공간을 확인한 뒤 다시 시도해 주세요. 공개 기록 검색은 계속 사용할 수 있어요.",
+          ? "그래픽 메모리가 부족하거나 GPU 연결이 끊겼어요. 공개 기록으로 대화를 계속할 수 있어요."
+          : "모델을 준비하지 못했어요. 인터넷 연결을 확인한 뒤 다시 시도해 주세요. 공개 기록 검색은 계속 사용할 수 있어요.",
       });
       console.warn("Persona WebLLM initialization failed:", error);
     } finally {
@@ -202,17 +205,20 @@ export class PersonaBrowserEngine {
     }
   }
 
-  cancelLoad() {
-    if (!this.loading) return;
+  /** Also runs for BFCache pagehide. A restored page can explicitly call load() again. */
+  dispose(reason: "pagehide" | "manual" = "manual") {
     ++this.revision;
-    this.loading.abort("cancelled");
+    this.loading?.abort(reason);
     this.loading = null;
     this.releaseWorker();
+    this.generation = null;
     this.update({
-      state: "cancelled",
+      state: "idle",
+      modelId: undefined,
       progress: undefined,
+      phase: undefined,
       detail:
-        "모델 준비를 중지했어요. 이미 저장된 파일은 다음 시도에서 재사용될 수 있습니다.",
+        "AI 메모리를 해제했어요. 대화를 이어가려면 모델을 다시 준비합니다.",
     });
   }
 
@@ -233,6 +239,7 @@ export class PersonaBrowserEngine {
     if (!engine || !lifetime || !this.ready) throw new Error("MODEL_NOT_READY");
     let stopTimer: ReturnType<typeof setTimeout> | undefined;
     const stop = () => {
+      if (this.engine !== engine) return;
       engine.interruptGenerate();
       // A hung GPU must not leave the next question waiting forever.
       stopTimer = setTimeout(() => {
@@ -283,6 +290,7 @@ export class PersonaBrowserEngine {
       return text;
     })().catch((error) => {
       if (
+        this.engine === engine &&
         !signal.aborted &&
         !(error instanceof Error && error.message === "CONTEXT_TOO_LONG")
       ) {
