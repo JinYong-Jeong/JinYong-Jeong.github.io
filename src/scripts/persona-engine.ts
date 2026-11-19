@@ -127,7 +127,7 @@ export class PersonaBrowserEngine {
         modelId,
         phase: "download",
         detail:
-          "이 탭의 메모리로 모델을 내려받고 있어요. 대화창을 접어도 준비는 계속됩니다.",
+          "이 탭의 메모리로 모델을 내려받고 있어요.",
       });
       const worker = new Worker(
         new URL("./persona-webllm.worker.ts", import.meta.url),

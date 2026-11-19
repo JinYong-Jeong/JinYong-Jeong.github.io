@@ -232,6 +232,7 @@ svg {
 }
 
 .page-wrap {
+  container: page-content / inline-size;
   padding-block: 1.25rem 2.5rem;
 }
 
@@ -485,15 +486,18 @@ svg {
   }
 }
 
-@media (min-width: 1024px) {
+@container page-content (min-width: 60rem) {
   .about-content-grid {
     grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
   }
 }
 
-@media (min-width: 1200px) {
+@container page-content (min-width: 70rem) {
   .page-layout {
     grid-template-columns: minmax(0, 1fr) 320px;
+  }
+  .post-layout {
+    grid-template-columns: minmax(0, 1fr) 300px;
   }
 }
 

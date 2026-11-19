@@ -489,6 +489,25 @@
     transition: transform var(--duration-fast);
   }
 }
+@media screen and (min-width: 68rem) {
+  .cv-main {
+    container-type: inline-size;
+  }
+  .cv-shell {
+    padding-inline: clamp(24px, 5cqw, 76px);
+  }
+  .cv-hero {
+    gap: clamp(28px, 5.5cqw, 88px);
+  }
+  .cv-hero-copy {
+    padding-left: clamp(0px, 1.7cqw, 24px);
+    container-type: inline-size;
+  }
+  .cv-hero h1 {
+    font-size: clamp(44px, 25.5cqw, 108px);
+    white-space: nowrap;
+  }
+}
 @media (max-width: 900px) {
   .cv-shell {
     padding-inline: clamp(19px, 4vw, 36px);
@@ -525,6 +544,7 @@
     display: none;
   }
   .cv-hero h1 em {
+    display: inline-block;
     margin-left: 0.15em;
   }
   .cv-byline {

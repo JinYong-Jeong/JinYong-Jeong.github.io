@@ -24,7 +24,7 @@ const category = post.data.category as CategoryKey;
 
 <BaseLayout title={post.data.title} description={post.data.description} type="article">
   <div class="container-page page-wrap">
-    <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
+    <div class="post-layout grid gap-6">
       <article class="page-main-panel">
         <header class="surface-section">
           <a class="chip focus-ring mb-5 w-fit" href={`/blog/category/${category}/`}>

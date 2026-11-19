@@ -37,7 +37,7 @@ const imageUrl = new URL(image, siteUrl).toString();
 <html lang="ko" transition:animate="none">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
     <meta name="generator" content={Astro.generator} />
     <ClientRouter fallback="swap" />
     <meta
@@ -61,7 +61,7 @@ const imageUrl = new URL(image, siteUrl).toString();
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={imageUrl} />
   </head>
-  <body class={bodyClass}>
+  <body class:list={[bodyClass, "with-persona"]}>
     <script is:inline>
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker.getRegistrations().then((registrations) => {
@@ -70,6 +70,7 @@ const imageUrl = new URL(image, siteUrl).toString();
       }
     </script>
     <a class="skip-link" href="#main-content">본문으로 바로 가기</a>
+    <a class="skip-link" href="#persona-guide" data-persona-focus>AI 챗봇에 질문하기</a>
     <Header emblemSrc={emblem.src} />
     <main id="main-content" class={mainClass}>
       <slot />

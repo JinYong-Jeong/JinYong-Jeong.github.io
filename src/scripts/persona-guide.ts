@@ -31,66 +31,70 @@ type ConversationMessage = { role: "user" | "assistant"; content: string };
 type AskDetail = {
   question?: string;
   topic?: string;
-  opener?: HTMLElement;
-  source?: string;
 };
 
-const dialog = document.querySelector<HTMLDialogElement>("#persona-guide");
-if (dialog) initPersona(dialog);
+const panel = document.querySelector<HTMLElement>("#persona-guide");
+if (panel) initPersona(panel);
 
-function initPersona(dialog: HTMLDialogElement) {
-  const form = dialog.querySelector<HTMLFormElement>("[data-persona-form]")!;
-  const input = dialog.querySelector<HTMLTextAreaElement>(
+function initPersona(panel: HTMLElement) {
+  const launcher = document.querySelector<HTMLButtonElement>(
+    "[data-persona-expand]",
+  )!;
+  const viewKey = "persona-view";
+  try {
+    const saved = sessionStorage.getItem(viewKey);
+    if (saved === "expanded" || saved === "collapsed") panel.dataset.view = saved;
+  } catch {
+    // The persisted panel still retains the choice on internal navigation.
+  }
+
+  const form = panel.querySelector<HTMLFormElement>("[data-persona-form]")!;
+  const input = panel.querySelector<HTMLTextAreaElement>(
     "[data-persona-input]",
   )!;
-  const transcript = dialog.querySelector<HTMLOListElement>(
+  const transcript = panel.querySelector<HTMLOListElement>(
     "[data-persona-transcript]",
   )!;
-  const scrollArea = dialog.querySelector<HTMLElement>(
+  const scrollArea = panel.querySelector<HTMLElement>(
     "[data-persona-scroll]",
   )!;
-  const welcome = dialog.querySelector<HTMLElement>("[data-persona-welcome]")!;
-  const followups = dialog.querySelector<HTMLElement>(
+  const welcome = panel.querySelector<HTMLElement>("[data-persona-welcome]")!;
+  const followups = panel.querySelector<HTMLElement>(
     "[data-persona-followups]",
   )!;
-  const sendButton = dialog.querySelector<HTMLButtonElement>(
+  const sendButton = panel.querySelector<HTMLButtonElement>(
     "[data-persona-send]",
   )!;
-  const stopButton = dialog.querySelector<HTMLButtonElement>(
+  const stopButton = panel.querySelector<HTMLButtonElement>(
     "[data-persona-stop]",
   )!;
-  const status = dialog.querySelector<HTMLElement>("[data-persona-status]")!;
-  const mode = dialog.querySelector<HTMLElement>("[data-persona-mode]")!;
-  const modeLabel = dialog.querySelector<HTMLElement>(
+  const status = panel.querySelector<HTMLElement>("[data-persona-status]")!;
+  const mode = panel.querySelector<HTMLElement>("[data-persona-mode]")!;
+  const modeLabel = panel.querySelector<HTMLElement>(
     "[data-persona-mode-label]",
   )!;
-  const explanation = dialog.querySelector<HTMLElement>(
+  const explanation = panel.querySelector<HTMLElement>(
     "[data-persona-explanation]",
   )!;
-  const enginePanel = dialog.querySelector<HTMLElement>(
+  const enginePanel = panel.querySelector<HTMLElement>(
     "[data-persona-engine-panel]",
   );
-  const retryButton = dialog.querySelector<HTMLButtonElement>(
+  const retryButton = panel.querySelector<HTMLButtonElement>(
     "[data-persona-retry]",
   );
-  const loadProgress = dialog.querySelector<HTMLProgressElement>(
+  const loadProgress = panel.querySelector<HTMLProgressElement>(
     "[data-persona-load-progress]",
   );
-  const loadDetail = dialog.querySelector<HTMLElement>(
+  const loadDetail = panel.querySelector<HTMLElement>(
     "[data-persona-load-detail]",
   );
-  const engineStatus = dialog.querySelector<HTMLElement>(
+  const engineStatus = panel.querySelector<HTMLElement>(
     "[data-persona-engine-status]",
-  );
-  const toggles = document.querySelectorAll<HTMLButtonElement>(
-    "[data-persona-toggle]",
   );
   let context: PersonaContext = { recordIds: [] };
   let history: ConversationMessage[] = [];
   let lastPageAnswer: PersonaAnswer | null = null;
   let conversationPage = location.pathname + location.search;
-  let opener: HTMLElement | null = null;
-  let restoreFocusOnClose = true;
   let activeRequest: AbortController | null = null;
   let revision = 0;
   let busy = false;
@@ -162,6 +166,7 @@ function initPersona(dialog: HTMLDialogElement) {
   });
 
   function resizeInput() {
+    if (!input.getClientRects().length) return;
     input.style.height = "auto";
     input.style.height = `${Math.min(input.scrollHeight, 115)}px`;
   }
@@ -176,15 +181,19 @@ function initPersona(dialog: HTMLDialogElement) {
     followups.hidden = value || !followups.childElementCount;
   }
 
-  function scrollToLatest() {
-    requestAnimationFrame(() =>
+  function showMessage(message: HTMLElement) {
+    requestAnimationFrame(() => {
+      if (!message.isConnected) return;
       scrollArea.scrollTo({
-        top: scrollArea.scrollHeight,
+        top:
+          scrollArea.scrollTop +
+          message.getBoundingClientRect().top -
+          scrollArea.getBoundingClientRect().top,
         behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
           ? "instant"
           : "smooth",
-      }),
-    );
+      });
+    });
   }
 
   function addMessage(
@@ -322,7 +331,7 @@ function initPersona(dialog: HTMLDialogElement) {
     addMessage("user", [question]);
     const pending = addMessage("assistant", ["관련 기록을 살펴보고 있어요."]);
     pending.classList.add("persona-message--pending");
-    scrollToLatest();
+    showMessage(pending);
     let paragraphs = answer.paragraphs;
     let usedAI = false;
     let lastProgressUpdate = 0;
@@ -416,14 +425,13 @@ function initPersona(dialog: HTMLDialogElement) {
                     : answer.sources.length
                       ? "공개 기록을 바탕으로 구성한 답변입니다."
                       : "";
-      scrollToLatest();
+      showMessage(item);
     } finally {
       clearTimeout(timeout);
       if (currentRevision === revision) {
         pending.remove();
         activeRequest = null;
         setBusy(false);
-        if (dialog.open) input.focus({ preventScroll: true });
       }
     }
   }
@@ -437,35 +445,25 @@ function initPersona(dialog: HTMLDialogElement) {
     setBusy(false);
     status.textContent =
       "답변을 중지했어요. 질문을 바꾸거나 다시 물어볼 수 있습니다.";
-    if (focusInput && dialog.open) input.focus({ preventScroll: true });
+    if (focusInput) input.focus({ preventScroll: true });
   }
 
-  function openGuide(detail: AskDetail = {}) {
-    if (!dialog.open) {
-      opener =
-        detail.opener ??
-        (document.activeElement instanceof HTMLElement
-          ? document.activeElement
-          : null);
-      dialog.show();
-      updateToggles();
-      resizeInput();
-    }
-    prepareAI();
+  function askPersona(detail: AskDetail) {
+    setView("expanded");
     const topic = detail.topic
       ? (personaTopicAliases[detail.topic] ?? detail.topic)
       : undefined;
     const record = personaRecords.find(
       (item) => item.id === topic || item.title === topic,
     );
-    input.focus({ preventScroll: true });
+    scrollArea.focus({ preventScroll: true });
     if (detail.question) void submitQuestion(detail.question, record?.id);
     else if (detail.topic) {
       void submitQuestion(
         `${record?.title ?? detail.topic}에 대해 알려 줘`,
         record?.id,
       );
-    }
+    } else input.focus({ preventScroll: true });
   }
 
   function resetConversation() {
@@ -479,18 +477,71 @@ function initPersona(dialog: HTMLDialogElement) {
     welcome.hidden = false;
     input.value = "";
     status.textContent = "새 대화를 시작했어요.";
+    scrollArea.scrollTop = 0;
     resizeInput();
     input.focus({ preventScroll: true });
   }
+
+  function setView(view: "expanded" | "collapsed") {
+    panel.dataset.view = view;
+    try {
+      sessionStorage.setItem(viewKey, view);
+    } catch {
+      // Storage may be disabled by the visitor.
+    }
+    if (view === "expanded") resizeInput();
+  }
+
+  function collapse() {
+    setView("collapsed");
+    if (personaEntryRequested(location.href)) {
+      window.history.replaceState(window.history.state, "", personaClosedUrl(location.href));
+    }
+    launcher.focus({ preventScroll: true });
+  }
+
+  launcher.addEventListener("click", () => {
+    setView("expanded");
+    panel.querySelector<HTMLElement>("#persona-title")?.focus({ preventScroll: true });
+  });
+  panel.querySelector("[data-persona-collapse]")?.addEventListener("click", collapse);
+  panel.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !event.defaultPrevented && !event.isComposing) {
+      event.preventDefault();
+      collapse();
+    }
+  });
+  document.addEventListener("click", (event) => {
+    if (!(event.target instanceof Element) || !event.target.closest("[data-persona-focus]"))
+      return;
+    event.preventDefault();
+    setView("expanded");
+    input.focus({ preventScroll: true });
+  });
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     void submitQuestion(input.value);
   });
   input.addEventListener("input", resizeInput);
-  window.addEventListener("resize", () => {
-    if (dialog.open) resizeInput();
-  });
+  window.addEventListener("resize", resizeInput);
+  // Some mobile keyboards shrink only the visual viewport and cover fixed controls.
+  const viewport = window.visualViewport;
+  if (viewport) {
+    const fitKeyboard = () => {
+      const covered = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
+      if (covered > 1 && Math.abs(viewport.scale - 1) < 0.01) {
+        panel.style.setProperty("--persona-keyboard-inset", `${covered}px`);
+        panel.style.setProperty("--persona-visible-height", `${viewport.height}px`);
+      } else {
+        panel.style.removeProperty("--persona-keyboard-inset");
+        panel.style.removeProperty("--persona-visible-height");
+      }
+    };
+    viewport.addEventListener("resize", fitKeyboard);
+    viewport.addEventListener("scroll", fitKeyboard);
+    fitKeyboard();
+  }
   function showCurrentPage() {
     const path = location.pathname.replace(/\/+$/, "");
     const article =
@@ -503,14 +554,14 @@ function initPersona(dialog: HTMLDialogElement) {
           ?.textContent?.replace(/\s+/g, " ")
           .trim() || document.title
       : "정진용의 CV";
-    const caption = dialog.querySelector<HTMLElement>(
+    const caption = panel.querySelector<HTMLElement>(
       "[data-persona-current-page]",
     );
     if (caption) {
       caption.textContent = `현재 ${article ? "글" : "페이지"} · ${title}`;
       caption.title = title;
     }
-    const starter = dialog.querySelector<HTMLButtonElement>(
+    const starter = panel.querySelector<HTMLButtonElement>(
       "[data-page-starter]",
     );
     const label = starter?.querySelector("span");
@@ -538,7 +589,7 @@ function initPersona(dialog: HTMLDialogElement) {
       lastPageAnswer = null;
       conversationPage = nextPage;
     }
-    openFromUrl();
+    focusFromUrl();
   });
   input.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
@@ -554,13 +605,10 @@ function initPersona(dialog: HTMLDialogElement) {
   window.addEventListener("pageshow", (event) => {
     if (event.persisted) prepareAI();
   });
-  dialog
-    .querySelector("[data-persona-close]")
-    ?.addEventListener("click", () => dialog.close());
-  dialog
+  panel
     .querySelector("[data-persona-reset]")
     ?.addEventListener("click", resetConversation);
-  dialog.addEventListener("click", (event) => {
+  panel.addEventListener("click", (event) => {
     if (!(event.target instanceof Element)) return;
     const question = event.target.closest<HTMLElement>(
       "[data-persona-question]",
@@ -579,8 +627,6 @@ function initPersona(dialog: HTMLDialogElement) {
       return;
     const url = new URL(source.href);
     if (url.origin !== location.origin) return;
-    restoreFocusOnClose = false;
-    dialog.close();
     if (url.pathname !== location.pathname || !url.hash) return;
     const target = document.getElementById(
       decodeURIComponent(url.hash.slice(1)),
@@ -623,68 +669,17 @@ function initPersona(dialog: HTMLDialogElement) {
     );
   }
 
-  dialog.addEventListener("close", () => {
-    cancelGeneration();
-    updateToggles();
-    window.history.replaceState(
-      window.history.state,
-      "",
-      personaClosedUrl(location.href),
-    );
-    if (restoreFocusOnClose) {
-      const destination =
-        opener?.isConnected && opener.getClientRects().length
-          ? opener
-          : document.querySelector<HTMLElement>(
-              "[data-persona-toggle], [data-open-persona]",
-            );
-      destination?.focus({ preventScroll: true });
-    }
-    restoreFocusOnClose = true;
-  });
-  document.addEventListener("click", (event) => {
-    if (!(event.target instanceof Element)) return;
-    const trigger = event.target.closest<HTMLElement>(
-      "[data-persona-toggle], [data-open-persona]",
-    );
-    if (!trigger) return;
-    if (
-      trigger instanceof HTMLAnchorElement &&
-      (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
-    )
-      return;
-    event.preventDefault();
-    if (trigger.hasAttribute("data-persona-toggle") && dialog.open) {
-      dialog.close();
-      return;
-    }
-    openGuide({
-      opener: trigger,
-      question: trigger.dataset.personaQuestion,
-      topic: trigger.dataset.personaTopic,
-    });
-  });
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && dialog.open && !event.defaultPrevented) {
-      event.preventDefault();
-      dialog.close();
-    }
-  });
-  function updateToggles() {
-    toggles.forEach((toggle) => {
-      toggle.hidden = false;
-      toggle.setAttribute("aria-expanded", String(dialog.open));
-    });
-  }
-  updateToggles();
   window.addEventListener("cv:ask", (event) =>
-    openGuide((event as CustomEvent<AskDetail>).detail ?? {}),
+    askPersona((event as CustomEvent<AskDetail>).detail ?? {}),
   );
-  const openFromUrl = () => {
-    if (personaEntryRequested(location.href)) openGuide();
-  };
-  window.addEventListener("hashchange", openFromUrl);
+  function focusFromUrl() {
+    if (!personaEntryRequested(location.href)) return;
+    setView("expanded");
+    input.focus({ preventScroll: true });
+  }
+  window.addEventListener("hashchange", focusFromUrl);
   showCurrentPage();
+  resizeInput();
   prepareAI();
-  openFromUrl();
+  focusFromUrl();
 }
