@@ -11,76 +11,68 @@ const wood = await getImage({
   format: "webp",
   quality: 78,
 });
-const community = cv.experience.find((item) => item.organization === "A.ing")!;
-const portfolio = cv.work.find((item) => item.id === "portfolio")!;
-const paper = cv.publications.find((item) => item.id === "health-agent")!;
-const facets = [
+const fedops = cv.work.find((work) => work.id === "fedops")!;
+const studyMaterials = cv.work.find((work) => work.id === "aing")!;
+const chapters = [
   {
-    id: "learning",
-    topic: "profile",
-    label: "Learn",
-    english: "A beginning",
-    note: "01 / LEARNING",
-    title: "배우는 사람",
-    subtitle: cv.education.school,
+    id: "education",
+    topic: "education",
+    label: "Education",
+    category: "학력",
+    heading: cv.education.school,
+    subtitle: cv.education.degree,
     description:
-      "LLM과 AI 에이전트가 도구와 데이터를 어떻게 활용하는지 공부합니다.",
-    detail: cv.education.degree,
-    date: cv.education.period,
+      "언어 모델이 어떤 도구를 선택하고, 그 결과로 어떻게 답을 만드는지 공부합니다.",
+    evidence: "재학 기간",
+    detail: cv.education.period,
     href: "#education",
-    link: "학력과 활동 보기",
-    source: "EDUCATION & EXPERIENCE",
-    question: "어떤 공부와 활동을 하고 있나요?",
+    link: "학력 기록 보기",
+    question: "어디에서 무엇을 전공하고 있나요?",
+  },
+  {
+    id: "projects",
+    topic: fedops.id,
+    label: "Projects",
+    category: "프로젝트",
+    heading: fedops.title,
+    subtitle: "모델을 공유하고 에이전트에 연결하는 일",
+    description:
+      "팀에서 FedOps의 모델 저장소와 Agent Studio를 연결하는 개발에 참여했습니다. 공유한 모델을 에이전트의 도구로 쓰는 과정입니다.",
+    evidence: "Interactive CV",
+    detail: "이 기록집과 방문자의 브라우저에서 답하는 챗봇도 직접 만들었습니다.",
+    href: "#fedops",
+    link: "프로젝트 기록 보기",
+    question: "FedOps에서 어떤 개발에 참여했나요?",
   },
   {
     id: "research",
     topic: "health-agent",
-    label: "Ask",
-    english: "A question",
-    note: "02 / RESEARCH",
-    title: "질문을 좇는 사람",
-    subtitle: "Cognitive Computing Lab",
-    description: "궁금한 것을 연구로 옮기고, 논문과 구현으로 남깁니다.",
-    detail: "개인건강데이터와 AI Agent 시스템 연구",
-    date: `${paper.year} · ${paper.type} · ${paper.role}`,
-    href: paper.href,
-    link: "실제 논문 읽기",
-    source: "A PUBLISHED RECORD",
-    question: "개인건강데이터 연구에서 무엇을 했나요?",
-  },
-  {
-    id: "building",
-    topic: "portfolio",
-    label: "Build",
-    english: "Ideas, made",
-    note: "03 / BUILDING",
-    title: "직접 만드는 사람",
-    subtitle: "From an idea to something real",
+    label: "Research",
+    category: "연구",
+    heading: "Agents & LLMs",
+    subtitle: "Cognitive Computing Lab · 학부연구생",
     description:
-      "연구 시스템부터 이 웹사이트까지, 아이디어를 작동하는 형태로 만듭니다.",
-    detail: "이 사이트의 구조와 구현을 공개합니다.",
-    date: portfolio.tags.join(" · "),
-    href: portfolio.href,
-    link: "이 사이트의 소스 보기",
-    source: "OPEN WORK",
-    question: "이 웹사이트를 어떤 문제의식으로 설계했나요?",
+      "건강 예측 모델을 AI 에이전트의 도구로 연결했습니다. 웨어러블 원본 데이터는 기기에 두고, 예측 결과를 개인의 맥락에 맞게 설명하는 연구입니다.",
+    evidence: "온디바이스 LLM",
+    detail: "동결된 LLM의 응답을 경량 판단 모델로 유도하는 방법도 연구했습니다.",
+    href: "#research",
+    link: `논문 ${cv.publications.length}편과 저자 역할 보기`,
+    question: "개인건강데이터 연구에서 에이전트는 예측 모델을 어떻게 활용하나요?",
   },
   {
-    id: "together",
+    id: "activities",
     topic: "aing-resnet",
-    label: "Connect",
-    english: "Learning together",
-    note: "04 / COMMUNITY",
-    title: "함께 배우는 사람",
-    subtitle: "A.ing · Gachon University",
+    label: "Activities",
+    category: "대외활동",
+    heading: "A.ing",
+    subtitle: "가천대학교 인공지능 학술동아리",
     description:
-      "A.ing에서 동료들과 ResNet 교육자료를 만들고, 논문 읽기와 모델 구현을 연결했습니다.",
-    detail: "ResNet 논문 읽기 · PyTorch 구현 · CIFAR-10 실험",
-    date: community.period,
-    href: community.href,
+      "동료들과 ResNet 주니어 스터디 교재를 만들었습니다. 논문 속 잔차 연결을 PyTorch로 구현하고 CIFAR-10으로 실험하는 과정입니다.",
+    evidence: "학회 발표",
+    detail: "한국데이터사이언스학회 추계종합학술대회에서 System 1 연구를 구두 발표했습니다.",
+    href: studyMaterials.href,
     link: "ResNet 교육자료 보기",
-    source: "LEARNING IN COMPANY",
-    question: "A.ing의 ResNet 주니어 스터디에서는 무엇을 배울 수 있나요?",
+    question: "ResNet 스터디에서 무엇을 직접 구현하나요?",
   },
 ];
 ---
@@ -125,17 +117,18 @@ const facets = [
           aria-label="어떤 기록을 펼칠까요?"
         >
           {
-            facets.map((facet, index) => (
+            chapters.map((chapter, index) => (
               <button
                 type="button"
                 role="tab"
-                id={`rd-tab-${facet.id}`}
-                aria-controls={`rd-page-${facet.id}`}
+                id={`rd-tab-${chapter.id}`}
+                aria-controls={`rd-page-${chapter.id}`}
                 aria-selected={index === 0 ? "true" : "false"}
                 tabindex={index === 0 ? 0 : -1}
+                lang="en"
                 data-book-tab={index}
               >
-                {facet.label}
+                {chapter.label}
               </button>
             ))
           }
@@ -143,46 +136,44 @@ const facets = [
         <div class="rd-paper">
           <div class="rd-paper-grain" aria-hidden="true"></div>
           {
-            facets.map((facet, index) => (
+            chapters.map((chapter, index) => (
               <article
                 class="rd-page"
-                id={`rd-page-${facet.id}`}
+                id={`rd-page-${chapter.id}`}
                 role="tabpanel"
-                aria-labelledby={`rd-tab-${facet.id}`}
+                aria-labelledby={`rd-tab-${chapter.id}`}
                 data-book-page={index}
                 hidden={index !== 0}
               >
-                <p class="rd-page-kicker">{facet.note}</p>
-                <h3 tabindex="-1">{facet.english}</h3>
-                <p class="rd-page-title">{facet.title}</p>
+                <p class="rd-page-kicker">{chapter.category}</p>
+                <h3 tabindex="-1" lang="en">{chapter.heading}</h3>
+                <p class="rd-page-title">{chapter.subtitle}</p>
                 <span class="rd-small-rule" aria-hidden="true" />
-                <p class="rd-page-description">{facet.description}</p>
+                <p class="rd-page-description">{chapter.description}</p>
                 <div class="rd-evidence">
-                  <span>{facet.source}</span>
-                  <strong>{facet.subtitle}</strong>
-                  <p>{facet.detail}</p>
-                  <small>{facet.date}</small>
+                  <strong>{chapter.evidence}</strong>
+                  <p>{chapter.detail}</p>
                 </div>
                 <a
                   class="rd-evidence-link"
-                  href={facet.href}
-                  target={facet.href.startsWith("https") ? "_blank" : undefined}
+                  href={chapter.href}
+                  target={chapter.href.startsWith("https") ? "_blank" : undefined}
                   rel={
-                    facet.href.startsWith("https")
+                    chapter.href.startsWith("https")
                       ? "noopener noreferrer"
                       : undefined
                   }
                 >
-                  {facet.link}
+                  {chapter.link}
                   <span aria-hidden="true">↗</span>
                 </a>
                 <button
                   type="button"
                   class="rd-question"
-                  data-book-question={facet.question}
-                  data-book-topic={facet.topic}
+                  data-book-question={chapter.question}
+                  data-book-topic={chapter.topic}
                 >
-                  이 이야기가 궁금하다면 <span aria-hidden="true">↗</span>
+                  이 챕터에 대해 묻기 <span aria-hidden="true">↗</span>
                 </button>
               </article>
             ))
@@ -192,7 +183,7 @@ const facets = [
               ><span aria-hidden="true">←</span></button
             >
             <span class="rd-page-count" aria-hidden="true"
-              ><span data-book-number>01</span><i>/</i>04</span
+              ><span data-book-number>01</span><i>/</i>{String(chapters.length).padStart(2, "0")}</span
             >
             <button type="button" data-book-next aria-label="다음 기록"
               ><span aria-hidden="true">→</span></button
@@ -241,7 +232,7 @@ const facets = [
           <span class="rd-inside-name">Jinyong<br />Jeong</span>
           <span class="rd-inside-rule"></span>
           <p>하나의 직함보다,<br />여러 개의 기록으로</p>
-          <ol>{facets.map((facet) => <li>{facet.title}</li>)}</ol>
+          <ol>{chapters.map((chapter) => <li>{chapter.category}</li>)}</ol>
           <Image
             src={dragon}
             alt=""
@@ -258,7 +249,7 @@ const facets = [
       <div class="rd-spine" aria-hidden="true"><span>JINYONG JEONG</span></div>
     </div>
     <p class="rd-scene-note">
-      <span data-book-hint>책 한 권에 담긴 몇 가지 모습</span>
+      <span data-book-hint>책을 펼쳐 네 가지 기록을 살펴보세요.</span>
     </p>
   </div>
   <p

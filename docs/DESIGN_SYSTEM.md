@@ -36,7 +36,7 @@
 
 | 동작 | 구현 | 연결되는 내용 |
 | --- | --- | --- |
-| 표지 펼치기, 책갈피 선택, 페이지 넘기기 | `RecordDesk.astro`, `record-desk.ts`, `record-desk.css` | 학업·연구·개발·동아리 기록, 각 기록의 출처 |
+| 표지 펼치기, 책갈피 선택, 드래그·스와이프로 책장 넘기기 | `RecordDesk.astro`, `record-desk.ts`, `record-desk.css`, `record-gesture.css` | 학력·프로젝트·연구·대외활동 네 챕터와 관련 자료. 화살표 버튼과 방향키로도 이동 |
 | 펼쳐진 페이지에서 질문하기 | `cv:ask` 이벤트 | 질문과 관련 이력을 대화창에 전달 |
 | 기록을 바탕으로 대화하기 | `PersonaGuide.astro`, `config/persona.ts`, `lib/persona.ts`, `scripts/persona-guide.ts` | 자유 입력, 후속 질문, 관련 이력·원문, 생성 중지, 새 대화 |
 | CV 문서 읽기 | `pages/index.astro`, `scripts/cv.ts`, `styles/cv.css` | 경력·논문의 상세 설명, 프로젝트 파일 선택, 직접 링크, 인쇄 |

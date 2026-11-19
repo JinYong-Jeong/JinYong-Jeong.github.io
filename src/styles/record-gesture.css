@@ -1,0 +1,49 @@
+/* Let the browser handle vertical reading and pinch zoom until a horizontal
+   pointer gesture actually turns the page. */
+.record-desk[data-open="true"] :is(.rd-paper, .rd-cover-inside) {
+  touch-action: pan-y pinch-zoom;
+  cursor: grab;
+}
+.record-desk[data-drag-turn] {
+  user-select: none;
+  -webkit-user-select: none;
+}
+.record-desk[data-drag-turn] :is(.rd-paper, .rd-cover-inside),
+.record-desk[data-drag-turn] {
+  cursor: grabbing;
+}
+.rd-gesture-sheet {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  border-radius: 1px 4px 5px 1px;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  pointer-events: none;
+  background: linear-gradient(90deg, #cbbda0, #eee5d2 7%, #f4ecdc 70%, #e7dcc5);
+  box-shadow:
+    inset -1px 0 2px #85725370,
+    3px 2px 7px #43321d30;
+}
+.rd-gesture-sheet > .rd-page {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  transform: translateZ(1px);
+}
+.rd-gesture-sheet[data-outer-hinge] {
+  transform-origin: right center;
+}
+.record-desk[data-drag-turn] .rd-paper > [data-book-preview] {
+  display: block;
+  visibility: visible;
+  pointer-events: none;
+}
+.rd-paper:has(> [data-book-preview]) > .rd-page:not([hidden]) {
+  visibility: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rd-gesture-sheet {
+    display: none;
+  }
+}
