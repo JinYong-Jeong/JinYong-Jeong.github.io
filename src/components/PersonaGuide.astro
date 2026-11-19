@@ -1,5 +1,6 @@
 ---
 import { ArrowUpRight, ArrowUp, Minus, RotateCcw } from "@lucide/astro";
+import avatar from "@/assets/jinyong-avatar.webp";
 import { personaStarters } from "@/config/persona";
 import "@/styles/persona-guide.css";
 
@@ -19,11 +20,11 @@ const { emblemSrc } = Astro.props;
   <div class="persona-sheet">
     <header class="persona-header">
       <div class="persona-heading">
-        <span class="persona-emblem" aria-hidden="true">
-          <img src={emblemSrc} width="40" height="40" alt="" />
+        <span class="persona-portrait">
+          <img src={avatar.src} width="384" height="384" alt="손을 들어 인사하는 정진용의 AI 아바타" />
         </span>
         <div class="persona-heading-text">
-          <h2 id="persona-title" tabindex="-1">진용의 <em>AI 챗봇</em></h2>
+          <h2 id="persona-title" tabindex="-1"><span>반가워요,</span> <span><em>정진용</em>입니다</span></h2>
           <p class="persona-current-page" data-persona-current-page></p>
         </div>
       </div>
@@ -36,8 +37,7 @@ const { emblemSrc } = Astro.props;
     <div class="persona-conversation" data-persona-scroll tabindex="-1">
       <div class="persona-introduction">
         <p id="persona-description">
-          정진용의 공개 기록을 안내하는 AI 페르소나예요.<br />실제 본인의 실시간
-          답변은 아니에요.
+          저는 진용의 AI 아바타예요. 이 CV에 담긴 연구와 프로젝트를 소개할게요.
         </p>
         <div
           class="persona-engine"

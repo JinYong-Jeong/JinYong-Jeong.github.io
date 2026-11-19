@@ -76,7 +76,7 @@ const personalQuestion =
 const pageReference =
   /(?:이|현재|지금|보고\s*있는|읽고\s*있는|방금\s*(?:본|읽은))\s*(?:페이지|글|본문|포스트|문서|화면|구역|섹션|부분|내용)|여기(?:서|에|는|가|엔|를|의|\s|$)|페이지.{0,12}(?:내용|뭐|무엇|있|요약|설명)/;
 const pageFollowUp =
-  /^(?:그(?:럼|건|거|것|\s)|이것|이건|방금|좀\s*더|더\s|자세|요약|정리|설명|왜|어떻게|출처|근거|링크|무슨\s*뜻|어떤\s*뜻)/;
+  /^(?:그(?:럼|건|거|것|\s)|이것|이건|방금|좀\s*더|더\s|자세|요약|정리|설명|왜|어떻게|출처|근거|링크|장단점|장점|단점|무슨\s*뜻|어떤\s*뜻)/;
 const stopWords = new Set([
   "페이지",
   "본문",
@@ -452,6 +452,7 @@ export function answerFromPage(
     !page ||
     !page.blocks.length ||
     options.core?.kind === "private" ||
+    options.core?.kind === "interview" ||
     options.core?.kind === "greeting"
   )
     return null;

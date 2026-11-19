@@ -4,7 +4,7 @@ export interface PersonaContext {
   recordIds: string[];
 }
 export interface PersonaAnswer {
-  kind: "record" | "greeting" | "private" | "clarify" | "page";
+  kind: "record" | "interview" | "greeting" | "private" | "clarify" | "page";
   paragraphs: string[];
   sources: PersonaSource[];
   suggestions: string[];
@@ -21,9 +21,13 @@ const normalize = (text: string) =>
     .trim();
 const greeting =
   /^(?:안녕하세요|안녕하십니까|안녕|반가워요?|반갑습니다|감사합니다|고마워요?|hello|hi|hey|thanks)(?:\s+|$)/i;
-const transition = /^(?:그럼|그러면|근데|그런데|혹시|저기)\s*/;
+const transition = /^(?:(?:그럼|그러면|근데|그런데|혹시|저기|그리고)\s*)+/;
+// Keep the addressee in place while resolving ownership ("네 강점" vs "네 프로젝트의 강점").
+// Then remove it from keyword retrieval so the owner's name cannot outrank the actual topic.
+const ownerTerm =
+  /(?:^|\s)(?:(?:(?:정\s*)?진용(?:\s*(?:님|씨)|이|아)?|당신|귀하|본인|너)(?:께서|에게|한테|의|을|를|은|는|이|가|에)?|넌|널|네가|니가|네|니|you(?:rself|r)?|jinyong(?:\s+jeong)?)(?=\s|$|장단점|장점|단점|강점|약점|왜|뽑|채용)/g;
 const followUp =
-  /^(?:그때|거기|그거|그건|그곳|그중|그\s|이건|이것|더 |좀 더|자세|구체|언제|어디|역할|출처|링크|요약|정리|그래서|또 |왜 |방금|앞서|what about|tell me more)/i;
+  /^(?:그때|거기|그거|그건|그곳|그중|그\s|이건|이것|더 |좀 더|자세|구체|언제|어디|역할|장단점|장점|단점|강점|약점|출처|링크|요약|정리|그래서|또 |왜 |방금|앞서|what about|tell me more)/i;
 const roleQuestion = /역할|기여|맡|몇.?저자|저자|role|contribut/i;
 const dateQuestion =
   /언제|시기|기간|년도|몇.?년|시작|종료|완료|얼마나 걸|when|date/i;
@@ -41,6 +45,54 @@ const preference =
   /개인적인?\s?(생각|의견)|네 생각|너의 생각|좋아[하해]|싫어[하해]|느꼈|가장 중요|제일 중요|가장 의미|가장 보람/i;
 const researchInterest =
   /좋아하는\s*(?:연구|학문|기술)\s*(?:분야|주제)?|(?:연구|학문|기술)\s*(?:분야|주제)(?:를|가)?\s*좋아/;
+const aboutOwner =
+  /^@(?:\s*에)?\s*대해(?:서)?(?:\s|$)|^(?:who are @|what do @ do|what are @ working on|(?:tell me )?about @)$/;
+
+function interviewTopics(addressed: string, context: PersonaContext): string[] {
+  const selection = /뽑|채용|고용|선발|영입/u.exec(addressed);
+  const hiringBenefit =
+    /(?:뽑으면|(?:채용|고용|영입|선발)하면).*(?:도움|기여|뭐가\s*좋|장점|이점)/.test(
+      addressed,
+    );
+  if (
+    selection &&
+    (hiringBenefit || /왜|이유|근거|해야|필요|가치|메리트/.test(addressed))
+  ) {
+    const before = addressed.slice(0, selection.index).trim();
+    // Match the candidate being selected. A recruiter addressing the avatar can also ask about a third person.
+    const candidate =
+      /(?:^|@\s*)(?:(?:(?:우리|저희)(?:가|는|\s*(?:팀|회사|조직)(?:에서|이|가|에|은|는)?)|면접관이|지원자로|팀원으로|왜|꼭|굳이|다시)\s*)*$/.test(
+        before,
+      );
+    if (candidate) return ["interview-fit"];
+  }
+  if (/\b(?:hire|choose|recruit|pick)\s+@/.test(addressed))
+    return ["interview-fit"];
+
+  const assessment =
+    /장단점|장점|강점|잘하는\s*(?:점|것|게|일)|잘해|strengths?|단점|약점|부족한\s*(?:부분|점)|보완(?:해야\s*할|할)\s*점|weakness(?:es)?/g;
+  const matches = [...addressed.matchAll(assessment)];
+  if (!matches.length) return [];
+  const prefix = addressed.slice(0, matches[0].index).trim();
+  const qualifiers =
+    /(?:(?:가장|제일|큰|대표적인|가진|가지고\s*있는|스스로\s*생각하는|어떤|뭘|무엇을|뭐가?|특히|일할\s*때|업무상)\s*)+$/;
+  const owner = prefix.replace(qualifiers, "").trim();
+  const explicitOwner = owner.endsWith("@");
+  const implicitOwner = !owner || /^(?:what are|what is)$/.test(owner);
+  const priorSubjectIsOwner = context.recordIds.every(
+    (id) =>
+      id.startsWith("interview-") || id === "profile" || id === "education",
+  );
+  if (!explicitOwner && !(implicitOwner && priorSubjectIsOwner)) return [];
+  const ids = new Set<string>();
+  for (const [word] of matches) {
+    if (word === "장단점" || /장점|강점|잘하|잘해|strength/.test(word))
+      ids.add("interview-strength");
+    if (word === "장단점" || /단점|약점|부족|보완|weakness/.test(word))
+      ids.add("interview-weakness");
+  }
+  return [...ids];
+}
 
 // Recognize questions addressed to the CV owner, including omitted pronouns and Korean spacing.
 // Specific subjects such as “ResNet은 뭐 하는 거야?” are still resolved by record retrieval.
@@ -79,7 +131,15 @@ export function answerFromRecords(
   preferredRecordId?: string,
 ): PersonaAnswer {
   const normalized = normalize(question);
-  const query = normalized.replace(greeting, "").replace(transition, "").trim();
+  const questionBody = normalized
+    .replace(greeting, "")
+    .replace(transition, "")
+    .trim();
+  const addressed = questionBody
+    .replace(ownerTerm, " @ ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const query = addressed.replace(/@/g, " ").replace(/\s+/g, " ").trim();
   const allSources = (selected: PersonaRecord[]) =>
     [
       ...new Map(
@@ -108,21 +168,22 @@ export function answerFromRecords(
     "어떤 연구를 하고 있어?",
     "직접 만든 프로젝트는?",
   ];
-  if (!query && greeting.test(normalized))
+  if (!questionBody && greeting.test(normalized))
     return base(
       [],
       [
         /고마|감사|thanks/.test(normalized)
           ? "고마워요! 또 궁금한 게 있으면 편하게 물어보세요."
-          : "안녕하세요! 정진용의 AI 챗봇이에요. 제 공부나 프로젝트에 대해 편하게 물어보세요.",
+          : "반가워요! 저는 정진용의 공개 CV로 대화하는 아바타예요. 제 연구나 프로젝트에 대해 편하게 물어보세요.",
       ],
       starters,
       false,
       "greeting",
     );
   if (
+    /^@\s*(?:뭐야$|ai야|ai예요|챗봇이|봇이)/.test(addressed) ||
     /(?:실제|진짜|본인|직접).{0,6}(?:진용|사람이|답하|답변하)|(?:너|넌|이거|이건)\s*(?:ai야|ai예요|챗봇이|봇이)|^(?:너|넌|너는)\s*뭐야$/i.test(
-      query,
+      questionBody,
     )
   )
     return base(
@@ -136,7 +197,8 @@ export function answerFromRecords(
     );
   if (
     privateFact.test(question) ||
-    (preference.test(question) && !researchInterest.test(query))
+    ((preference.test(question) || /@\s*생각/.test(addressed)) &&
+      !researchInterest.test(query))
   )
     return base(
       [],
@@ -159,6 +221,27 @@ export function answerFromRecords(
       false,
       "clarify",
     );
+  const interviewSuggestions = [
+    "System 1 연구에서 맡은 역할은?",
+    "개인건강데이터 연구를 소개해 줘",
+    "ResNet 교육자료를 보고 싶어",
+  ];
+  const interviewIds = preferredRecordId
+    ? []
+    : interviewTopics(addressed, context);
+  if (interviewIds.length) {
+    const selected = interviewIds.flatMap((id) =>
+      records.filter((record) => record.id === id),
+    );
+    if (selected.length)
+      return base(
+        selected,
+        selected.flatMap((record) => [record.summary, ...record.details]),
+        interviewSuggestions,
+        true,
+        "interview",
+      );
+  }
   const ranked = records
     .map((record) => ({ record, score: rankRecord(record, query) }))
     .filter((item) => item.score > 0)
@@ -179,7 +262,10 @@ export function answerFromRecords(
     .map((item) => item.record);
   if (studyLocation)
     selected = records.filter((item) => item.id === "education");
-  const intro = asksForIntroduction(query);
+  const intro =
+    asksForIntroduction(query) ||
+    addressed === "@" ||
+    aboutOwner.test(addressed);
   if (
     !selected.length &&
     (intro || ranked.some(({ record }) => record === profile))
@@ -279,6 +365,14 @@ export function answerFromRecords(
             ? "자기소개부터 들려줘"
             : "다른 프로젝트도 소개해 줘",
         ];
+  if (selected.every((record) => record.id.startsWith("interview-")))
+    return base(
+      selected,
+      paragraphs.slice(0, 5),
+      interviewSuggestions,
+      true,
+      "interview",
+    );
   return base(selected, paragraphs.slice(0, 5), suggestions);
 }
 

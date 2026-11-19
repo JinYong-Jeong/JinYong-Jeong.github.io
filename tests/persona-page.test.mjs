@@ -60,6 +60,20 @@ test("the visible summary starter works with spaced and unspaced Korean verbs", 
   }
 });
 
+test("an article follow-up keeps its subject until the visitor addresses Jinyong", () => {
+  const previous = answerFromPage("이 글 요약해 줘", article);
+  const context = { recordIds: previous.recordIds };
+  for (const question of ["그럼 단점은?", "장점은?"]) {
+    const core = answerFromRecords(question, personaRecords, context);
+    assert.equal(answerFromPage(question, article, { previous, core })?.kind, "page", question);
+  }
+  for (const question of ["너의 단점은?", "진용을 왜 뽑아야 돼?"]) {
+    const core = answerFromRecords(question, personaRecords, context);
+    assert.equal(core.kind, "interview", question);
+    assert.equal(answerFromPage(question, article, { previous, core }), null, question);
+  }
+});
+
 test("the page does not replace a question about Jinyong or provide admin content", () => {
   for (const question of ["뭐하는 사람이야?", "진용이 MBTI가 뭐야?"]) {
     assert.equal(

@@ -300,12 +300,13 @@ function initPersona(panel: HTMLElement) {
     const coreAnswer = answerFromRecords(
       question,
       personaRecords,
-      { recordIds: context.recordIds.filter((id) => !id.startsWith("page:")) },
+      context,
       preferredRecordId,
     );
     const answer =
       !preferredRecordId &&
       coreAnswer.kind !== "private" &&
+      coreAnswer.kind !== "interview" &&
       coreAnswer.kind !== "greeting"
         ? (answerFromPage(question, readCurrentPage(document, location.href), {
             previous: lastPageAnswer,
@@ -341,7 +342,7 @@ function initPersona(panel: HTMLElement) {
     );
     try {
       if (currentRevision !== revision || controller.signal.aborted) return;
-      if (browserEngine.ready && answer.supported) {
+      if (browserEngine.ready && answer.supported && answer.kind !== "interview") {
         reply.label.textContent = "브라우저 AI · 생성 중";
         status.textContent = "답변을 작성하고 있어요.";
         try {
