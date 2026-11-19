@@ -39,7 +39,7 @@
 | 표지 펼치기, 책갈피 선택, 드래그·스와이프로 책장 넘기기 | `RecordDesk.astro`, `record-desk.ts`, `record-desk.css`, `record-gesture.css` | 학력·프로젝트·연구·대외활동 네 챕터와 관련 자료. 화살표 버튼과 방향키로도 이동 |
 | 펼쳐진 페이지에서 질문하기 | `cv:ask` 이벤트 | 질문과 관련 이력을 대화창에 전달 |
 | 기록을 바탕으로 대화하기 | `PersonaGuide.astro`, `config/persona.ts`, `lib/persona.ts`, `scripts/persona-guide.ts` | 자유 입력, 후속 질문, 관련 이력·원문, 생성 중지, 새 대화 |
-| CV 문서 읽기 | `pages/index.astro`, `scripts/cv.ts`, `styles/cv.css` | 경력·논문의 상세 설명, 프로젝트 파일 선택, 직접 링크, 인쇄 |
+| CV 문서 읽기 | `pages/index.astro`, `scripts/cv.ts`, `styles/cv.css` | 경력·논문의 상세 설명, 프로젝트 파일 선택, 직접 링크 |
 | 본문을 읽으면서 질문하기 | `PersonaGuide.astro`, `persona-guide.css` | 데스크톱에서는 오른쪽 대화창을 기본으로 펼치고, 좁은 화면에서는 버튼을 누르면 하단에 표시. 같은 탭에서 열림·접힘 선택 유지 |
 
 정적 HTML에 프로젝트와 이력 전문이 들어 있습니다. 공개 페이지에 들어오면 Qwen3 1.7B 다운로드가 자동으로 시작되며, 준비 중에도 공개 기록으로 답변합니다. 공개 페이지의 공통 `BaseLayout`은 Astro `ClientRouter`를 사용합니다. 메뉴와 글 링크로 이동할 때 본문은 교체하고, `transition:persist`로 대화창과 실행 중인 모델을 같은 탭에 유지합니다. 새 페이지의 답변 근거는 질문할 때 현재 본문에서 읽습니다.

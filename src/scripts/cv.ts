@@ -174,38 +174,6 @@ function mountCV() {
       { signal },
     );
   }
-  const printButton =
-    document.querySelector<HTMLButtonElement>("[data-print-cv]");
-  if (printButton) {
-    printButton.hidden = false;
-    printButton.addEventListener("click", () => window.print(), { signal });
-  }
-  // Expand disclosures for printing, then restore the visitor's reading state.
-  let openBeforePrint: HTMLDetailsElement[] = [];
-  window.addEventListener(
-    "beforeprint",
-    () => {
-      const details = Array.from(
-        document.querySelectorAll<HTMLDetailsElement>(".cv-main details"),
-      );
-      openBeforePrint = details.filter((detail) => detail.open);
-      details.forEach((detail) => {
-        detail.open = true;
-      });
-    },
-    { signal },
-  );
-  window.addEventListener(
-    "afterprint",
-    () => {
-      document
-        .querySelectorAll<HTMLDetailsElement>(".cv-main details")
-        .forEach((detail) => {
-          detail.open = openBeforePrint.includes(detail);
-        });
-    },
-    { signal },
-  );
 }
 mountCV();
 document.addEventListener("astro:page-load", mountCV);

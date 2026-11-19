@@ -41,7 +41,7 @@ npm run build
 | 사이트 제목·설명·내비게이션·공통 링크 | `src/config/site.ts` |
 | Primary/secondary 색상, 글꼴, 간격, 모션 토큰 | `src/styles/tokens.css` |
 | 홈 섹션 구성과 스타일 | `src/pages/index.astro`, `src/styles/cv.css` |
-| 홈 목차·프로젝트 파일·이메일 복사·CV 인쇄 | `src/scripts/cv.ts` |
+| 홈 목차·프로젝트 파일·이메일 복사 | `src/scripts/cv.ts` |
 | 공개 페이지 이동·챗봇 유지·앵커 복원 | `src/layouts/BaseLayout.astro`, `src/scripts/public-navigation.ts`, `src/components/PersonaGuide.astro` |
 | 인터랙티브 기록집 | `src/components/RecordDesk.astro`, `src/scripts/record-desk.ts` |
 | 페르소나의 공개 근거와 대화 | `src/config/persona.ts`, `src/lib/persona.ts`, `src/components/PersonaGuide.astro` |
