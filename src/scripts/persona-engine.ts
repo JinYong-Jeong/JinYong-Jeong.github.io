@@ -3,6 +3,7 @@ import type {
   WebWorkerMLCEngine,
 } from "@mlc-ai/web-llm";
 import { removeLegacyPersonaAssets } from "./persona-legacy-cache";
+import { cleanPersonaCompletion } from "../lib/persona";
 
 export type PersonaEngineState =
   | "idle"
@@ -225,7 +226,7 @@ export class PersonaBrowserEngine {
   async generate(
     messages: ChatCompletionMessageParam[],
     signal: AbortSignal,
-    onProgress: (characters: number) => void,
+    onText: (text: string) => void,
   ) {
     if (!this.ready || !this.engine || !this.lifetime)
       throw new Error("MODEL_NOT_READY");
@@ -268,17 +269,22 @@ export class PersonaBrowserEngine {
         }),
         lifetime.signal,
       );
-      let text = "";
+      let raw = "";
+      let visible = "";
       const iterator = stream[Symbol.asyncIterator]();
       try {
         while (true) {
           const result = await withAbort(iterator.next(), lifetime.signal);
           if (signal.aborted) throw aborted(signal);
           if (result.done) break;
-          text += result.value.choices[0]?.delta.content ?? "";
-          onProgress(
-            text.replace(/<think>[\s\S]*?<\/think>/g, "").trim().length,
-          );
+          const delta = result.value.choices[0]?.delta.content;
+          if (!delta) continue;
+          raw += delta;
+          const next = cleanPersonaCompletion(raw);
+          if (next !== visible) {
+            visible = next;
+            onText(visible);
+          }
         }
       } finally {
         if (!lifetime.signal.aborted)
@@ -287,7 +293,7 @@ export class PersonaBrowserEngine {
             lifetime.signal,
           );
       }
-      return text;
+      return visible;
     })().catch((error) => {
       if (
         this.engine === engine &&

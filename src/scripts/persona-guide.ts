@@ -7,7 +7,6 @@ import {
 } from "../config/persona";
 import {
   answerFromRecords,
-  cleanPersonaCompletion,
   makeGrounding,
   personaClosedUrl,
   personaEntryRequested,
@@ -28,6 +27,7 @@ import {
 } from "./persona-engine";
 
 type ConversationMessage = { role: "user" | "assistant"; content: string };
+const maxAnswerCharacters = 1800;
 type AskDetail = {
   question?: string;
   topic?: string;
@@ -129,11 +129,8 @@ function initPersona(panel: HTMLElement) {
       else loadProgress.value = progress;
     }
     if (loadDetail) {
-      const detail = loading
-        ? snapshot.phase === "download"
-          ? "약 1GB의 모델을 받는 동안에도 공개 기록으로 바로 답변해요."
-          : "준비하는 동안에도 공개 기록으로 바로 답변해요."
-        : snapshot.state === "unsupported"
+      const detail =
+        snapshot.state === "unsupported"
           ? "이 환경에서는 AI 대신 공개 기록으로 답변해요."
           : failed
             ? "AI를 준비하지 못했어요. 공개 기록으로 계속 답변해요."
@@ -144,7 +141,7 @@ function initPersona(panel: HTMLElement) {
     const announcement = ready
       ? "AI가 준비됐어요. 이제 AI와 대화할 수 있어요."
       : loading
-        ? "AI를 준비하고 있어요. 공개 기록으로 먼저 답변할 수 있어요."
+        ? "AI를 준비하고 있어요."
         : (loadDetail?.textContent ?? "");
     if (engineStatus && engineStatus.textContent !== announcement)
       engineStatus.textContent = announcement;
@@ -178,6 +175,7 @@ function initPersona(panel: HTMLElement) {
     stopButton.hidden = !value;
     input.readOnly = value;
     form.setAttribute("aria-busy", String(value));
+    transcript.setAttribute("aria-busy", String(value));
     followups.hidden = value || !followups.childElementCount;
   }
 
@@ -196,32 +194,23 @@ function initPersona(panel: HTMLElement) {
     });
   }
 
-  function addMessage(
-    role: "user" | "assistant",
-    paragraphs: string[],
-    label?: string,
-  ) {
+  function addMessage(role: "user" | "assistant", text: string) {
     const item = document.createElement("li");
     item.className = `persona-message persona-message--${role}`;
     const heading = document.createElement("p");
     heading.className = "persona-message-label";
     heading.textContent =
       role === "user" ? "YOUR QUESTION" : "JINYONG · DIGITAL PERSONA";
-    if (label) {
-      const note = document.createElement("small");
-      note.textContent = label;
-      heading.append(note);
-    }
+    const label = document.createElement("small");
+    if (role === "assistant") heading.append(label);
     const body = document.createElement("div");
     body.className = "persona-message-body";
-    for (const text of paragraphs) {
-      const paragraph = document.createElement("p");
-      paragraph.textContent = text;
-      body.append(paragraph);
-    }
+    const paragraph = document.createElement("p");
+    paragraph.textContent = text;
+    body.append(paragraph);
     item.append(heading, body);
     transcript.append(item);
-    return item;
+    return { item, label, body, paragraph };
   }
 
   function addSources(item: HTMLElement, sources: PersonaSource[]) {
@@ -266,14 +255,14 @@ function initPersona(panel: HTMLElement) {
     question: string,
     answer: PersonaAnswer,
     signal: AbortSignal,
-    onProgress: (characters: number) => void,
+    onText: (text: string) => void,
   ) {
     const relevant = answer.records;
     const pageAnswer = relevant.some(isPageRecord);
     const sameTopic = answer.recordIds.some((id) =>
       context.recordIds.includes(id),
     );
-    const raw = await browserEngine.generate(
+    const text = await browserEngine.generate(
       [
         {
           role: "system",
@@ -293,14 +282,13 @@ function initPersona(panel: HTMLElement) {
         },
       ],
       signal,
-      onProgress,
+      onText,
     );
-    const text = cleanPersonaCompletion(raw);
     if (!text) throw new Error("Empty response");
     if (!validatePersonaCompletion(text, relevant, question))
       throw new Error("UNGROUNDED_RESPONSE");
     return text
-      .slice(0, 1800)
+      .slice(0, maxAnswerCharacters)
       .split(/\n\s*\n/)
       .filter(Boolean);
   }
@@ -328,16 +316,25 @@ function initPersona(panel: HTMLElement) {
     input.value = "";
     resizeInput();
     setBusy(true);
-    addMessage("user", [question]);
-    const pending = addMessage("assistant", ["관련 기록을 살펴보고 있어요."]);
-    pending.classList.add("persona-message--pending");
-    showMessage(pending);
+    addMessage("user", question);
+    const reply = addMessage("assistant", "관련 기록을 살펴보고 있어요.");
+    reply.item.classList.add("persona-message--pending");
+    showMessage(reply.item);
     let paragraphs = answer.paragraphs;
     let usedAI = false;
-    let lastProgressUpdate = 0;
+    let hasStreamedText = false;
     let fallback: "engine" | "grounding" | "context" | "timeout" | null = null;
     const controller = new AbortController();
     activeRequest = controller;
+    controller.signal.addEventListener(
+      "abort",
+      () => {
+        if (controller.signal.reason !== "cancelled") return;
+        if (hasStreamedText) reply.label.textContent = "중지된 답변";
+        else reply.item.remove();
+      },
+      { once: true },
+    );
     const timeout = window.setTimeout(
       () => controller.abort("timeout"),
       120000,
@@ -345,23 +342,26 @@ function initPersona(panel: HTMLElement) {
     try {
       if (currentRevision !== revision || controller.signal.aborted) return;
       if (browserEngine.ready && answer.supported) {
-        pending.querySelector(".persona-message-body p")!.textContent =
-          "브라우저 AI가 관련 기록을 읽고 답변을 작성하고 있어요.";
-        status.textContent = "이 기기에서 생성 중 · 중지할 수 있어요";
+        reply.label.textContent = "브라우저 AI · 생성 중";
+        status.textContent = "답변을 작성하고 있어요.";
         try {
           paragraphs = await generate(
             question,
             answer,
             controller.signal,
-            (characters) => {
+            (text) => {
               if (currentRevision !== revision || controller.signal.aborted)
                 return;
-              if (performance.now() - lastProgressUpdate < 500) return;
-              lastProgressUpdate = performance.now();
-              pending.querySelector(".persona-message-body p")!.textContent =
-                characters
-                  ? `답변 ${characters}자를 작성했어요. 공개 기록과 함께 확인하고 있어요.`
-                  : "브라우저 AI가 관련 기록을 읽고 있어요.";
+              const visible = text.slice(0, maxAnswerCharacters);
+              if (!visible || (hasStreamedText && reply.paragraph.textContent === visible))
+                return;
+              const atBottom =
+                scrollArea.scrollHeight - scrollArea.clientHeight - scrollArea.scrollTop <= 24;
+              hasStreamedText = true;
+              reply.item.classList.remove("persona-message--pending");
+              reply.paragraph.textContent = visible;
+              if (atBottom)
+                scrollArea.scrollTo({ top: scrollArea.scrollHeight, behavior: "instant" });
             },
           );
           usedAI = true;
@@ -384,19 +384,22 @@ function initPersona(panel: HTMLElement) {
         controller.signal.reason === "cancelled"
       )
         return;
-      pending.remove();
-      const item = addMessage(
-        "assistant",
-        paragraphs,
-        usedAI
-          ? "브라우저 AI 답변"
-          : answer.kind === "page"
-            ? "현재 페이지 답변"
-            : answer.sources.length
-              ? "기록 검색 답변"
-              : "챗봇 답변",
+      reply.item.classList.remove("persona-message--pending");
+      reply.label.textContent = usedAI
+        ? "브라우저 AI 답변"
+        : answer.kind === "page"
+          ? "현재 페이지 답변"
+          : answer.sources.length
+            ? "기록 검색 답변"
+            : "챗봇 답변";
+      reply.body.replaceChildren(
+        ...paragraphs.map((text) => {
+          const paragraph = document.createElement("p");
+          paragraph.textContent = text;
+          return paragraph;
+        }),
       );
-      addSources(item, answer.sources);
+      addSources(reply.item, answer.sources);
       if (answer.supported && answer.recordIds.length) {
         if (!answer.recordIds.some((id) => context.recordIds.includes(id)))
           history = [];
@@ -425,11 +428,9 @@ function initPersona(panel: HTMLElement) {
                     : answer.sources.length
                       ? "공개 기록을 바탕으로 구성한 답변입니다."
                       : "";
-      showMessage(item);
     } finally {
       clearTimeout(timeout);
       if (currentRevision === revision) {
-        pending.remove();
         activeRequest = null;
         setBusy(false);
       }
@@ -441,7 +442,6 @@ function initPersona(panel: HTMLElement) {
     revision++;
     activeRequest?.abort("cancelled");
     activeRequest = null;
-    transcript.querySelector(".persona-message--pending")?.remove();
     setBusy(false);
     status.textContent =
       "답변을 중지했어요. 질문을 바꾸거나 다시 물어볼 수 있습니다.";

@@ -293,9 +293,24 @@ export function makeGrounding(records: PersonaRecord[]) {
 }
 
 export function cleanPersonaCompletion(raw: string) {
-  return raw
-    .replace(/<think>[\s\S]*?(?:<\/think>|$)/g, "")
-    .replace(/<\/?think>/g, "")
+  // A WebLLM delta can end anywhere within a control tag or a UTF-16 pair.
+  const bracket = raw.lastIndexOf("<");
+  if (bracket !== -1) {
+    const tail = raw.slice(bracket).toLowerCase();
+    if ("<think>".startsWith(tail) || "</think>".startsWith(tail))
+      raw = raw.slice(0, bracket);
+  }
+  let visible = "";
+  let reasoningDepth = 0;
+  for (const part of raw.split(/(<\/?think>)/i)) {
+    const tag = part.toLowerCase();
+    if (tag === "<think>") reasoningDepth++;
+    else if (tag === "</think>")
+      reasoningDepth = Math.max(0, reasoningDepth - 1);
+    else if (reasoningDepth === 0) visible += part;
+  }
+  return visible
+    .replace(/[\uD800-\uDBFF]$/, "")
     .replace(/\*\*([^*\n]+)\*\*/g, "$1")
     .trim()
     .replace(/^정진용(?:은|는)\s*/, "저는 ")

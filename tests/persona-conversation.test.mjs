@@ -3,11 +3,31 @@ import test from "node:test";
 import { personaRecords } from "../src/config/persona.ts";
 import {
   answerFromRecords,
+  cleanPersonaCompletion,
   validatePersonaCompletion,
 } from "../src/lib/persona.ts";
 
 const ask = (question, recordIds = []) =>
   answerFromRecords(question, personaRecords, { recordIds });
+
+test("streamed text reveals only the answer, including when a token splits a reasoning tag", () => {
+  const withReasoning = "<think>초안<THINK>검토</THINK>추론</think>안녕하세요";
+  const answerStart = withReasoning.indexOf("안녕");
+  for (let end = 1; end <= withReasoning.length; end++) {
+    assert.equal(
+      cleanPersonaCompletion(withReasoning.slice(0, end)),
+      withReasoning.slice(answerStart, end),
+    );
+  }
+  assert.equal(cleanPersonaCompletion("첫 줄\n\n<think>검토"), "첫 줄");
+  assert.equal(
+    cleanPersonaCompletion("첫 줄\n\n<think>검토</think>둘째 줄"),
+    "첫 줄\n\n둘째 줄",
+  );
+  assert.equal(cleanPersonaCompletion("x < 3"), "x < 3");
+  assert.equal(cleanPersonaCompletion("안녕 \uD83D"), "안녕");
+  assert.equal(cleanPersonaCompletion("안녕 👋"), "안녕 👋");
+});
 
 test("a greeting followed by an ordinary question about Jinyong reaches his CV", () => {
   const greeting = ask("안녕");
