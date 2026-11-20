@@ -4,6 +4,7 @@ import { personaRecords } from "../src/config/persona.ts";
 import {
   answerFromRecords,
   cleanPersonaCompletion,
+  needsPersonaReferences,
   validatePersonaCompletion,
 } from "../src/lib/persona.ts";
 
@@ -190,4 +191,18 @@ test("names and pronouns do not change ordinary CV lookups", () => {
   assert.equal(ask("당신의 MBTI는?").kind, "private");
   assert.equal(ask("진용의 생각은?").kind, "private");
   assert.equal(ask("네가 만든 ResNet 교육자료는?").recordIds[0], "aing-resnet");
+});
+
+test("ordinary chat skips retrieval even after discussing a CV record", () => {
+  for (const recordIds of [[], ["fedops"]]) {
+    for (const question of ["안녕!", "점심 메뉴 좀 골라줘", "김치찌개 끓이는 법 알려줘", "파이썬 리스트 정렬 방법은?", "오늘 너무 힘들어", "이력서 쓰는 법 알려줘", "논문을 읽는 방법 알려줘"]) {
+      assert.equal(needsPersonaReferences(question, {recordIds}), false, question);
+    }
+  }
+  for (const question of ["너는 뭘 잘해?", "어디서 공부해?", "자기소개 해줘", "FedOps에서 뭘 맡았어?", "이 글 요약해 줘"]) {
+    assert.equal(needsPersonaReferences(question, {recordIds: []}), true, question);
+  }
+  assert.equal(needsPersonaReferences("그때 역할은?", {recordIds:["fedops"]}), true);
+  assert.equal(needsPersonaReferences("자세히", {recordIds:[]}), false);
+  assert.equal(needsPersonaReferences("알려줘", {recordIds:[]}, "education"), true);
 });

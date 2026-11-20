@@ -1,350 +1,112 @@
-import type {
-  ChatCompletionMessageParam,
-  WebWorkerMLCEngine,
-} from "@mlc-ai/web-llm";
-import { removeLegacyPersonaAssets } from "./persona-legacy-cache";
+import type { Wllama } from "@wllama/wllama";
+import wasmUrl from "@wllama/wllama/esm/wasm/wllama.wasm?url";
 import { cleanPersonaCompletion } from "../lib/persona";
+import { removeLegacyPersonaAssets } from "./persona-legacy-cache";
 
-export type PersonaEngineState =
-  | "idle"
-  | "checking"
-  | "loading"
-  | "ready"
-  | "unsupported"
-  | "error";
+type Message = { role: "system" | "user" | "assistant"; content: string };
 export interface PersonaEngineSnapshot {
-  state: PersonaEngineState;
-  modelId?: string;
+  state: "idle" | "checking" | "loading" | "ready" | "unsupported" | "error";
   progress?: number;
   phase?: "download" | "initializing";
   detail: string;
 }
 
-export const PERSONA_CONTEXT_WINDOW = 2048;
-const OUTPUT_TOKENS = 320;
-const MODEL_IDS = {
-  f16: "Qwen3-1.7B-q4f16_1-MLC",
-  f32: "Qwen3-1.7B-q4f32_1-MLC",
-} as const;
+const modelUrl = "https://huggingface.co/wlsdyd5373/jjmethod/resolve/255fb2e0dac754251c9d1f8943519c971dfadd51/gguf/qwen3-1.7b-personal-style-q4_k_m.gguf";
+const modelBytes = 1107408768;
 
-function aborted(signal: AbortSignal) {
-  return new DOMException(String(signal.reason ?? "Cancelled"), "AbortError");
-}
-
-function withAbort<T>(operation: Promise<T>, signal: AbortSignal): Promise<T> {
-  if (signal.aborted) return Promise.reject(aborted(signal));
-  return new Promise((resolve, reject) => {
-    const cancel = () => reject(aborted(signal));
-    signal.addEventListener("abort", cancel, { once: true });
-    operation
-      .then(resolve, reject)
-      .finally(() => signal.removeEventListener("abort", cancel));
-  });
-}
-
-/** One tab's worker owns the model. No downloaded artifacts survive worker termination. */
 export class PersonaBrowserEngine {
-  private worker: Worker | null = null;
-  private engine: WebWorkerMLCEngine | null = null;
-  private lifetime: AbortController | null = null;
-  private loading: AbortController | null = null;
-  private generation: Promise<string> | null = null;
-  private revision = 0;
-  private snapshot: PersonaEngineSnapshot = {
-    state: "idle",
-    detail: "AI를 켜기 전에도 공개 기록에 질문할 수 있어요.",
-  };
+  private engine: Wllama | null = null;
+  private session = new AbortController();
+  private loading: Promise<void> | null = null;
 
-  constructor(
-    private readonly onChange: (snapshot: PersonaEngineSnapshot) => void,
-  ) {
+  constructor(private readonly onChange: (s: PersonaEngineSnapshot) => void) {
     void removeLegacyPersonaAssets();
-    window.addEventListener("pagehide", () => this.dispose("pagehide"));
+    window.addEventListener("pagehide", () => this.dispose());
   }
 
-  get ready() {
-    return this.snapshot.state === "ready" && this.engine !== null;
-  }
+  get ready() { return !!this.engine; }
 
-  private update(update: Partial<PersonaEngineSnapshot>) {
-    this.snapshot = { ...this.snapshot, ...update };
-    this.onChange({ ...this.snapshot });
-  }
-
-  private releaseWorker() {
-    this.lifetime?.abort("worker-stopped");
-    this.worker?.terminate();
-    this.worker = null;
-    this.engine = null;
-    this.lifetime = null;
-  }
-
-  async load() {
-    if (this.loading || this.ready) return;
-    const revision = ++this.revision;
-    const controller = new AbortController();
-    this.loading = controller;
-    this.update({
-      state: "checking",
-      modelId: undefined,
-      progress: undefined,
-      phase: undefined,
-      detail: "이 브라우저의 WebGPU 지원을 확인하고 있어요.",
+  load(): Promise<void> {
+    if (this.ready) return Promise.resolve();
+    if (this.loading) return this.loading;
+    const signal = this.session.signal;
+    this.loading = this.initialize(signal).finally(() => {
+      if (!signal.aborted) this.loading = null;
     });
+    return this.loading;
+  }
+
+  private async initialize(signal: AbortSignal) {
+    let runtime: Wllama | undefined;
     try {
-      if (!window.isSecureContext || !navigator.gpu) {
-        this.update({
-          state: "unsupported",
-          detail:
-            "이 환경에서는 브라우저 AI를 실행할 수 없어요. HTTPS에서 WebGPU를 지원하는 최신 Chrome을 사용하거나 공개 기록 검색을 이용해 주세요.",
-        });
+      this.onChange({ state: "checking", detail: "브라우저 지원을 확인하고 있어요." });
+      const { gpu } = navigator as Navigator & { gpu?: { requestAdapter(): Promise<unknown> } };
+      if (!window.isSecureContext || !(await gpu?.requestAdapter())) {
+        if (!signal.aborted) this.onChange({state:"unsupported", detail:"WebGPU를 지원하는 Chrome이 필요해요."});
         return;
       }
-      const adapter = await withAbort(
-        navigator.gpu.requestAdapter(),
-        controller.signal,
-      );
-      if (!adapter) {
-        this.update({
-          state: "unsupported",
-          detail:
-            "사용할 수 있는 WebGPU 그래픽 장치를 찾지 못했어요. 공개 기록 검색은 계속 사용할 수 있습니다.",
-        });
-        return;
-      }
-      const modelId =
-        MODEL_IDS[adapter.features.has("shader-f16") ? "f16" : "f32"];
-      const webllm = await withAbort(
-        import("@mlc-ai/web-llm"),
-        controller.signal,
-      );
-      const modelRecord = webllm.prebuiltAppConfig.model_list.find(
-        (record) => record.model_id === modelId,
-      );
-      if (!modelRecord) throw new Error("MODEL_NOT_REGISTERED");
-      if (controller.signal.aborted) return;
-      this.update({
-        state: "loading",
-        modelId,
-        phase: "download",
-        detail:
-          "이 탭의 메모리로 모델을 내려받고 있어요.",
-      });
-      const worker = new Worker(
-        new URL("./persona-webllm.worker.ts", import.meta.url),
-        { type: "module" },
-      );
-      this.worker = worker;
-      this.lifetime = new AbortController();
-      worker.addEventListener("error", () => {
-        if (revision !== this.revision) return;
-        controller.abort("worker-error");
-        this.releaseWorker();
-        this.update({
-          state: "error",
-          progress: undefined,
-          detail:
-            "AI 실행 중 오류가 발생했어요. 공개 기록 검색을 이용하거나 모델을 다시 준비해 주세요.",
-        });
-      });
-      const engine = new webllm.WebWorkerMLCEngine(worker, {
-        logLevel: "ERROR",
-        appConfig: { model_list: [modelRecord], cacheBackend: "cache" },
-        initProgressCallback: (report) => {
-          if (revision !== this.revision || controller.signal.aborted) return;
-          const phase = /Fetching param|Start to fetch/i.test(report.text)
-            ? "download"
-            : /Loading model|Finish loading/i.test(report.text)
-              ? "initializing"
-              : undefined;
-          this.update({
-            progress: Number.isFinite(report.progress)
-              ? Math.max(0, Math.min(1, report.progress))
-              : undefined,
-            phase,
-            detail:
-              phase === "download"
-                ? "모델을 이 탭의 메모리로 내려받고 있어요."
-                : phase === "initializing"
-                  ? "내려받은 모델을 GPU에 준비하고 있어요."
-                  : "브라우저 AI를 준비하고 있어요.",
-          });
+      signal.throwIfAborted();
+      const { Wllama } = await import("@wllama/wllama");
+      signal.throwIfAborted();
+      const response = await fetch(modelUrl, { signal, cache: "no-store", credentials: "omit" });
+      if (!response.ok || !response.body) throw new Error("MODEL_DOWNLOAD_FAILED");
+      let received = 0;
+      let percent = -1;
+      const stream = response.body.pipeThrough(new TransformStream<Uint8Array, Uint8Array>({
+        transform: (chunk, controller) => {
+          received += chunk.length;
+          const next = Math.floor(100 * received / modelBytes);
+          if (next !== percent && !signal.aborted) {
+            percent = next;
+            this.onChange({state:"loading", phase:"download", progress:received/modelBytes, detail:"모델 다운로드 중"});
+          }
+          controller.enqueue(chunk);
         },
-      });
-      this.engine = engine;
-      await withAbort(
-        engine.reload(modelId, { context_window_size: PERSONA_CONTEXT_WINDOW }),
-        controller.signal,
-      );
-      if (revision !== this.revision || controller.signal.aborted) return;
-      this.update({
-        state: "ready",
-        progress: 1,
-        phase: undefined,
-        detail:
-          "모델 준비가 끝났어요. 이제 이 브라우저에서 AI 답변을 작성합니다.",
-      });
-    } catch (error) {
-      if (revision !== this.revision) return;
-      this.releaseWorker();
-      if (this.snapshot.state === "error") return;
-      const message = error instanceof Error ? error.message : String(error);
-      const memory =
-        /memory|allocation|allocat|buffer|out.of.memory|device.lost/i.test(
-          message,
-        );
-      this.update({
-        state: "error",
-        progress: undefined,
-        detail: memory
-          ? "그래픽 메모리가 부족하거나 GPU 연결이 끊겼어요. 공개 기록으로 대화를 계속할 수 있어요."
-          : "모델을 준비하지 못했어요. 인터넷 연결을 확인한 뒤 다시 시도해 주세요. 공개 기록 검색은 계속 사용할 수 있어요.",
-      });
-      console.warn("Persona WebLLM initialization failed:", error);
-    } finally {
-      if (this.loading === controller) this.loading = null;
+      }));
+      const blob = await new Response(stream).blob();
+      if (blob.size !== modelBytes) throw new Error("INCOMPLETE_GGUF");
+      signal.throwIfAborted();
+      this.onChange({state:"loading", phase:"initializing", detail:"모델을 준비하고 있어요."});
+      runtime = new Wllama({ default: wasmUrl }, { suppressNativeLog: true });
+      await runtime.loadModel([blob], { n_ctx: 4096, n_batch: 128, n_ubatch: 128, n_threads: 1, n_gpu_layers: 99, reasoning: false, warmup: false });
+      signal.throwIfAborted();
+      this.engine = runtime;
+      this.onChange({state:"ready",detail:"진용의 대화 모델이 준비됐어요."});
+    } catch (err) {
+      if (runtime) await runtime.exit().catch(() => {});
+      if (!signal.aborted) {
+        console.warn("Persona model initialization failed", err);
+        this.onChange({state:"error",detail:"모델을 준비하지 못했어요."});
+      }
     }
   }
 
-  /** Also runs for BFCache pagehide. A restored page can explicitly call load() again. */
-  dispose(reason: "pagehide" | "manual" = "manual") {
-    ++this.revision;
-    this.loading?.abort(reason);
+  dispose(_reason?: "manual" | "pagehide") {
+    this.session.abort();
+    this.session = new AbortController();
+    const previous = this.engine;
+    this.engine = null;
     this.loading = null;
-    this.releaseWorker();
-    this.generation = null;
-    this.update({
-      state: "idle",
-      modelId: undefined,
-      progress: undefined,
-      phase: undefined,
-      detail:
-        "AI 메모리를 해제했어요. 대화를 이어가려면 모델을 다시 준비합니다.",
-    });
+    if (previous) void previous.exit().catch(() => {});
+    this.onChange({ state:"idle", detail:"모델 메모리를 해제했어요." });
   }
 
-  async generate(
-    messages: ChatCompletionMessageParam[],
-    signal: AbortSignal,
-    onText: (text: string) => void,
-  ) {
-    if (!this.ready || !this.engine || !this.lifetime)
-      throw new Error("MODEL_NOT_READY");
-    if (this.generation)
-      await withAbort(
-        this.generation.catch(() => ""),
-        signal,
-      );
+  async generate(messages: Message[], signal: AbortSignal, onText: (text: string) => void) {
     const engine = this.engine;
-    const lifetime = this.lifetime;
-    if (!engine || !lifetime || !this.ready) throw new Error("MODEL_NOT_READY");
-    let stopTimer: ReturnType<typeof setTimeout> | undefined;
-    const stop = () => {
-      if (this.engine !== engine) return;
-      engine.interruptGenerate();
-      // A hung GPU must not leave the next question waiting forever.
-      stopTimer = setTimeout(() => {
-        if (this.engine !== engine) return;
-        this.releaseWorker();
-        this.update({
-          state: "error",
-          progress: undefined,
-          detail:
-            "GPU가 중지 요청에 응답하지 않아 AI를 종료했어요. 다시 준비하거나 공개 기록으로 대화를 이어갈 수 있어요.",
-        });
-      }, 3000);
-    };
-    signal.addEventListener("abort", stop, { once: true });
-    const task = (async () => {
-      const fitted = await this.fitMessages(messages, engine, lifetime.signal);
-      if (signal.aborted) throw aborted(signal);
-      const stream = await withAbort(
-        engine.chat.completions.create({
-          messages: fitted,
-          temperature: 0.2,
-          top_p: 0.8,
-          max_tokens: OUTPUT_TOKENS,
-          stream: true,
-          extra_body: { enable_thinking: false },
-        }),
-        lifetime.signal,
-      );
-      let raw = "";
-      let visible = "";
-      const iterator = stream[Symbol.asyncIterator]();
-      try {
-        while (true) {
-          const result = await withAbort(iterator.next(), lifetime.signal);
-          if (signal.aborted) throw aborted(signal);
-          if (result.done) break;
-          const delta = result.value.choices[0]?.delta.content;
-          if (!delta) continue;
+    if (!engine) throw new Error("MODEL_NOT_READY");
+    let raw = "";
+    await engine.createChatCompletion({
+      messages, abortSignal: AbortSignal.any([signal, this.session.signal]),
+      stream: true, temperature: 0.6, top_p: 0.85, max_tokens: 320,
+      chat_template_kwargs: {enable_thinking:false},
+      onData(chunk) {
+        const delta = chunk.choices[0]?.delta.content;
+        if (delta && !signal.aborted) {
           raw += delta;
-          const next = cleanPersonaCompletion(raw);
-          if (next !== visible) {
-            visible = next;
-            onText(visible);
-          }
+          onText(cleanPersonaCompletion(raw));
         }
-      } finally {
-        if (!lifetime.signal.aborted)
-          await withAbort(
-            Promise.resolve(iterator.return?.()),
-            lifetime.signal,
-          );
-      }
-      return visible;
-    })().catch((error) => {
-      if (
-        this.engine === engine &&
-        !signal.aborted &&
-        !(error instanceof Error && error.message === "CONTEXT_TOO_LONG")
-      ) {
-        this.releaseWorker();
-        this.update({
-          state: "error",
-          progress: undefined,
-          detail:
-            "AI가 답변을 마치지 못했어요. 공개 기록으로 답변하며, AI 준비를 다시 시도할 수 있어요.",
-        });
-        console.warn("Persona WebLLM generation failed:", error);
-      }
-      throw error;
+      },
     });
-    this.generation = task;
-    void task
-      .finally(() => {
-        signal.removeEventListener("abort", stop);
-        clearTimeout(stopTimer);
-        if (this.generation === task) this.generation = null;
-      })
-      .catch(() => {});
-    if (signal.aborted) stop();
-    return withAbort(task, signal);
-  }
-
-  /** Count with the loaded tokenizer; preserve the current question and supplied facts first. */
-  private async fitMessages(
-    messages: ChatCompletionMessageParam[],
-    engine: WebWorkerMLCEngine,
-    signal: AbortSignal,
-  ) {
-    const fitted = messages.map((message) => ({ ...message }));
-    const budget = PERSONA_CONTEXT_WINDOW - OUTPUT_TOKENS - 96;
-    const count = async () => {
-      const text = fitted
-        .map((message) =>
-          typeof message.content === "string" ? message.content : "",
-        )
-        .join("\n");
-      return (
-        (await withAbort(engine.tokenize(text), signal)).length +
-        fitted.length * 12
-      );
-    };
-    while ((await count()) > budget && fitted.length > 2)
-      fitted.splice(1, Math.min(2, fitted.length - 2));
-    if ((await count()) > budget) throw new Error("CONTEXT_TOO_LONG");
-    return fitted;
+    return cleanPersonaCompletion(raw);
   }
 }

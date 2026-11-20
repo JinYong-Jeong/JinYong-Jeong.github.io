@@ -4,7 +4,7 @@ export interface PersonaContext {
   recordIds: string[];
 }
 export interface PersonaAnswer {
-  kind: "record" | "interview" | "greeting" | "private" | "clarify" | "page";
+  kind: "chat" | "record" | "interview" | "greeting" | "private" | "clarify" | "page";
   paragraphs: string[];
   sources: PersonaSource[];
   suggestions: string[];
@@ -107,6 +107,23 @@ function asksForIntroduction(query: string) {
   return /^(?:(?:뭐|뭘|무얼|무엇을?|어떤일을?|무슨일을?)(?:주로|보통)?[하해했]|뭐먹고사|어떤(?:사람|분)|무슨분|누구|하는일|직업|근황|어떻게지내|자기소개|소개해)/.test(
     subject,
   );
+}
+
+/** Route before scanning the CV records or extracting text from the current page. */
+export function needsPersonaReferences(question: string, context: PersonaContext, preferredRecordId?: string, articleTitle = "") {
+  if (preferredRecordId) return true;
+  const q = normalize(question).replace(greeting, "").replace(transition, "").trim();
+  if (!q) return false;
+  const addressed = q.replace(ownerTerm, " @ ").replace(/\s+/g, " ").trim();
+  // A writing or study request can mention CV topics without asking about this person or site.
+  if (!addressed.includes("@") && /(?:쓰는|읽는|만드는|시작하는|작성하는|작성|준비하는|공부하는)\s*(?:방법|법|요령|팁)|예시(?:를)?\s*(?:만들|써)|대신\s*써/.test(q) && !/(?:이|현재)\s*(?:글|페이지|본문)|공개 기록/.test(q)) return false;
+  if (asksForIntroduction(q) || interviewTopics(addressed, context).length || placeOfStudy.test(q)) return true;
+  if (/(?:이|그|현재|지금 보고 있는)\s*(?:글|페이지|본문|사이트|포스트|프로젝트|연구|논문)|this (?:page|article|post)|your (?:work|research|projects|education)|어떤 연구|공개 기록|자기소개|포트폴리오|이력서|학력|경력|직접 만든|가천대|fedops|system\s*1|개인건강데이터|a\s*ing|resnet 교육자료|연락처|이메일 주소|깃허브 주소/i.test(q)) return true;
+  if (/^(?:논문|연구|프로젝트|동아리|블로그|수상|활동|연락|학업)(?:$|을|를|에서|는|은|에 대해| 목록| 소개| 알려| 보여)/.test(q)) return true;
+  if (articleTitle && normalize(articleTitle).split(/\s+/).some((word) => word.length >= 4 && q.includes(word))) return true;
+  if (/(?:현재|여기|방금\s*(?:본|읽은)).{0,8}(?:내용|페이지|글|프로젝트)|깃허브|링크드인|공개 이메일|fedllm|sound haptic/i.test(q)) return true;
+  if (addressed.includes("@") && /연구|프로젝트|공부|활동|학교|전공|논문|경험|역할|이력|학력|수상|연락|회사|깃허브|블로그|생일|집주소|전화번호/.test(q)) return true;
+  return context.recordIds.length > 0 && /^(?:더 알려|자세히|좀 더|더 자세|(?:그거|그건|그때|거기|방금|앞서)|(?:역할|기여|기간|출처|장점|단점|장단점|왜|언제|어디서)(?:$|은|는|이|가|요|였|야|\s*(?:뭐|알려|했|부터|했어)))/.test(q);
 }
 
 function rankRecord(record: PersonaRecord, query: string) {

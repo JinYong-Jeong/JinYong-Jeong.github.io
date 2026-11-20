@@ -7,6 +7,7 @@ import {
 } from "../config/persona";
 import {
   answerFromRecords,
+  needsPersonaReferences,
   makeGrounding,
   personaClosedUrl,
   personaEntryRequested,
@@ -120,8 +121,8 @@ function initPersona(panel: HTMLElement) {
         ? `${snapshot.phase === "initializing" ? "AI 시작 중" : "AI 준비 중"}${progress === undefined ? "" : ` · ${Math.floor(progress * 100)}%`}`
         : "공개 기록으로 답변";
     explanation.textContent = ready
-      ? "AI가 이 브라우저에서 공개 기록과 최근 대화로 답변을 작성합니다. 질문은 서버로 전송하지 않습니다. AI 답변은 부정확할 수 있으니 연결된 근거도 확인해 주세요."
-      : "질문과 관련된 공개 기록을 찾아 답변합니다. AI가 준비되면 같은 기록과 최근 대화로 답변을 작성하며, 기록에 없는 내용은 답하지 않습니다.";
+      ? "진용의 말투로 학습한 AI가 이 기기에서 답해요. 이력이나 현재 글을 물을 때만 공개 자료를 참고해요."
+      : "AI가 준비되면 일상 이야기도 나눌 수 있어요. 공개 기록에 관한 질문은 지금도 답할 수 있어요.";
     if (retryButton) retryButton.hidden = !failed;
     if (loadProgress) {
       loadProgress.hidden = !loading;
@@ -259,6 +260,7 @@ function initPersona(panel: HTMLElement) {
   ) {
     const relevant = answer.records;
     const pageAnswer = relevant.some(isPageRecord);
+    const direct = answer.kind === "chat";
     const sameTopic = answer.recordIds.some((id) =>
       context.recordIds.includes(id),
     );
@@ -266,11 +268,13 @@ function initPersona(panel: HTMLElement) {
       [
         {
           role: "system",
-          content: pageAnswer
+          content: direct
+            ? "정진용의 AI 아바타로서 상대방의 메시지에 자연스러운 한국어 채팅 말투로 답해. 일상 대화는 편하게 이어가. 추천을 부탁하면 구체적인 선택 하나를 먼저 말하고, 설명을 부탁하면 질문의 답부터 알려줘. 상대의 조건을 기억하고 정진용의 실제 개인정보나 경험을 추측하지 마."
+            : pageAnswer
             ? PAGE_REFERENCE_INSTRUCTIONS
             : `${personaSystemPrompt}\n\n<공개기록>\n${makeGrounding(relevant)}\n</공개기록>`,
         },
-        ...(sameTopic ? history.slice(-4) : []).map((message) => ({
+        ...(direct || sameTopic ? history.slice(-4) : []).map((message) => ({
           ...message,
           content: message.content.slice(0, 500),
         })),
@@ -285,7 +289,7 @@ function initPersona(panel: HTMLElement) {
       onText,
     );
     if (!text) throw new Error("Empty response");
-    if (!validatePersonaCompletion(text, relevant, question))
+    if (!direct && !validatePersonaCompletion(text, relevant, question))
       throw new Error("UNGROUNDED_RESPONSE");
     return text
       .slice(0, maxAnswerCharacters)
@@ -297,14 +301,18 @@ function initPersona(panel: HTMLElement) {
     const question = value.trim().slice(0, 600);
     if (!question || busy) return;
     const currentRevision = ++revision;
-    const coreAnswer = answerFromRecords(
+    const articleTitle = document.querySelector('meta[property="og:type"]')?.getAttribute("content") === "article"
+      ? document.title.split("|")[0] : "";
+    const useRecords = needsPersonaReferences(question, context, preferredRecordId, articleTitle);
+    const coreAnswer: PersonaAnswer = useRecords ? answerFromRecords(
       question,
       personaRecords,
       context,
       preferredRecordId,
-    );
+    ) : {kind: "chat", supported: true, records: [], recordIds: [], sources: [], suggestions: [],
+         paragraphs: ["이 기기에서 대화 모델을 준비하지 못했어요. WebGPU를 지원하는 Chrome에서 다시 시도해 주세요."]};
     const answer =
-      !preferredRecordId &&
+      useRecords && !preferredRecordId &&
       coreAnswer.kind !== "private" &&
       coreAnswer.kind !== "interview" &&
       coreAnswer.kind !== "greeting"
@@ -318,7 +326,7 @@ function initPersona(panel: HTMLElement) {
     resizeInput();
     setBusy(true);
     addMessage("user", question);
-    const reply = addMessage("assistant", "관련 기록을 살펴보고 있어요.");
+    const reply = addMessage("assistant", useRecords ? "관련 기록을 살펴보고 있어요." : "답변을 준비하고 있어요.");
     reply.item.classList.add("persona-message--pending");
     showMessage(reply.item);
     let paragraphs = answer.paragraphs;
@@ -342,7 +350,20 @@ function initPersona(panel: HTMLElement) {
     );
     try {
       if (currentRevision !== revision || controller.signal.aborted) return;
-      if (browserEngine.ready && answer.supported && answer.kind !== "interview") {
+      if (!useRecords && (engineState === "checking" || engineState === "loading")) {
+        reply.paragraph.textContent = "모델을 준비하는 대로 답할게요.";
+        const signal = controller.signal;
+        let stop!: () => void;
+        try {
+          await Promise.race([browserEngine.load(), new Promise<void>((resolve) => {
+            stop = resolve;
+            signal.addEventListener("abort", stop, {once:true});
+          })]);
+        } finally { signal.removeEventListener("abort", stop); }
+        if (currentRevision !== revision || signal.reason === "cancelled") return;
+        if (signal.aborted) paragraphs = ["모델 준비가 오래 걸리고 있어요. 준비가 끝나면 다시 물어봐 주세요."];
+      }
+      if (!controller.signal.aborted && browserEngine.ready && answer.supported && answer.kind !== "interview") {
         reply.label.textContent = "브라우저 AI · 생성 중";
         status.textContent = "답변을 작성하고 있어요.";
         try {
@@ -368,6 +389,7 @@ function initPersona(panel: HTMLElement) {
           usedAI = true;
         } catch (error) {
           if (controller.signal.reason === "cancelled") return;
+          if (!useRecords) paragraphs = ["답변 생성을 마치지 못했어요. 다시 시도해 주세요."];
           if (error instanceof Error && error.message === "UNGROUNDED_RESPONSE")
             fallback = "grounding";
           else if (
@@ -401,19 +423,19 @@ function initPersona(panel: HTMLElement) {
         }),
       );
       addSources(reply.item, answer.sources);
-      if (answer.supported && answer.recordIds.length) {
-        if (!answer.recordIds.some((id) => context.recordIds.includes(id)))
+      if (!useRecords || (answer.supported && answer.recordIds.length)) {
+        if (useRecords && !answer.recordIds.some((id) => context.recordIds.includes(id)))
           history = [];
         context = { recordIds: answer.recordIds };
         lastPageAnswer = answer.kind === "page" ? answer : null;
-        history.push(
+        if (usedAI || useRecords) history.push(
           { role: "user", content: question },
           { role: "assistant", content: paragraphs.join("\n\n") },
         );
         history = history.slice(-16);
       }
       showFollowups(answer);
-      status.textContent =
+      status.textContent = !useRecords ? (usedAI ? "진용의 AI 아바타가 작성한 답변입니다." : "일반 대화에는 AI 모델이 필요해요.") :
         fallback === "grounding"
           ? "AI 답변이 공개 기록과 맞지 않아 기록으로 답변했어요."
           : fallback === "engine"
