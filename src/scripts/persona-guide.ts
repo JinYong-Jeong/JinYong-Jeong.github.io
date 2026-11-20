@@ -7,21 +7,14 @@ import {
 } from "../config/persona";
 import {
   answerFromRecords,
-  isReplyComplaint,
-  needsPersonaReferences,
-  repriseIntent,
-  standaloneGreeting,
   withProjectArchive,
   personaClosedUrl,
   personaEntryRequested,
-  validatePersonaCompletion,
   type PersonaAnswer,
   type PersonaContext,
 } from "../lib/persona";
 import {
   answerFromPage,
-  makePageGrounding,
-  PAGE_REFERENCE_INSTRUCTIONS,
   readCurrentPage,
 } from "../lib/persona-page";
 import {
@@ -29,7 +22,9 @@ import {
   type PersonaEngineSnapshot,
 } from "./persona-engine";
 
-type ConversationMessage = { role: "user" | "assistant"; content: string };
+import { chatHistoryFor, choiceGrammar, instantChatReply, offeredChoices, type ChatMessage } from "../lib/persona-chat";
+
+type ChatMode = "cv" | "general";
 const maxAnswerCharacters = 1800;
 type AskDetail = {
   question?: string;
@@ -56,16 +51,22 @@ function initPersona(panel: HTMLElement) {
   const input = panel.querySelector<HTMLTextAreaElement>(
     "[data-persona-input]",
   )!;
-  const transcript = panel.querySelector<HTMLOListElement>(
-    "[data-persona-transcript]",
-  )!;
-  const scrollArea = panel.querySelector<HTMLElement>(
-    "[data-persona-scroll]",
-  )!;
-  const welcome = panel.querySelector<HTMLElement>("[data-persona-welcome]")!;
-  const followups = panel.querySelector<HTMLElement>(
-    "[data-persona-followups]",
-  )!;
+  const scrollArea = panel.querySelector<HTMLElement>("[data-persona-scroll]")!;
+  function threadFor(mode: ChatMode) {
+    const pane = panel.querySelector<HTMLElement>(`[data-persona-thread="${mode}"]`)!;
+    return {
+      pane,
+      transcript: pane.querySelector<HTMLOListElement>("[data-persona-transcript]")!,
+      welcome: pane.querySelector<HTMLElement>("[data-persona-welcome]")!,
+      followups: pane.querySelector<HTMLElement>("[data-persona-followups]")!,
+      draft: "", status: "", scrollTop: 0,
+    };
+  }
+  const threads = { cv: threadFor("cv"), general: threadFor("general") };
+  let chatMode: ChatMode = "cv";
+  let thread = threads.cv;
+  const switches = panel.querySelectorAll<HTMLInputElement>('input[name="persona-chat-mode"]');
+  const description = panel.querySelector<HTMLElement>("#persona-description")!;
   const sendButton = panel.querySelector<HTMLButtonElement>(
     "[data-persona-send]",
   )!;
@@ -76,9 +77,6 @@ function initPersona(panel: HTMLElement) {
   const mode = panel.querySelector<HTMLElement>("[data-persona-mode]")!;
   const modeLabel = panel.querySelector<HTMLElement>(
     "[data-persona-mode-label]",
-  )!;
-  const explanation = panel.querySelector<HTMLElement>(
-    "[data-persona-explanation]",
   )!;
   const enginePanel = panel.querySelector<HTMLElement>(
     "[data-persona-engine-panel]",
@@ -96,8 +94,7 @@ function initPersona(panel: HTMLElement) {
     "[data-persona-engine-status]",
   );
   let context: PersonaContext = { recordIds: [] };
-  let history: ConversationMessage[] = [];
-  let lastKind: PersonaAnswer["kind"] | undefined;
+  let history: ChatMessage[] = [];
   let lastPageAnswer: PersonaAnswer | null = null;
   let conversationPage = location.pathname + location.search;
   let activeRequest: AbortController | null = null;
@@ -123,10 +120,7 @@ function initPersona(panel: HTMLElement) {
       ? "AI 준비됨"
       : loading
         ? `${snapshot.phase === "initializing" ? "AI 시작 중" : "AI 준비 중"}${progress === undefined ? "" : ` · ${Math.floor(progress * 100)}%`}`
-        : "공개 기록으로 답변";
-    explanation.textContent = ready
-      ? "진용의 말투로 학습한 AI가 이 기기에서 답해요. 이력이나 현재 글을 물을 때만 공개 자료를 참고해요."
-      : "AI가 준비되면 일상 이야기도 나눌 수 있어요. 공개 기록에 관한 질문은 지금도 답할 수 있어요.";
+        : failed || snapshot.state === "unsupported" ? "AI 사용 불가" : "AI 대기 중";
     if (retryButton) retryButton.hidden = !failed;
     if (loadProgress) {
       loadProgress.hidden = !loading;
@@ -136,9 +130,9 @@ function initPersona(panel: HTMLElement) {
     if (loadDetail) {
       const detail =
         snapshot.state === "unsupported"
-          ? "이 환경에서는 AI 대신 공개 기록으로 답변해요."
+          ? "일반 대화 모델을 실행하려면 WebGPU를 지원하는 Chrome이 필요해요."
           : failed
-            ? "AI를 준비하지 못했어요. 공개 기록으로 계속 답변해요."
+            ? "일반 대화 모델을 준비하지 못했어요. 다시 시도해 주세요."
             : "";
       loadDetail.hidden = !detail;
       if (loadDetail.textContent !== detail) loadDetail.textContent = detail;
@@ -180,8 +174,8 @@ function initPersona(panel: HTMLElement) {
     stopButton.hidden = !value;
     input.readOnly = value;
     form.setAttribute("aria-busy", String(value));
-    transcript.setAttribute("aria-busy", String(value));
-    followups.hidden = value || !followups.childElementCount;
+    thread.transcript.setAttribute("aria-busy", String(value));
+    thread.followups.hidden = value || !thread.followups.childElementCount;
   }
 
   function showMessage(message: HTMLElement) {
@@ -205,7 +199,7 @@ function initPersona(panel: HTMLElement) {
     const heading = document.createElement("p");
     heading.className = "persona-message-label";
     heading.textContent =
-      role === "user" ? "YOUR QUESTION" : "JINYONG · DIGITAL PERSONA";
+      role === "user" ? "YOUR QUESTION" : chatMode === "cv" ? "CV · 사이트" : "JINYONG · DIGITAL PERSONA";
     const label = document.createElement("small");
     if (role === "assistant") heading.append(label);
     const body = document.createElement("div");
@@ -214,7 +208,7 @@ function initPersona(panel: HTMLElement) {
     paragraph.textContent = text;
     body.append(paragraph);
     item.append(heading, body);
-    transcript.append(item);
+    thread.transcript.append(item);
     return { item, label, body, paragraph };
   }
 
@@ -245,234 +239,118 @@ function initPersona(panel: HTMLElement) {
   }
 
   function showFollowups(answer: PersonaAnswer) {
-    followups.replaceChildren();
+    thread.followups.replaceChildren();
     for (const text of answer.suggestions) {
       const button = document.createElement("button");
       button.type = "button";
       button.dataset.personaQuestion = text;
       button.textContent = text;
-      followups.append(button);
+      thread.followups.append(button);
     }
-    followups.hidden = false;
+    thread.followups.hidden = !thread.followups.childElementCount;
   }
 
-  async function generate(
-    question: string,
-    answer: PersonaAnswer,
-    signal: AbortSignal,
-    onText: (text: string) => void,
-  ) {
-    const relevant = answer.records;
-    const direct = answer.kind === "chat";
-    const lastQuestion = history.at(-2);
-    const clarifyChat = direct && lastKind === "chat" && lastQuestion?.role === "user" &&
-      (repriseIntent(question) === "explain" || isReplyComplaint(question));
-    const request = clarifyChat
-      ? `${question}\n앞서 내가 물은 “${lastQuestion.content}”에 대한 답을 더 쉽게 다시 말해 줘.`
-      : question;
-    const sameTopic = answer.recordIds.some((id) =>
-      context.recordIds.includes(id),
-    );
-    const text = await browserEngine.generate(
-      [
-        {
-          role: "system",
-          content: direct
-            ? personaSystemPrompt
-            : PAGE_REFERENCE_INSTRUCTIONS,
-        },
-        ...((direct && !context.recordIds.length) || sameTopic ? history.slice(-6) : []).map((message) => ({
-          ...message,
-          content: message.content.slice(0, 500),
-        })),
-        {
-          role: "user",
-          content: direct ? request : makePageGrounding(relevant, question),
-        },
-      ],
-      signal,
-      onText,
-    );
-    if (!text) throw new Error("Empty response");
-    if (!direct && !validatePersonaCompletion(text, relevant, question))
-      throw new Error("UNGROUNDED_RESPONSE");
-    return text
-      .slice(0, maxAnswerCharacters)
-      .split(/\n\s*\n/)
-      .filter(Boolean);
+  function cvAnswer(question: string, preferredRecordId?: string) {
+    const core = answerFromRecords(question, records, context, preferredRecordId);
+    const explicitPage = /(?:이|현재)\s*(?:글|페이지|본문)/.test(question);
+    const aboutWork = core.records.some((record) => record.publication || record.project);
+    if (preferredRecordId || ["private", "interview", "greeting"].includes(core.kind) ||
+        (aboutWork && !explicitPage)) return core;
+    return answerFromPage(question, readCurrentPage(document, location.href), {
+      previous: lastPageAnswer, core,
+    }) ?? core;
   }
 
   async function submitQuestion(value: string, preferredRecordId?: string) {
     const question = value.trim().slice(0, 600);
     if (!question || busy) return;
     const currentRevision = ++revision;
-    const articleTitle = document.querySelector('meta[property="og:type"]')?.getAttribute("content") === "article"
-      ? document.title.split("|")[0] : "";
-    const hello = preferredRecordId ? null : standaloneGreeting(question);
-    const reprise = repriseIntent(question);
-    const greetingRepair = !preferredRecordId && lastKind === "greeting" && reprise === "explain";
-    const restart = !preferredRecordId && !context.recordIds.length && isReplyComplaint(question) &&
-      (!lastKind || lastKind === "greeting" || lastKind === "clarify");
-    const useRecords = !hello && !greetingRepair && !restart &&
-      needsPersonaReferences(question, context, preferredRecordId, articleTitle);
-    let coreAnswer: PersonaAnswer;
-    if (hello) {
-      coreAnswer = hello;
-    } else if (useRecords) {
-      coreAnswer = answerFromRecords(question, records, context, preferredRecordId);
-    } else {
-      const text = restart ? "내 대답이 어색했지. 뭐가 궁금했어?" : greetingRepair
-        ? (/고마|감사|thanks/i.test(history.at(-2)?.content ?? "") ? "고맙다는 뜻이었어!" : "그냥 반갑다고 인사한 거야!")
-        : "이 기기에서 대화 모델을 준비하지 못했어요. WebGPU를 지원하는 Chrome에서 다시 시도해 주세요.";
-      coreAnswer = {kind: greetingRepair || restart ? "clarify" : "chat", supported: !(greetingRepair || restart),
-        paragraphs: [text], records: [], recordIds: [], sources: [], suggestions: []};
-    }
-    const explicitPage = /(?:이|현재)\s*(?:글|페이지|본문)/.test(question);
-    const aboutWork = coreAnswer.records.some((record) => record.publication || record.project);
-    const answer =
-      useRecords && !preferredRecordId &&
-      coreAnswer.kind !== "private" &&
-      coreAnswer.kind !== "interview" &&
-      coreAnswer.kind !== "greeting" &&
-      !(aboutWork && !explicitPage)
-        ? (answerFromPage(question, readCurrentPage(document, location.href), {
-            previous: lastPageAnswer,
-            core: coreAnswer,
-          }) ?? coreAnswer)
-        : coreAnswer;
-    welcome.hidden = true;
+    thread.welcome.hidden = true;
     input.value = "";
     resizeInput();
-    setBusy(true);
     addMessage("user", question);
-    const reply = addMessage("assistant", useRecords ? "관련 기록을 살펴보고 있어요." : "답변을 준비하고 있어요.");
-    reply.item.classList.add("persona-message--pending");
+    const reply = addMessage("assistant", "");
     showMessage(reply.item);
-    let paragraphs = answer.paragraphs;
-    let usedAI = false;
-    let hasStreamedText = false;
-    let fallback: "engine" | "grounding" | "context" | "timeout" | null = null;
+    if (chatMode === "cv") {
+      const answer = cvAnswer(question, preferredRecordId);
+      reply.label.textContent = answer.kind === "page" ? "현재 페이지" : answer.sources.length ? "공개 기록" : "CV 안내";
+      reply.body.replaceChildren(...answer.paragraphs.map((text) => {
+        const paragraph = document.createElement("p");
+        paragraph.textContent = text;
+        return paragraph;
+      }));
+      addSources(reply.item, answer.sources);
+      context = {recordIds: answer.recordIds};
+      lastPageAnswer = answer.kind === "page" ? answer : null;
+      showFollowups(answer);
+      status.textContent = "";
+      return;
+    }
+
     const controller = new AbortController();
     activeRequest = controller;
-    controller.signal.addEventListener(
-      "abort",
-      () => {
-        if (controller.signal.reason !== "cancelled") return;
-        if (hasStreamedText) reply.label.textContent = "중지된 답변";
-        else reply.item.remove();
-      },
-      { once: true },
-    );
-    const timeout = window.setTimeout(
-      () => controller.abort("timeout"),
-      120000,
-    );
+    const signal = controller.signal;
+    let streamed = false;
+    let timeout: number | undefined;
+    const cancel = () => {
+      if (signal.reason !== "cancelled") return;
+      if (streamed) reply.label.textContent = "중지된 답변";
+      else reply.item.remove();
+    };
+    signal.addEventListener("abort", cancel, { once: true });
+    setBusy(true);
+    reply.item.classList.add("persona-message--pending");
+    status.textContent = "";
     try {
-      if (currentRevision !== revision || controller.signal.aborted) return;
-      if (answer.kind === "chat" && (engineState === "checking" || engineState === "loading")) {
-        reply.paragraph.textContent = "모델을 준비하는 대로 답할게요.";
-        const signal = controller.signal;
-        let stop!: () => void;
-        try {
-          await Promise.race([browserEngine.load(), new Promise<void>((resolve) => {
-            stop = resolve;
-            signal.addEventListener("abort", stop, {once:true});
-          })]);
-        } finally { signal.removeEventListener("abort", stop); }
-        if (currentRevision !== revision || signal.reason === "cancelled") return;
-        if (signal.aborted) paragraphs = ["모델 준비가 오래 걸리고 있어요. 준비가 끝나면 다시 물어봐 주세요."];
-      }
-      if (!controller.signal.aborted && browserEngine.ready && answer.supported && (answer.kind === "chat" || answer.kind === "page")) {
-        reply.label.textContent = "브라우저 AI · 생성 중";
-        status.textContent = "답변을 작성하고 있어요.";
-        try {
-          paragraphs = await generate(
-            question,
-            answer,
-            controller.signal,
-            (text) => {
-              if (currentRevision !== revision || controller.signal.aborted)
-                return;
-              const visible = text.slice(0, maxAnswerCharacters);
-              if (!visible || (hasStreamedText && reply.paragraph.textContent === visible))
-                return;
-              const atBottom =
-                scrollArea.scrollHeight - scrollArea.clientHeight - scrollArea.scrollTop <= 24;
-              hasStreamedText = true;
-              reply.item.classList.remove("persona-message--pending");
-              reply.paragraph.textContent = visible;
-              if (atBottom)
-                scrollArea.scrollTo({ top: scrollArea.scrollHeight, behavior: "instant" });
-            },
-          );
-          usedAI = true;
-        } catch (error) {
-          if (controller.signal.reason === "cancelled") return;
-          if (!useRecords) paragraphs = ["답변 생성을 마치지 못했어요. 다시 시도해 주세요."];
-          if (error instanceof Error && error.message === "UNGROUNDED_RESPONSE")
-            fallback = "grounding";
-          else if (
-            error instanceof Error &&
-            error.message === "CONTEXT_TOO_LONG"
-          )
-            fallback = "context";
-          else
-            fallback =
-              controller.signal.reason === "timeout" ? "timeout" : "engine";
+      const quick = instantChatReply(question, history);
+      const relevantHistory = quick ? history : chatHistoryFor(question, history);
+      let text = quick;
+      if (!text) {
+        if (!browserEngine.ready && (engineState === "loading" || engineState === "checking" || engineState === "idle")) {
+          reply.paragraph.textContent = "모델을 준비하는 대로 답할게요.";
+          let stop!: () => void;
+          try {
+            await Promise.race([browserEngine.load(), new Promise<void>((resolve) => {
+              stop = resolve;
+              signal.addEventListener("abort", stop, {once:true});
+            })]);
+          } finally { signal.removeEventListener("abort", stop); }
         }
+        if (signal.aborted || currentRevision !== revision) return;
+        if (!browserEngine.ready) throw new Error("MODEL_NOT_READY");
+        timeout = window.setTimeout(() => controller.abort("timeout"), 120000);
+        reply.label.textContent = "진용 AI · 생성 중";
+        const options = offeredChoices(question);
+        text = await browserEngine.generate([
+          {role: "system", content: personaSystemPrompt},
+          ...relevantHistory,
+          {role: "user", content: question},
+        ], signal, (partial) => {
+          if (signal.aborted || currentRevision !== revision || !partial) return;
+          const atBottom = scrollArea.scrollHeight - scrollArea.clientHeight - scrollArea.scrollTop <= 24;
+          streamed = true;
+          reply.item.classList.remove("persona-message--pending");
+          reply.paragraph.textContent = partial.slice(0, maxAnswerCharacters);
+          if (atBottom) scrollArea.scrollTo({ top: scrollArea.scrollHeight, behavior: "instant" });
+        }, choiceGrammar(options));
+        if (signal.aborted || !text) throw new Error("INCOMPLETE");
       }
-      if (
-        currentRevision !== revision ||
-        controller.signal.reason === "cancelled"
-      )
-        return;
-      reply.item.classList.remove("persona-message--pending");
-      reply.label.textContent = usedAI
-        ? "브라우저 AI 답변"
-        : answer.kind === "page"
-          ? "현재 페이지 답변"
-          : answer.sources.length
-            ? "기록 검색 답변"
-            : "챗봇 답변";
-      reply.body.replaceChildren(
-        ...paragraphs.map((text) => {
-          const paragraph = document.createElement("p");
-          paragraph.textContent = text;
-          return paragraph;
-        }),
-      );
-      addSources(reply.item, answer.sources);
-      lastKind = answer.kind;
-      if (!useRecords || (answer.supported && answer.recordIds.length)) {
-        if (useRecords && !answer.recordIds.some((id) => context.recordIds.includes(id)))
-          history = [];
-        context = { recordIds: answer.recordIds };
-        lastPageAnswer = answer.kind === "page" ? answer : null;
-        if (usedAI || useRecords || hello || greetingRepair || restart) history.push(
-          { role: "user", content: question },
-          { role: "assistant", content: paragraphs.join("\n\n") },
-        );
-        history = history.slice(-16);
-      }
-      showFollowups(answer);
-      status.textContent = !useRecords ? (usedAI ? "진용의 AI 아바타가 작성한 답변입니다." : answer.kind === "chat" ? "일반 대화에는 AI 모델이 필요해요." : "") :
-        fallback === "grounding"
-          ? "AI 답변이 공개 기록과 맞지 않아 기록으로 답변했어요."
-          : fallback === "engine"
-            ? "브라우저 AI가 답변을 마치지 못해 공개 기록으로 답변했어요."
-            : fallback === "timeout"
-              ? "AI 응답이 오래 걸려 중지하고 공개 기록으로 답변했어요."
-              : fallback === "context"
-                ? "관련 자료가 모델의 입력 범위를 넘어 공개 기록으로 답변했어요."
-                : usedAI
-                  ? "AI가 작성한 답변입니다. 연결된 근거를 함께 확인해 주세요."
-                  : answer.kind === "page" && answer.supported
-                    ? "현재 페이지 본문을 바탕으로 구성한 답변입니다."
-                    : answer.sources.length
-                      ? "공개 기록을 바탕으로 구성한 답변입니다."
-                      : "";
+      if (currentRevision !== revision) return;
+      const visible = text.slice(0, maxAnswerCharacters);
+      reply.paragraph.textContent = visible;
+      reply.label.textContent = "일반 대화";
+      if (!quick) history = [...relevantHistory,
+        {role: "user", content: question}, {role: "assistant", content: visible}];
+    } catch {
+      if (signal.reason === "cancelled" || currentRevision !== revision) return;
+      reply.label.textContent = "일반 대화 안내";
+      reply.paragraph.textContent = !browserEngine.ready
+        ? "말투 모델이 준비되지 않았어요. WebGPU를 지원하는 Chrome에서 일반 대화를 사용할 수 있어요."
+        : "답변을 마치지 못했어. 한 번 더 말해 줄래?";
     } finally {
       clearTimeout(timeout);
+      signal.removeEventListener("abort", cancel);
+      reply.item.classList.remove("persona-message--pending");
       if (currentRevision === revision) {
         activeRequest = null;
         setBusy(false);
@@ -493,6 +371,7 @@ function initPersona(panel: HTMLElement) {
 
   function askPersona(detail: AskDetail) {
     setView("expanded");
+    if (detail.question || detail.topic) selectMode("cv");
     const topic = detail.topic
       ? (personaTopicAliases[detail.topic] ?? detail.topic)
       : undefined;
@@ -511,20 +390,47 @@ function initPersona(panel: HTMLElement) {
 
   function resetConversation() {
     cancelGeneration();
-    context = { recordIds: [] };
-    history = [];
-    lastKind = undefined;
-    lastPageAnswer = null;
-    transcript.replaceChildren();
-    followups.replaceChildren();
-    followups.hidden = true;
-    welcome.hidden = false;
+    if (chatMode === "cv") {
+      context = { recordIds: [] };
+      lastPageAnswer = null;
+    } else history = [];
+    thread.transcript.replaceChildren();
+    thread.followups.replaceChildren();
+    thread.followups.hidden = true;
+    thread.welcome.hidden = false;
     input.value = "";
     status.textContent = "새 대화를 시작했어요.";
     scrollArea.scrollTop = 0;
     resizeInput();
     input.focus({ preventScroll: true });
   }
+
+  function selectMode(next: ChatMode) {
+    if (next !== chatMode) {
+      cancelGeneration(false);
+      thread.draft = input.value;
+      thread.status = status.textContent ?? "";
+      thread.scrollTop = scrollArea.scrollTop;
+      thread.pane.hidden = true;
+      chatMode = next;
+      thread = threads[next];
+      thread.pane.hidden = false;
+      input.value = thread.draft;
+      status.textContent = thread.status;
+    }
+    const general = next === "general";
+    panel.dataset.chatMode = next;
+    for (const radio of switches) radio.checked = radio.value === next;
+    if (enginePanel) enginePanel.hidden = !general;
+    description.textContent = general ? "진용의 말투로 편하게 이야기해요." : "공개 CV와 현재 페이지에서 근거를 찾아 답해요.";
+    input.placeholder = general ? "메시지 보내기" : "이력이나 이 페이지에 대해 물어보세요";
+    resizeInput();
+    scrollArea.scrollTop = thread.scrollTop;
+    try { sessionStorage.setItem("persona-chat-mode", next); } catch { /* Optional tab preference. */ }
+  }
+  for (const radio of switches) radio.addEventListener("change", () => {
+    if (radio.checked) selectMode(radio.value === "general" ? "general" : "cv");
+  });
 
   function setView(view: "expanded" | "collapsed") {
     panel.dataset.view = view;
@@ -625,10 +531,9 @@ function initPersona(panel: HTMLElement) {
     showCurrentPage();
     const nextPage = location.pathname + location.search;
     if (nextPage !== conversationPage) {
-      cancelGeneration(false);
+      if (chatMode === "cv") cancelGeneration(false);
       if (context.recordIds.some((id) => id.startsWith("page:"))) {
         context = { recordIds: [] };
-        history = [];
       }
       lastPageAnswer = null;
       conversationPage = nextPage;
@@ -722,6 +627,9 @@ function initPersona(panel: HTMLElement) {
     input.focus({ preventScroll: true });
   }
   window.addEventListener("hashchange", focusFromUrl);
+  let firstMode: ChatMode = "cv";
+  try { if (sessionStorage.getItem("persona-chat-mode") === "general") firstMode = "general"; } catch { /* Start in CV. */ }
+  selectMode(firstMode);
   showCurrentPage();
   resizeInput();
   prepareAI();

@@ -432,7 +432,7 @@ export function answerFromRecords(
     return base(
       [],
       [
-        "어떤 이야기가 궁금하세요? 제 연구나 프로젝트 이름을 알려 주시면 관련 경험부터 말씀드릴게요.",
+        "공개 CV와 현재 페이지에서 이 질문에 답할 근거를 찾지 못했어요. 연구나 프로젝트 이름을 알려 주시면 해당 기록을 확인할게요.",
       ],
       starters,
       false,

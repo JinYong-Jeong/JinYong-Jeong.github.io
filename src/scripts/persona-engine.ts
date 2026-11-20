@@ -11,7 +11,7 @@ export interface PersonaEngineSnapshot {
   detail: string;
 }
 
-const modelUrl = "https://huggingface.co/wlsdyd5373/jjmethod/resolve/3e52c9b4a6adecab702966dd8c39dc0c6b7de668/gguf/qwen3-1.7b-personal-style-balanced-q4_k_m.gguf";
+const modelUrl = "https://huggingface.co/wlsdyd5373/jjmethod/resolve/255fb2e0dac754251c9d1f8943519c971dfadd51/gguf/qwen3-1.7b-personal-style-q4_k_m.gguf";
 const modelBytes = 1107408768;
 
 export class PersonaBrowserEngine {
@@ -91,13 +91,14 @@ export class PersonaBrowserEngine {
     this.onChange({ state:"idle", detail:"모델 메모리를 해제했어요." });
   }
 
-  async generate(messages: Message[], signal: AbortSignal, onText: (text: string) => void) {
+  async generate(messages: Message[], signal: AbortSignal, onText: (text: string) => void, grammar?: string) {
     const engine = this.engine;
     if (!engine) throw new Error("MODEL_NOT_READY");
     let raw = "";
     await engine.createChatCompletion({
       messages, abortSignal: AbortSignal.any([signal, this.session.signal]),
-      stream: true, temperature: 0.6, top_p: 0.85, max_tokens: 320,
+      stream: true, temperature: 0.6, top_p: 0.85, max_tokens: grammar ? 96 : 256,
+      ...(grammar ? { grammar } : {}),
       chat_template_kwargs: {enable_thinking:false},
       onData(chunk) {
         const delta = chunk.choices[0]?.delta.content;

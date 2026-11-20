@@ -49,6 +49,44 @@
   gap: 0.75rem;
   min-width: 0;
 }
+.persona-switch {
+  display: flex;
+  flex: none;
+  gap: 2px;
+  margin: .55rem var(--persona-inset) .35rem;
+  padding: 3px;
+  border: 1px solid var(--persona-line);
+  border-radius: 6px;
+  background: var(--color-surface-soft);
+}
+.persona-switch label {
+  position: relative;
+  flex: 1;
+  padding: .4rem .3rem;
+  border-radius: 3px;
+  color: var(--color-muted);
+  text-align: center;
+  cursor: pointer;
+  font-size: .78rem;
+  font-weight: 600;
+}
+.persona-switch label:has(:checked) {
+  background: var(--persona-ink);
+  color: var(--persona-paper);
+}
+.persona-switch label:has(:focus-visible) {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+.persona-switch input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
 .persona-portrait {
   width: clamp(4.25rem, 5.5vw, 5rem);
   aspect-ratio: 1;
@@ -626,7 +664,7 @@
   .persona-conversation > * {
     flex: none;
   }
-  .persona-conversation:has(.persona-welcome:not([hidden])) .persona-introduction {
+  .persona-conversation:has([data-persona-thread]:not([hidden]) .persona-welcome:not([hidden])) .persona-introduction {
     order: 1;
     border-bottom: 0;
   }

@@ -38,10 +38,15 @@ const projects = projectSnapshot(await getAllProjects());
       </button>
     </header>
 
+    <fieldset class="persona-switch">
+      <legend class="persona-sr-only">대화 모드</legend>
+      <label><input type="radio" name="persona-chat-mode" value="general" />일반 대화</label>
+      <label><input type="radio" name="persona-chat-mode" value="cv" checked />CV·사이트</label>
+    </fieldset>
     <div class="persona-conversation" data-persona-scroll tabindex="-1">
       <div class="persona-introduction">
         <p id="persona-description">
-          저는 진용의 AI 아바타예요. 편하게 이야기해요. 연구나 프로젝트도 물어보세요.
+          공개 CV와 현재 페이지에서 근거를 찾아 답해요.
         </p>
         <div
           class="persona-engine"
@@ -74,15 +79,14 @@ const projects = projectSnapshot(await getAllProjects());
           </p>
         </div>
       </div>
+      {(["cv", "general"] as const).map((mode) => (
+      <div data-persona-thread={mode} hidden={mode !== "cv"}>
       <div class="persona-welcome" data-persona-welcome>
-        <p>어떤 이야기가 <em>궁금하세요?</em></p>
-        <span class="persona-welcome-caption"
-          >연구, 프로젝트, 함께해 온 일들에 관해 물어보세요.</span
-        >
+        <p>{mode === "cv" ? "어떤 경험이 궁금하세요?" : "무슨 얘기 할까?"}</p>
         <div class="persona-starters">
           {
-            personaStarters.map((question, index) => (
-              <button type="button" data-persona-question={question} data-page-starter={index === 0 ? "" : undefined}>
+            (mode === "cv" ? personaStarters : ["야 뭐해", "오늘 좀 지쳤어", "영화랑 산책 중에 뭐 할까?"]).map((question, index) => (
+              <button type="button" data-persona-question={question} data-page-starter={mode === "cv" && index === 0 ? "" : undefined}>
                 <span>{question}</span>
                 <ArrowUpRight size={15} aria-hidden="true" />
               </button>
@@ -105,6 +109,8 @@ const projects = projectSnapshot(await getAllProjects());
         hidden
       >
       </div>
+      </div>
+      ))}
     </div>
 
     <footer class="persona-footer">
@@ -138,11 +144,10 @@ const projects = projectSnapshot(await getAllProjects());
           <summary>답변에 관하여 <span aria-hidden="true">+</span></summary>
           <div>
             <p>
-              정진용의 공개 CV로 구성한 디지털 페르소나입니다. 실제 본인의
-              실시간 답변은 아니에요.
+              일반 대화에는 정진용의 말투를 학습한 AI가 답해요. CV·사이트에서는 공개 기록과 페이지 본문을 사용해요.
             </p>
             <p data-persona-explanation>
-              일상 대화는 AI가 이 기기에서 답하고, 이력이나 현재 글을 물으면 공개 자료를 참고해요.
+              대화는 브라우저 안에서 처리해요. 각 모드에서 나눈 이야기를 따로 이어갈 수 있어요.
             </p>
             <p>
               사이트에 들어오면 AI 모델을 자동으로 내려받습니다. 같은 탭에서
