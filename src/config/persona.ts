@@ -15,8 +15,9 @@ export interface PersonaRecord {
   details: readonly string[];
   role?: string;
   period?: string;
-  publication?: { year: string; status: string };
+  publication?: { year: string; status: string; explanation: string };
   project?: boolean;
+  projectDate?: { day: string; updated: boolean };
   sources: PersonaSource[];
 }
 
@@ -266,10 +267,20 @@ export const personaRecords: PersonaRecord[] = [
         ...(paper.award ? [`이 연구로 ${paper.award}을 받았습니다.`] : []),
       ],
       role: paper.role,
-      publication: { year: String(paper.year), status: paper.status },
+      publication: {
+        year: String(paper.year),
+        status: paper.status,
+        explanation: ({
+          "system-1": "큰 언어 모델의 가중치는 그대로 두고, 답변을 유도하는 작은 판단 모델만 학습시켰어요. 그 작은 모델을 갤럭시 S24 울트라에서도 학습시킬 수 있는지 확인한 연구예요.",
+          "gpu-scheduling": "학습 중에 기관 업무가 들어오면 GPU를 먼저 쓰게 하고, 그 업무가 끝나면 멈췄던 학습을 이어가는 방법을 연구했어요.",
+          "inference-caching": "여러 AI 모델 중 하나만 바뀌었을 때 모든 분석을 처음부터 다시 돌릴 필요가 있는지 살펴봤어요. 그대로 쓸 수 있는 이전 결과는 재사용했어요.",
+          "cumulative-token-alignment": "여러 기기가 함께 언어 모델을 학습할 때, 통신 횟수가 달라도 읽는 데이터의 총량은 같게 맞춰서 결과를 비교했어요.",
+          "health-agent": "웨어러블에서 모은 건강 데이터를 각 기기에 두고, AI 에이전트가 다섯 가지 건강 예측 모델을 사용해 결과를 설명하도록 했어요.",
+        } as Record<string, string>)[paper.id] ?? paper.description,
+      },
       sources: [
         cvSource(
-          "CV · 이 연구의 기록",
+          paper.korean,
           paper.id,
           `${paper.role} · ${paper.status}`,
         ),
@@ -311,13 +322,16 @@ export const personaRecords: PersonaRecord[] = [
         }[work.id] ?? []),
       ],
       summary:
-        work.id === "portfolio" ? `저는 ${work.description}` : work.description,
+        work.id === "portfolio" ? "연구와 프로젝트를 책장처럼 넘겨 보고, 궁금한 경험은 챗봇에 바로 물어볼 수 있는 개인 CV 사이트를 만들었어요." : work.description,
       details: [
         ...(work.id === "portfolio"
           ? [
-              "이 사이트에 실린 이력과 경험의 주인은 저, 정진용입니다. 방문자는 제 경험을 펼쳐 보고 질문할 수 있습니다.",
+              "방문자가 책장에서 연구나 프로젝트를 고른 뒤, 대화창에 제 역할을 물으면 해당 기록의 근거 링크를 함께 볼 수 있어요.",
+              "일상 대화에 쓰는 언어 모델은 방문자의 Chrome에서 WebGPU로 실행해요.",
             ]
-          : []),
+          : work.id === "fedops"
+            ? ["팀에서 만든 모델은 Registry에 공유하고, Agent Studio에서는 그 모델을 에이전트의 도구로 연결해 서비스에 쓸 수 있어요."]
+            : ["스터디에서는 빈칸이 있는 노트북에 PyTorch 코드를 채워 ResNet을 구현하고, CIFAR-10 이미지 분류 실험 결과를 비교해요."]),
         `공개된 기술·분류는 ${work.tags.join(", ")}입니다.`,
         work.subtitle,
       ],

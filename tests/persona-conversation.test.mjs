@@ -5,6 +5,8 @@ import {
   answerFromRecords,
   cleanPersonaCompletion,
   needsPersonaReferences,
+  standaloneGreeting,
+  withProjectArchive,
   validatePersonaCompletion,
 } from "../src/lib/persona.ts";
 
@@ -61,7 +63,7 @@ test("a greeting followed by an ordinary question about Jinyong reaches his CV",
 });
 
 test("a named new subject wins over a greeting, a profile keyword or the previous topic", () => {
-  assert.equal(ask("안녕하세요! 논문을 소개해 줘").recordIds[0], "research");
+  assert.equal(ask("안녕하세요! 논문을 소개해 줘").recordIds[0], "system-1");
   assert.deepEqual(ask("그럼 동아리에서는 뭐 했어?", ["system-1"]).recordIds, [
     "community",
   ]);
@@ -205,4 +207,55 @@ test("ordinary chat skips retrieval even after discussing a CV record", () => {
   assert.equal(needsPersonaReferences("그때 역할은?", {recordIds:["fedops"]}), true);
   assert.equal(needsPersonaReferences("자세히", {recordIds:[]}), false);
   assert.equal(needsPersonaReferences("알려줘", {recordIds:[]}, "education"), true);
+});
+
+test("a standalone greeting is immediate, but a new question after a greeting is answered", () => {
+  assert.deepEqual(standaloneGreeting("안녕!")?.paragraphs, ["안녕! 반가워."]);
+  assert.equal(standaloneGreeting("안녕하세요! 최근에 논문 뭐 썼어요?"), null);
+  assert.equal(standaloneGreeting("안녕! 점심 뭐 먹을까?"), null);
+});
+
+test("recent papers, explanations and personal contributions keep the concrete paper in focus", () => {
+  for (const q of ["너 최근에 논문 뭐 썼어?", "최근에 어떤 논문을 쓰셨어요?", "논문 뭐 썼어?"]) {
+    assert.equal(needsPersonaReferences(q, { recordIds: [] }), true, q);
+    const recent = ask(q);
+    assert.deepEqual(recent.recordIds, ["system-1", "gpu-scheduling", "inference-caching"]);
+    assert.match(recent.paragraphs[0], /System 1.*제1저자.*구두 발표/);
+    assert.match(recent.paragraphs.join(" "), /발행 예정/);
+    assert.ok(recent.sources.some((s) => s.href === "/#system-1"));
+    const explain = ask("아니 뭔 말이야", recent.recordIds);
+    assert.match(explain.paragraphs[0], /작은 판단 모델/);
+    assert.deepEqual(explain.recordIds, ["system-1"]);
+    for (const follow of ["너 뭐했냐고", "거기서 뭘 했어?", "네가 맡은 역할은?"]) {
+      assert.equal(needsPersonaReferences(follow, { recordIds: explain.recordIds }), true, follow);
+      const role = ask(follow, explain.recordIds);
+      assert.match(role.paragraphs[0], /제1저자.*구두 발표/);
+      assert.deepEqual(role.recordIds, ["system-1"]);
+    }
+    const second = ask("두 번째 논문을 쉽게 설명해 줘", recent.recordIds);
+    assert.deepEqual(second.recordIds, ["gpu-scheduling"]);
+    assert.match(second.paragraphs[0], /GPU/);
+    assert.deepEqual(ask("이메일 주소 알려 줘", explain.recordIds).recordIds, ["contact"]);
+    assert.equal(needsPersonaReferences("점심 뭐 먹지?", { recordIds: explain.recordIds }), false);
+  }
+});
+
+test("recent projects use the archive date, keep the project for follow-ups and follow archive changes", () => {
+  const archive = [
+    { id: "portfolio", title: "CV", href: "https://github.com/JinYong-Jeong/JinYong-Jeong.github.io", date: "2026-11-19", updated: true, description: "개인 CV", techStack: ["Astro"] },
+    { id: "other", title: "교육용 노트북", date: "2026-09-02", updated: false, description: "학습 자료를 보관합니다.", techStack: ["Python"] },
+  ];
+  const records = withProjectArchive(personaRecords, archive);
+  const question = "아니 너 최근에 한 프로젝트가 뭐야?";
+  assert.equal(needsPersonaReferences(question, {recordIds: []}), true);
+  const recent = answerFromRecords(question, records);
+  assert.deepEqual(recent.recordIds, ["portfolio"]);
+  assert.match(recent.paragraphs.join(" "), /Personal portfolio.*책장.*업데이트.*2026-11-19/);
+  assert.ok(recent.sources.some((s) => s.href === "/projects/#portfolio"));
+  const detail = answerFromRecords("좀 더 자세히 알려 줘", records, {recordIds: recent.recordIds});
+  assert.deepEqual(detail.recordIds, ["portfolio"]);
+  assert.match(detail.paragraphs.join(" "), /Personal portfolio.*근거 링크.*WebGPU/);
+  assert.equal(needsPersonaReferences("요즘 할 만한 프로젝트 아이디어 추천해줘", {recordIds: []}), false);
+  archive[1].date = "2026-11-20";
+  assert.deepEqual(answerFromRecords(question, withProjectArchive(personaRecords, archive)).recordIds, ["archive-other"]);
 });

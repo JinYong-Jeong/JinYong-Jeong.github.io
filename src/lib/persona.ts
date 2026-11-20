@@ -1,4 +1,42 @@
 import type { PersonaRecord, PersonaSource } from "../config/persona";
+import type { Project } from "./content";
+
+interface ArchiveProject {
+  id: string;
+  title: string;
+  description: string;
+  techStack: string[];
+  href?: string;
+  date: string;
+  updated: boolean;
+}
+
+export function projectSnapshot(projects: Project[]): ArchiveProject[] {
+  return projects.filter(({ data }) => data.status !== "fork" && data.status !== "idea")
+    .map(({ id, data }) => ({
+      id, title: data.title, description: data.description, techStack: data.techStack,
+      href: data.links.find((link) => link.label.toLowerCase() === "github")?.href ?? data.links[0]?.href,
+      date: data.date.toISOString().slice(0, 10), updated: data.source === "github",
+    }));
+}
+
+export function withProjectArchive(records: PersonaRecord[], projects: ArchiveProject[]) {
+  const byId = new Map(records.map((record) => [record.id, record]));
+  for (const project of projects) {
+    const curated = project.href && records.find((record) => record.project && record.sources.some((source) => source.href === project.href));
+    const entry: PersonaRecord = curated || {
+      id: `archive-${project.id}`, title: project.title, aliases: [project.title, project.id],
+      summary: project.description, project: true, details: [], sources: [],
+    };
+    const archive = { label: project.title, href: `/projects/#${encodeURIComponent(project.id)}`, detail: project.description };
+    const sources = [archive, ...entry.sources];
+    if (project.href && !sources.some((source) => source.href === project.href))
+      sources.push({ label: "프로젝트 원문", href: project.href, detail: project.title });
+    const details = curated ? entry.details : project.techStack.length ? [`공개된 기술은 ${project.techStack.join(", ")}예요.`] : [];
+    byId.set(entry.id, { ...entry, projectDate: { day: project.date, updated: project.updated }, details, sources });
+  }
+  return [...byId.values()];
+}
 
 export interface PersonaContext {
   recordIds: string[];
@@ -21,6 +59,44 @@ const normalize = (text: string) =>
     .trim();
 const greeting =
   /^(?:안녕하세요|안녕하십니까|안녕|반가워요?|반갑습니다|감사합니다|고마워요?|hello|hi|hey|thanks)(?:\s+|$)/i;
+/** A bare greeting is a complete turn. A question after a greeting still needs an answer. */
+export function standaloneGreeting(question: string): PersonaAnswer | null {
+  const q = normalize(question);
+  if (!greeting.test(q) || q.replace(greeting, "").trim()) return null;
+  const text = /고마|감사|thanks/.test(q) ? "고마워요!"
+    : /^(안녕|반가워|hi|hey|hello)$/.test(q) ? "안녕! 반가워." : "안녕하세요! 반가워요.";
+  return { kind: "greeting", supported: false, paragraphs: [text], suggestions: [],
+    records: [], recordIds: [], sources: [] };
+}
+
+export function repriseIntent(question: string) {
+  const q = normalize(question).replace(/^(?:(?:아니|그러니까|그래서|그럼|아|그래)\s*)+/, "");
+  if (/^(?:(?:넌|너는?|네가|니가|직접|거기서|그때)\s*)*(?:뭐|뭘|무엇을?|무슨\s*일을?)\s*(?:했(?:어|어요|냐|냐고|는데|는데요|다고)?|한\s*거(?:야|예요|냐고)?|맡았(?:어|어요|냐고)?)(?:요)?$/.test(q)) return "contribution";
+  if (/^(?:(?:그게|그건|이게|그거|그건 대체)\s*)?(?:(?:뭔|무슨)\s*(?:말|소리|뜻)(?:인지|이에요|이야|인가요|임|야|이냐|이죠)?|이해(?:가)?\s*(?:잘\s*)?안\s*(?:돼|되네|가|돼요)|(?:다시|쉽게|풀어서|쉽게 다시)\s*(?:말|설명)(?:해|해줘|해 줘|해 주세요|해봐))$/.test(q)) return "explain";
+  return null;
+}
+
+function asksForPapers(q: string) {
+  return /(?:논문|출판물|publications?|papers?)/i.test(q) &&
+    /최근|요즘|최신|목록|어떤|무슨|뭐|뭘|썼|쓴|쓰셨|쓰셨어|작성했|발표했|참여했|전부|모두|전체|소개|recent|latest|your papers/i.test(q);
+}
+
+function asksForRecentProject(q: string) {
+  return /최근|요즘|요새|마지막|최신|most recent|latest/.test(q) && /프로젝트|작업|project/.test(q) &&
+    !/추천|동향|트렌드|아이디어|다른 사람|뉴스|하는 법|관리 도구/.test(q);
+}
+
+function paperOrdinal(q: string) {
+  return /(?:첫\s*번째|첫째|첫)\s*(?:논문|연구)/.test(q) ? 0
+    : /(?:두\s*번째|둘째)\s*(?:논문|연구)/.test(q) ? 1
+    : /(?:세\s*번째|셋째)\s*(?:논문|연구)/.test(q) ? 2 : -1;
+}
+
+function describePaperRole(record: PersonaRecord) {
+  if (!record.role) return "";
+  const [author, presentation] = record.role.split(" · ");
+  return presentation ? `${author}로 참여해 ${presentation}를 맡았어요.` : `${author}로 참여했어요.`;
+}
 const transition = /^(?:(?:그럼|그러면|근데|그런데|혹시|저기|그리고)\s*)+/;
 // Keep the addressee in place while resolving ownership ("네 강점" vs "네 프로젝트의 강점").
 // Then remove it from keyword retrieval so the owner's name cannot outrank the actual topic.
@@ -117,6 +193,9 @@ export function needsPersonaReferences(question: string, context: PersonaContext
   const addressed = q.replace(ownerTerm, " @ ").replace(/\s+/g, " ").trim();
   // A writing or study request can mention CV topics without asking about this person or site.
   if (!addressed.includes("@") && /(?:쓰는|읽는|만드는|시작하는|작성하는|작성|준비하는|공부하는)\s*(?:방법|법|요령|팁)|예시(?:를)?\s*(?:만들|써)|대신\s*써/.test(q) && !/(?:이|현재)\s*(?:글|페이지|본문)|공개 기록/.test(q)) return false;
+  if (context.recordIds.length && (repriseIntent(question) || paperOrdinal(q) >= 0)) return true;
+  if (asksForRecentProject(q)) return true;
+  if (asksForPapers(q) && (addressed.includes("@") || /썼|쓰셨|쓰셨어|발표했|참여했|출판물|논문\s*목록|your papers/.test(q))) return true;
   if (asksForIntroduction(q) || interviewTopics(addressed, context).length || placeOfStudy.test(q)) return true;
   if (/(?:이|그|현재|지금 보고 있는)\s*(?:글|페이지|본문|사이트|포스트|프로젝트|연구|논문)|this (?:page|article|post)|your (?:work|research|projects|education)|어떤 연구|공개 기록|자기소개|포트폴리오|이력서|학력|경력|직접 만든|가천대|fedops|system\s*1|개인건강데이터|a\s*ing|resnet 교육자료|연락처|이메일 주소|깃허브 주소/i.test(q)) return true;
   if (/^(?:논문|연구|프로젝트|동아리|블로그|수상|활동|연락|학업)(?:$|을|를|에서|는|은|에 대해| 목록| 소개| 알려| 보여)/.test(q)) return true;
@@ -185,18 +264,8 @@ export function answerFromRecords(
     "어떤 연구를 하고 있어?",
     "직접 만든 프로젝트는?",
   ];
-  if (!questionBody && greeting.test(normalized))
-    return base(
-      [],
-      [
-        /고마|감사|thanks/.test(normalized)
-          ? "고마워요! 또 궁금한 게 있으면 편하게 물어보세요."
-          : "반가워요! 저는 정진용의 공개 CV로 대화하는 아바타예요. 제 연구나 프로젝트에 대해 편하게 물어보세요.",
-      ],
-      starters,
-      false,
-      "greeting",
-    );
+  const hello = standaloneGreeting(question);
+  if (hello) return hello;
   if (
     /^@\s*(?:뭐야$|ai야|ai예요|챗봇이|봇이)/.test(addressed) ||
     /(?:실제|진짜|본인|직접).{0,6}(?:진용|사람이|답하|답변하)|(?:너|넌|이거|이건)\s*(?:ai야|ai예요|챗봇이|봇이)|^(?:너|넌|너는)\s*뭐야$/i.test(
@@ -243,6 +312,21 @@ export function answerFromRecords(
     "개인건강데이터 연구를 소개해 줘",
     "ResNet 교육자료를 보고 싶어",
   ];
+  const reprise = !preferredRecordId && repriseIntent(question);
+  const ordinal = paperOrdinal(query);
+  const referencedPaper = !preferredRecordId && ordinal >= 0 && records.find(
+    (record) => record.publication && record.id === context.recordIds[ordinal],
+  );
+  const previous = referencedPaper || (reprise && records.find((record) => record.id === context.recordIds[0]));
+  if (previous) {
+    const paper = previous.publication;
+    const paragraphs = paper
+      ? [reprise === "contribution" || roleQuestion.test(question)
+          ? `「${previous.title}」에서는 ${describePaperRole(previous)} ${paper.explanation}`
+          : `「${previous.title}」 얘기예요. ${paper.explanation}`]
+      : [previous.summary, ...(previous.role ? [`제 역할은 ${previous.role}였어요.`] : previous.details.slice(0, 1))];
+    return base([previous], paragraphs, ["그 기록의 출처를 보고 싶어"]);
+  }
   const interviewIds = preferredRecordId
     ? []
     : interviewTopics(addressed, context);
@@ -270,6 +354,35 @@ export function answerFromRecords(
   const precise = topics.filter(
     ({ record }) => record.publication || record.project,
   );
+  if (!preferredRecordId && !precise.length && asksForRecentProject(query)) {
+    const work = records.filter((record) => record.project && record.projectDate)
+      .sort((a, b) => b.projectDate!.day.localeCompare(a.projectDate!.day))[0];
+    if (work) {
+      const date = work.projectDate!;
+      const when = date.updated ? `공개 저장소의 최근 업데이트 날짜는 ${date.day}입니다.` : `프로젝트 기록 날짜는 ${date.day}입니다.`;
+      return base([work], [`최근 공개 프로젝트는 「${work.title}」예요. ${work.summary}`, when],
+        ["좀 더 자세히 알려 줘", "그 프로젝트의 소스 링크는?"]);
+    }
+    const representative = records.find((record) => record.project);
+    if (representative) return base([representative], [`공개 CV에 있는 프로젝트 중 하나는 「${representative.title}」예요. ${representative.summary}`, "작업 날짜는 CV에 따로 적혀 있지 않아요."], ["좀 더 자세히 알려 줘"]);
+  }
+  if (!preferredRecordId && !precise.length && asksForPapers(query)) {
+    const papers = records.filter((item) => item.publication)
+      .sort((a, b) => Number(b.publication!.year) - Number(a.publication!.year));
+    const all = /전부|모두|전체|목록/.test(query);
+    const selected = all ? papers : papers.filter((item) => item.publication!.year === papers[0]?.publication?.year).slice(0, 3);
+    if (selected.length) {
+      const sharedStatus = selected.length > 1 && selected.every((item) => item.publication!.status === selected[0].publication!.status);
+      const statusText = (status: string) => status === "게재 확정 · 발행 예정" ? "게재가 확정됐고 발행 예정이에요."
+        : status === "게재" ? "게재된 논문이에요." : status;
+      const descriptions = selected.map((item) =>
+        `${item.publication!.year}년 「${item.title}」에 ${describePaperRole(item)}` +
+        (sharedStatus ? "" : ` ${statusText(item.publication!.status)}`),
+      );
+      if (sharedStatus) descriptions.push(`이 논문들은 모두 ${statusText(selected[0].publication!.status)}`);
+      return base(selected, descriptions, ["첫 번째 논문을 쉽게 설명해 줘", "그 연구에서 맡은 역할은?"]);
+    }
+  }
   const candidates = precise.length ? precise : topics;
   let selected = candidates
     .slice(0, 2)
@@ -357,9 +470,11 @@ export function answerFromRecords(
         `${record.title}은 아래 기록에서 확인할 수 있어요. 제 역할과 공개된 상태도 함께 표시해 두었습니다.`,
       ];
     if (detailQuestion.test(question))
-      return [record.summary, ...record.details.slice(0, 3)];
+      return record.project && record.details.length
+        ? [`「${record.title}」 얘기예요. ${record.details[0]}`, ...record.details.slice(1, 3)]
+        : [record.summary, ...record.details.slice(0, 3)];
     return [
-      record.summary,
+      record.publication ? `「${record.title}」을 연구했어요. ${record.publication.explanation}` : record.summary,
       ...(record.publication
         ? [
             `${record.role ?? ""} · 논문 표기 ${record.publication.year}년 · ${record.publication.status}`,

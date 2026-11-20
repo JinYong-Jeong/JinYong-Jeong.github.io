@@ -1,14 +1,15 @@
 import {
   personaRecords,
   personaStarters,
-  personaSystemPrompt,
   personaTopicAliases,
   type PersonaSource,
 } from "../config/persona";
 import {
   answerFromRecords,
   needsPersonaReferences,
-  makeGrounding,
+  repriseIntent,
+  standaloneGreeting,
+  withProjectArchive,
   personaClosedUrl,
   personaEntryRequested,
   validatePersonaCompletion,
@@ -17,7 +18,6 @@ import {
 } from "../lib/persona";
 import {
   answerFromPage,
-  isPageRecord,
   makePageGrounding,
   PAGE_REFERENCE_INSTRUCTIONS,
   readCurrentPage,
@@ -38,6 +38,7 @@ const panel = document.querySelector<HTMLElement>("#persona-guide");
 if (panel) initPersona(panel);
 
 function initPersona(panel: HTMLElement) {
+  const records = withProjectArchive(personaRecords, JSON.parse(panel.dataset.projectArchive ?? "[]"));
   const launcher = document.querySelector<HTMLButtonElement>(
     "[data-persona-expand]",
   )!;
@@ -94,6 +95,7 @@ function initPersona(panel: HTMLElement) {
   );
   let context: PersonaContext = { recordIds: [] };
   let history: ConversationMessage[] = [];
+  let lastKind: PersonaAnswer["kind"] | undefined;
   let lastPageAnswer: PersonaAnswer | null = null;
   let conversationPage = location.pathname + location.search;
   let activeRequest: AbortController | null = null;
@@ -259,7 +261,6 @@ function initPersona(panel: HTMLElement) {
     onText: (text: string) => void,
   ) {
     const relevant = answer.records;
-    const pageAnswer = relevant.some(isPageRecord);
     const direct = answer.kind === "chat";
     const sameTopic = answer.recordIds.some((id) =>
       context.recordIds.includes(id),
@@ -269,20 +270,16 @@ function initPersona(panel: HTMLElement) {
         {
           role: "system",
           content: direct
-            ? "정진용의 AI 아바타로서 상대방의 메시지에 자연스러운 한국어 채팅 말투로 답해. 일상 대화는 편하게 이어가. 추천을 부탁하면 구체적인 선택 하나를 먼저 말하고, 설명을 부탁하면 질문의 답부터 알려줘. 상대의 조건을 기억하고 정진용의 실제 개인정보나 경험을 추측하지 마."
-            : pageAnswer
-            ? PAGE_REFERENCE_INSTRUCTIONS
-            : `${personaSystemPrompt}\n\n<공개기록>\n${makeGrounding(relevant)}\n</공개기록>`,
+            ? "너는 진용의 AI 아바타야. 한국어로 친구와 대화하듯 자연스럽게 답해. 지금 상대가 물은 내용에 바로 답하고, 되물으면 직전 답을 더 쉽게 설명해. 추천이나 선택을 맡기면 하나를 직접 골라줘. 네 실제 일정이나 경험을 지어내지 마."
+            : PAGE_REFERENCE_INSTRUCTIONS,
         },
-        ...(direct || sameTopic ? history.slice(-4) : []).map((message) => ({
+        ...((direct && !context.recordIds.length) || sameTopic ? history.slice(-6) : []).map((message) => ({
           ...message,
           content: message.content.slice(0, 500),
         })),
         {
           role: "user",
-          content: pageAnswer
-            ? makePageGrounding(relevant, question)
-            : question,
+          content: direct ? question : makePageGrounding(relevant, question),
         },
       ],
       signal,
@@ -303,19 +300,31 @@ function initPersona(panel: HTMLElement) {
     const currentRevision = ++revision;
     const articleTitle = document.querySelector('meta[property="og:type"]')?.getAttribute("content") === "article"
       ? document.title.split("|")[0] : "";
-    const useRecords = needsPersonaReferences(question, context, preferredRecordId, articleTitle);
-    const coreAnswer: PersonaAnswer = useRecords ? answerFromRecords(
-      question,
-      personaRecords,
-      context,
-      preferredRecordId,
-    ) : {kind: "chat", supported: true, records: [], recordIds: [], sources: [], suggestions: [],
-         paragraphs: ["이 기기에서 대화 모델을 준비하지 못했어요. WebGPU를 지원하는 Chrome에서 다시 시도해 주세요."]};
+    const hello = preferredRecordId ? null : standaloneGreeting(question);
+    const reprise = repriseIntent(question);
+    const greetingRepair = !preferredRecordId && lastKind === "greeting" && reprise === "explain";
+    const useRecords = !hello && !greetingRepair &&
+      needsPersonaReferences(question, context, preferredRecordId, articleTitle);
+    let coreAnswer: PersonaAnswer;
+    if (hello) {
+      coreAnswer = hello;
+    } else if (useRecords) {
+      coreAnswer = answerFromRecords(question, records, context, preferredRecordId);
+    } else {
+      const text = greetingRepair
+        ? (/고마|감사|thanks/i.test(history.at(-2)?.content ?? "") ? "고맙다는 뜻이었어!" : "그냥 반갑다고 인사한 거야!")
+        : "이 기기에서 대화 모델을 준비하지 못했어요. WebGPU를 지원하는 Chrome에서 다시 시도해 주세요.";
+      coreAnswer = {kind: greetingRepair ? "clarify" : "chat", supported: !greetingRepair,
+        paragraphs: [text], records: [], recordIds: [], sources: [], suggestions: []};
+    }
+    const explicitPage = /(?:이|현재)\s*(?:글|페이지|본문)/.test(question);
+    const aboutWork = coreAnswer.records.some((record) => record.publication || record.project);
     const answer =
       useRecords && !preferredRecordId &&
       coreAnswer.kind !== "private" &&
       coreAnswer.kind !== "interview" &&
-      coreAnswer.kind !== "greeting"
+      coreAnswer.kind !== "greeting" &&
+      !(aboutWork && !explicitPage)
         ? (answerFromPage(question, readCurrentPage(document, location.href), {
             previous: lastPageAnswer,
             core: coreAnswer,
@@ -350,7 +359,7 @@ function initPersona(panel: HTMLElement) {
     );
     try {
       if (currentRevision !== revision || controller.signal.aborted) return;
-      if (!useRecords && (engineState === "checking" || engineState === "loading")) {
+      if (answer.kind === "chat" && (engineState === "checking" || engineState === "loading")) {
         reply.paragraph.textContent = "모델을 준비하는 대로 답할게요.";
         const signal = controller.signal;
         let stop!: () => void;
@@ -363,7 +372,7 @@ function initPersona(panel: HTMLElement) {
         if (currentRevision !== revision || signal.reason === "cancelled") return;
         if (signal.aborted) paragraphs = ["모델 준비가 오래 걸리고 있어요. 준비가 끝나면 다시 물어봐 주세요."];
       }
-      if (!controller.signal.aborted && browserEngine.ready && answer.supported && answer.kind !== "interview") {
+      if (!controller.signal.aborted && browserEngine.ready && answer.supported && (answer.kind === "chat" || answer.kind === "page")) {
         reply.label.textContent = "브라우저 AI · 생성 중";
         status.textContent = "답변을 작성하고 있어요.";
         try {
@@ -423,19 +432,20 @@ function initPersona(panel: HTMLElement) {
         }),
       );
       addSources(reply.item, answer.sources);
+      lastKind = answer.kind;
       if (!useRecords || (answer.supported && answer.recordIds.length)) {
         if (useRecords && !answer.recordIds.some((id) => context.recordIds.includes(id)))
           history = [];
         context = { recordIds: answer.recordIds };
         lastPageAnswer = answer.kind === "page" ? answer : null;
-        if (usedAI || useRecords) history.push(
+        if (usedAI || useRecords || hello || greetingRepair) history.push(
           { role: "user", content: question },
           { role: "assistant", content: paragraphs.join("\n\n") },
         );
         history = history.slice(-16);
       }
       showFollowups(answer);
-      status.textContent = !useRecords ? (usedAI ? "진용의 AI 아바타가 작성한 답변입니다." : "일반 대화에는 AI 모델이 필요해요.") :
+      status.textContent = !useRecords ? (usedAI ? "진용의 AI 아바타가 작성한 답변입니다." : answer.kind === "chat" ? "일반 대화에는 AI 모델이 필요해요." : "") :
         fallback === "grounding"
           ? "AI 답변이 공개 기록과 맞지 않아 기록으로 답변했어요."
           : fallback === "engine"
@@ -476,7 +486,7 @@ function initPersona(panel: HTMLElement) {
     const topic = detail.topic
       ? (personaTopicAliases[detail.topic] ?? detail.topic)
       : undefined;
-    const record = personaRecords.find(
+    const record = records.find(
       (item) => item.id === topic || item.title === topic,
     );
     scrollArea.focus({ preventScroll: true });
@@ -493,6 +503,7 @@ function initPersona(panel: HTMLElement) {
     cancelGeneration();
     context = { recordIds: [] };
     history = [];
+    lastKind = undefined;
     lastPageAnswer = null;
     transcript.replaceChildren();
     followups.replaceChildren();

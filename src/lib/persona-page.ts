@@ -1,5 +1,6 @@
 import type { PersonaRecord } from "../config/persona";
 import type { PersonaAnswer } from "./persona";
+import { repriseIntent } from "./persona.ts";
 
 export interface PersonaPageNode {
   tag?: string;
@@ -473,7 +474,7 @@ export function answerFromPage(
     )
       ? options.previous
       : null;
-  const followUp = !!previous && pageFollowUp.test(question.trim());
+  const followUp = !!previous && (pageFollowUp.test(question.trim()) || !!repriseIntent(question));
   const tokens = queryTokens(question).filter(
     (token) =>
       page.kind !== "listing" || !["프로젝트", "목록", "항목"].includes(token),

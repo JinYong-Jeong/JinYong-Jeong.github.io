@@ -2,17 +2,21 @@
 import { ArrowUpRight, ArrowUp, Minus, RotateCcw } from "@lucide/astro";
 import avatar from "@/assets/jinyong-avatar.webp";
 import { personaStarters } from "@/config/persona";
+import { getAllProjects } from "@/lib/content";
+import { projectSnapshot } from "@/lib/persona";
 import "@/styles/persona-guide.css";
 
 interface Props {
   emblemSrc: string;
 }
 const { emblemSrc } = Astro.props;
+const projects = projectSnapshot(await getAllProjects());
 ---
 
 <aside
   class="persona-guide"
   id="persona-guide"
+  data-project-archive={JSON.stringify(projects)}
   transition:persist="persona-guide"
   aria-labelledby="persona-title"
   aria-describedby="persona-description"
