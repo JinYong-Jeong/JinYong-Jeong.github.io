@@ -5,6 +5,13 @@ import {
   validatePersonaCompletion,
 } from "../src/lib/persona.ts";
 import { personaRecords } from "../src/config/persona.ts";
+
+test("an unsupported reply with a page link falls back to the excerpt", () => {
+  const page = {id: "page:/projects", title: "모델 공유", summary: "Registry에서 모델을 공유하고 Agent Studio에서 모델을 도구로 연결해요.", details: []};
+  for (const fragment of ["그건 뭔지 모르겠네", "내가 지금 연구하는 프로젝트는"])
+    assert.equal(validatePersonaCompletion(fragment, [page]), false);
+  assert.equal(validatePersonaCompletion(page.summary, [page]), true);
+});
 import {
   answerFromPage,
   extractPageContext,

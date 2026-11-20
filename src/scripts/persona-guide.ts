@@ -1,11 +1,13 @@
 import {
   personaRecords,
   personaStarters,
+  personaSystemPrompt,
   personaTopicAliases,
   type PersonaSource,
 } from "../config/persona";
 import {
   answerFromRecords,
+  isReplyComplaint,
   needsPersonaReferences,
   repriseIntent,
   standaloneGreeting,
@@ -262,6 +264,12 @@ function initPersona(panel: HTMLElement) {
   ) {
     const relevant = answer.records;
     const direct = answer.kind === "chat";
+    const lastQuestion = history.at(-2);
+    const clarifyChat = direct && lastKind === "chat" && lastQuestion?.role === "user" &&
+      (repriseIntent(question) === "explain" || isReplyComplaint(question));
+    const request = clarifyChat
+      ? `${question}\n앞서 내가 물은 “${lastQuestion.content}”에 대한 답을 더 쉽게 다시 말해 줘.`
+      : question;
     const sameTopic = answer.recordIds.some((id) =>
       context.recordIds.includes(id),
     );
@@ -270,7 +278,7 @@ function initPersona(panel: HTMLElement) {
         {
           role: "system",
           content: direct
-            ? "너는 진용의 AI 아바타야. 한국어로 친구와 대화하듯 자연스럽게 답해. 지금 상대가 물은 내용에 바로 답하고, 되물으면 직전 답을 더 쉽게 설명해. 추천이나 선택을 맡기면 하나를 직접 골라줘. 네 실제 일정이나 경험을 지어내지 마."
+            ? personaSystemPrompt
             : PAGE_REFERENCE_INSTRUCTIONS,
         },
         ...((direct && !context.recordIds.length) || sameTopic ? history.slice(-6) : []).map((message) => ({
@@ -279,7 +287,7 @@ function initPersona(panel: HTMLElement) {
         })),
         {
           role: "user",
-          content: direct ? question : makePageGrounding(relevant, question),
+          content: direct ? request : makePageGrounding(relevant, question),
         },
       ],
       signal,
@@ -303,7 +311,9 @@ function initPersona(panel: HTMLElement) {
     const hello = preferredRecordId ? null : standaloneGreeting(question);
     const reprise = repriseIntent(question);
     const greetingRepair = !preferredRecordId && lastKind === "greeting" && reprise === "explain";
-    const useRecords = !hello && !greetingRepair &&
+    const restart = !preferredRecordId && !context.recordIds.length && isReplyComplaint(question) &&
+      (!lastKind || lastKind === "greeting" || lastKind === "clarify");
+    const useRecords = !hello && !greetingRepair && !restart &&
       needsPersonaReferences(question, context, preferredRecordId, articleTitle);
     let coreAnswer: PersonaAnswer;
     if (hello) {
@@ -311,10 +321,10 @@ function initPersona(panel: HTMLElement) {
     } else if (useRecords) {
       coreAnswer = answerFromRecords(question, records, context, preferredRecordId);
     } else {
-      const text = greetingRepair
+      const text = restart ? "내 대답이 어색했지. 뭐가 궁금했어?" : greetingRepair
         ? (/고마|감사|thanks/i.test(history.at(-2)?.content ?? "") ? "고맙다는 뜻이었어!" : "그냥 반갑다고 인사한 거야!")
         : "이 기기에서 대화 모델을 준비하지 못했어요. WebGPU를 지원하는 Chrome에서 다시 시도해 주세요.";
-      coreAnswer = {kind: greetingRepair ? "clarify" : "chat", supported: !greetingRepair,
+      coreAnswer = {kind: greetingRepair || restart ? "clarify" : "chat", supported: !(greetingRepair || restart),
         paragraphs: [text], records: [], recordIds: [], sources: [], suggestions: []};
     }
     const explicitPage = /(?:이|현재)\s*(?:글|페이지|본문)/.test(question);
@@ -438,7 +448,7 @@ function initPersona(panel: HTMLElement) {
           history = [];
         context = { recordIds: answer.recordIds };
         lastPageAnswer = answer.kind === "page" ? answer : null;
-        if (usedAI || useRecords || hello || greetingRepair) history.push(
+        if (usedAI || useRecords || hello || greetingRepair || restart) history.push(
           { role: "user", content: question },
           { role: "assistant", content: paragraphs.join("\n\n") },
         );

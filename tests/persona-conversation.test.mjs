@@ -6,6 +6,7 @@ import {
   cleanPersonaCompletion,
   needsPersonaReferences,
   standaloneGreeting,
+  isReplyComplaint,
   withProjectArchive,
   validatePersonaCompletion,
 } from "../src/lib/persona.ts";
@@ -213,6 +214,8 @@ test("a standalone greeting is immediate, but a new question after a greeting is
   assert.deepEqual(standaloneGreeting("안녕!")?.paragraphs, ["안녕! 반가워."]);
   assert.equal(standaloneGreeting("안녕하세요! 최근에 논문 뭐 썼어요?"), null);
   assert.equal(standaloneGreeting("안녕! 점심 뭐 먹을까?"), null);
+  assert.equal(isReplyComplaint("바보임?"), true);
+  assert.equal(isReplyComplaint("바보라는 말이 무슨 뜻이야?"), false);
 });
 
 test("recent papers, explanations and personal contributions keep the concrete paper in focus", () => {

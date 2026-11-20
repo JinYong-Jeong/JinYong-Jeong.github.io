@@ -11,7 +11,7 @@ export interface PersonaEngineSnapshot {
   detail: string;
 }
 
-const modelUrl = "https://huggingface.co/wlsdyd5373/jjmethod/resolve/255fb2e0dac754251c9d1f8943519c971dfadd51/gguf/qwen3-1.7b-personal-style-q4_k_m.gguf";
+const modelUrl = "https://huggingface.co/wlsdyd5373/jjmethod/resolve/3e52c9b4a6adecab702966dd8c39dc0c6b7de668/gguf/qwen3-1.7b-personal-style-balanced-q4_k_m.gguf";
 const modelBytes = 1107408768;
 
 export class PersonaBrowserEngine {

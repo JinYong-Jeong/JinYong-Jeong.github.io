@@ -76,6 +76,11 @@ export function repriseIntent(question: string) {
   return null;
 }
 
+export function isReplyComplaint(question: string) {
+  const q = normalize(question).replace(/^(?:아니|아)\s*/, "");
+  return /^(?:(?:너|너는|넌)\s*)?(?:바보(?:임|야|냐|니)|동문서답(?:이야|이네|이잖아)?|(?:자꾸\s*)?딴소리(?:야|하네|잖아)|(?:왜\s*)?(?:답변|대답)(?:이|이 왜)?\s*(?:이상해|이래|엉뚱해))$/.test(q);
+}
+
 function asksForPapers(q: string) {
   return /(?:논문|출판물|publications?|papers?)/i.test(q) &&
     /최근|요즘|최신|목록|어떤|무슨|뭐|뭘|썼|쓴|쓰셨|쓰셨어|작성했|발표했|참여했|전부|모두|전체|소개|recent|latest|your papers/i.test(q);
@@ -193,7 +198,7 @@ export function needsPersonaReferences(question: string, context: PersonaContext
   const addressed = q.replace(ownerTerm, " @ ").replace(/\s+/g, " ").trim();
   // A writing or study request can mention CV topics without asking about this person or site.
   if (!addressed.includes("@") && /(?:쓰는|읽는|만드는|시작하는|작성하는|작성|준비하는|공부하는)\s*(?:방법|법|요령|팁)|예시(?:를)?\s*(?:만들|써)|대신\s*써/.test(q) && !/(?:이|현재)\s*(?:글|페이지|본문)|공개 기록/.test(q)) return false;
-  if (context.recordIds.length && (repriseIntent(question) || paperOrdinal(q) >= 0)) return true;
+  if (context.recordIds.length && (repriseIntent(question) || isReplyComplaint(question) || paperOrdinal(q) >= 0)) return true;
   if (asksForRecentProject(q)) return true;
   if (asksForPapers(q) && (addressed.includes("@") || /썼|쓰셨|쓰셨어|발표했|참여했|출판물|논문\s*목록|your papers/.test(q))) return true;
   if (asksForIntroduction(q) || interviewTopics(addressed, context).length || placeOfStudy.test(q)) return true;
@@ -312,7 +317,7 @@ export function answerFromRecords(
     "개인건강데이터 연구를 소개해 줘",
     "ResNet 교육자료를 보고 싶어",
   ];
-  const reprise = !preferredRecordId && repriseIntent(question);
+  const reprise = !preferredRecordId && (repriseIntent(question) || (isReplyComplaint(question) && "explain"));
   const ordinal = paperOrdinal(query);
   const referencedPaper = !preferredRecordId && ordinal >= 0 && records.find(
     (record) => record.publication && record.id === context.recordIds[ordinal],
@@ -558,6 +563,12 @@ export function validatePersonaCompletion(
     return false;
   const grounding = makeGrounding(records);
   if (records.some((record) => record.id.startsWith("page:"))) {
+    // A fluent-sounding fragment can still leave the reader with only a source link.
+    const stems = (value: string) => normalize(value).split(" ").filter((word) => word.length >= 2)
+      .map((word) => word.slice(0, Math.min(3, word.length)));
+    const referenceWords = new Set(stems(grounding));
+    const sharedWords = new Set(stems(text).filter((word) => referenceWords.has(word)));
+    if (sharedWords.size < 2 || /(?:모르겠네|잘 모르겠어|모르겠습니다)[.!?\s]*$/.test(text.trim())) return false;
     // When a paraphrase reverses cause and remedy, use the selected source passage.
     if (
       /(?:해결|방지|예방)하기\s*위해(?:서)?\s*(?:발생|생긴|일어난)/.test(text)
