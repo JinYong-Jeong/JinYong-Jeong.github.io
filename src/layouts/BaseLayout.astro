@@ -15,6 +15,7 @@ interface Props {
   bodyClass?: string;
   mainClass?: string;
   hideFooter?: boolean;
+  personaPage?: boolean;
 }
 
 const {
@@ -25,6 +26,7 @@ const {
   bodyClass,
   mainClass,
   hideFooter = false,
+  personaPage = false,
 } = Astro.props;
 const pageTitle = title ? `${title} | ${site.name}` : site.title;
 const emblem = await getImage({ src: dragon, width: 96, format: "png" });
@@ -39,7 +41,7 @@ const imageUrl = new URL(image, siteUrl).toString();
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
     <meta name="generator" content={Astro.generator} />
-    <ClientRouter fallback="swap" />
+    {!personaPage && <ClientRouter fallback="swap" />}
     <meta
       http-equiv="Cache-Control"
       content="no-cache, no-store, must-revalidate"
@@ -61,7 +63,7 @@ const imageUrl = new URL(image, siteUrl).toString();
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={imageUrl} />
   </head>
-  <body class:list={[bodyClass, "with-persona"]}>
+  <body class:list={[bodyClass, personaPage ? "chat-page" : "with-persona"]}>
     <script is:inline>
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker.getRegistrations().then((registrations) => {
@@ -70,7 +72,7 @@ const imageUrl = new URL(image, siteUrl).toString();
       }
     </script>
     <a class="skip-link" href="#main-content">본문으로 바로 가기</a>
-    <a class="skip-link" href="#persona-guide" data-persona-focus>AI 챗봇에 질문하기</a>
+    {!personaPage && <a class="skip-link" href="#persona-guide" data-persona-focus>CV 챗봇에 질문하기</a>}
     <Header emblemSrc={emblem.src} />
     <main id="main-content" class={mainClass}>
       <slot />
@@ -86,7 +88,7 @@ const imageUrl = new URL(image, siteUrl).toString();
         </footer>
       )
     }
-    <PersonaGuide emblemSrc={emblem.src} />
+    {!personaPage && <PersonaGuide emblemSrc={emblem.src} />}
     <script>
       import "@/scripts/public-navigation";
     </script>

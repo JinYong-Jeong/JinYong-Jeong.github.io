@@ -7,17 +7,22 @@ import { projectSnapshot } from "@/lib/persona";
 import "@/styles/persona-guide.css";
 
 interface Props {
-  emblemSrc: string;
+  emblemSrc?: string;
+  standalone?: boolean;
 }
-const { emblemSrc } = Astro.props;
-const projects = projectSnapshot(await getAllProjects());
+const { emblemSrc, standalone = false } = Astro.props;
+const projects = standalone ? undefined : projectSnapshot(await getAllProjects());
+const mode = standalone ? "general" : "cv";
+const Container = standalone ? "section" : "aside";
 ---
 
-<aside
+<Container
   class="persona-guide"
   id="persona-guide"
+  data-chat-mode={mode}
+  data-view={standalone ? "expanded" : undefined}
   data-project-archive={JSON.stringify(projects)}
-  transition:persist="persona-guide"
+  transition:persist={standalone ? "persona-chat-page" : "persona-guide"}
   aria-labelledby="persona-title"
   aria-describedby="persona-description"
 >
@@ -28,40 +33,34 @@ const projects = projectSnapshot(await getAllProjects());
           <img src={avatar.src} width="384" height="384" alt="정진용의 AI 아바타 초상" />
         </span>
         <div class="persona-heading-text">
-          <h2 id="persona-title" tabindex="-1"><span>반가워요,</span> <span><em>정진용</em>입니다</span></h2>
-          <p class="persona-current-page" data-persona-current-page></p>
+          {standalone ? <h1 id="persona-title">진용과 대화</h1> : <h2 id="persona-title" tabindex="-1">정진용의 CV 안내</h2>}
+          {standalone ? <p class="persona-current-page">정진용의 말투를 학습한 AI</p> : <p class="persona-current-page" data-persona-current-page></p>}
         </div>
       </div>
-      <button class="persona-collapse" type="button" data-persona-collapse
+      {standalone ? <a class="persona-route-link" href="/?ask=1" data-astro-reload>CV에 질문하기 <ArrowUpRight size={15} /></a> : <button class="persona-collapse" type="button" data-persona-collapse
         aria-label="AI 챗봇 접기" title="대화창 접기" aria-controls="persona-guide" aria-expanded="true">
         <Minus size={19} aria-hidden="true" />
-      </button>
+      </button>}
     </header>
 
-    <fieldset class="persona-switch">
-      <legend class="persona-sr-only">대화 모드</legend>
-      <label><input type="radio" name="persona-chat-mode" value="general" />일반 대화</label>
-      <label><input type="radio" name="persona-chat-mode" value="cv" checked />CV·사이트</label>
-    </fieldset>
     <div class="persona-conversation" data-persona-scroll tabindex="-1">
       <div class="persona-introduction">
         <p id="persona-description">
-          공개 CV와 현재 페이지에서 근거를 찾아 답해요.
+          {standalone ? "대화는 이 탭에서만 처리해요. AI 답변이 처음 필요할 때 모델 1.11GB를 내려받아요." : "공개 이력과 지금 읽는 페이지를 바탕으로 답해요."}
         </p>
         <div
           class="persona-engine"
           data-persona-engine-panel
           data-engine-state="idle"
+          hidden={!standalone}
         >
           <div class="persona-engine-heading">
             <span class="persona-mode" data-persona-mode>
               <i aria-hidden="true"></i><span data-persona-mode-label
-                >공개 기록으로 답변</span
+                >AI 대기 중</span
               >
             </span>
-            <button class="persona-retry" type="button" data-persona-retry hidden
-              >다시 시도</button
-            >
+            <button type="button" class="persona-retry" data-persona-unload hidden>모델 메모리 해제</button>
           </div>
           <progress
             class="persona-load-progress"
@@ -79,8 +78,7 @@ const projects = projectSnapshot(await getAllProjects());
           </p>
         </div>
       </div>
-      {(["cv", "general"] as const).map((mode) => (
-      <div data-persona-thread={mode} hidden={mode !== "cv"}>
+      <div data-persona-thread={mode}>
       <div class="persona-welcome" data-persona-welcome>
         <p>{mode === "cv" ? "어떤 경험이 궁금하세요?" : "무슨 얘기 할까?"}</p>
         <div class="persona-starters">
@@ -110,26 +108,26 @@ const projects = projectSnapshot(await getAllProjects());
       >
       </div>
       </div>
-      ))}
     </div>
 
     <footer class="persona-footer">
       <form class="persona-form" data-persona-form data-astro-reload>
         <label class="persona-sr-only" for="persona-question"
-          >진용의 AI 아바타에게 메시지 보내기</label
+          >{standalone ? "진용 AI에게 메시지 보내기" : "CV에 질문하기"}</label
         >
         <textarea
           id="persona-question"
-          name="question"
           rows="1"
+          disabled
           maxlength="600"
-          placeholder="궁금한 점을 물어보세요"
+          placeholder={standalone ? "메시지 보내기" : "이력이나 이 페이지에 대해 물어보세요"}
           required
           enterkeyhint="send"
           data-persona-input></textarea>
         <button
           class="persona-send"
           type="submit"
+          disabled
           data-persona-send
           aria-label="질문 보내기"
           ><ArrowUp size={20} aria-hidden="true" /></button
@@ -144,32 +142,27 @@ const projects = projectSnapshot(await getAllProjects());
           <summary>답변에 관하여 <span aria-hidden="true">+</span></summary>
           <div>
             <p>
-              일반 대화에는 정진용의 말투를 학습한 AI가 답해요. CV·사이트에서는 공개 기록과 페이지 본문을 사용해요.
-            </p>
-            <p data-persona-explanation>
-              대화는 브라우저 안에서 처리해요. 각 모드에서 나눈 이야기를 따로 이어갈 수 있어요.
+              {standalone ? "Qwen3-1.7B가 정진용의 대화 스타일로 답해요. AI가 한 말을 실제 경험이나 의견으로 받아들이지 않도록 참고해 주세요." : "답변 아래에 공개 근거를 표시해요. 근거 문장이 여러 개면 Qwen3-1.7B로 질문에 맞는 대목을 골라 볼 수 있어요."}
             </p>
             <p>
-              사이트에 들어오면 AI 모델을 자동으로 내려받습니다. 같은 탭에서
-              다른 메뉴나 글로 이동해도 모델과 대화가 이어집니다.
-              새로고침하거나 외부 사이트로 이동하거나 탭을 닫으면 AI 메모리를
-              해제합니다. 모델 파일을 다음 방문을 위해 저장하지 않습니다.
+              모델과 대화는 이 탭의 메모리에만 보관해요. 페이지를 새로고침하거나 탭을 닫으면 해제합니다.
             </p>
           </div>
         </details>
+        {!standalone && <a class="persona-route-link" href="/chat/" data-astro-reload>진용과 일상 대화 <ArrowUpRight size={14} /></a>}
         <button class="persona-reset" type="button" data-persona-reset
           ><RotateCcw size={13} aria-hidden="true" />새 대화</button
         >
       </div>
     </footer>
   </div>
-</aside>
+</Container>
 
-<button class="persona-launcher" type="button" data-persona-expand
+{!standalone && <button class="persona-launcher" type="button" data-persona-expand
   transition:persist="persona-launcher" aria-controls="persona-guide" aria-expanded="false"
   aria-label="진용의 AI 챗봇 열기">
   <img src={emblemSrc} width="30" height="30" alt="" />
-</button>
+</button>}
 
 <script>
   import "@/scripts/persona-guide";

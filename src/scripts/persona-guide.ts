@@ -24,7 +24,6 @@ import {
 
 import { chatHistoryFor, choiceGrammar, instantChatReply, offeredChoices, type ChatMessage } from "../lib/persona-chat";
 
-type ChatMode = "cv" | "general";
 const maxAnswerCharacters = 1800;
 type AskDetail = {
   question?: string;
@@ -35,14 +34,15 @@ const panel = document.querySelector<HTMLElement>("#persona-guide");
 if (panel) initPersona(panel);
 
 function initPersona(panel: HTMLElement) {
-  const records = withProjectArchive(personaRecords, JSON.parse(panel.dataset.projectArchive ?? "[]"));
+  const standalone = panel.dataset.chatMode === "general";
+  const records = standalone ? [] : withProjectArchive(personaRecords, JSON.parse(panel.dataset.projectArchive ?? "[]"));
   const launcher = document.querySelector<HTMLButtonElement>(
     "[data-persona-expand]",
-  )!;
+  );
   const viewKey = "persona-view";
   try {
     const saved = sessionStorage.getItem(viewKey);
-    if (saved === "expanded" || saved === "collapsed") panel.dataset.view = saved;
+    if (!standalone && (saved === "expanded" || saved === "collapsed")) panel.dataset.view = saved;
   } catch {
     // The persisted panel still retains the choice on internal navigation.
   }
@@ -52,21 +52,11 @@ function initPersona(panel: HTMLElement) {
     "[data-persona-input]",
   )!;
   const scrollArea = panel.querySelector<HTMLElement>("[data-persona-scroll]")!;
-  function threadFor(mode: ChatMode) {
-    const pane = panel.querySelector<HTMLElement>(`[data-persona-thread="${mode}"]`)!;
-    return {
-      pane,
-      transcript: pane.querySelector<HTMLOListElement>("[data-persona-transcript]")!,
-      welcome: pane.querySelector<HTMLElement>("[data-persona-welcome]")!,
-      followups: pane.querySelector<HTMLElement>("[data-persona-followups]")!,
-      draft: "", status: "", scrollTop: 0,
-    };
-  }
-  const threads = { cv: threadFor("cv"), general: threadFor("general") };
-  let chatMode: ChatMode = "cv";
-  let thread = threads.cv;
-  const switches = panel.querySelectorAll<HTMLInputElement>('input[name="persona-chat-mode"]');
-  const description = panel.querySelector<HTMLElement>("#persona-description")!;
+  const thread = {
+    transcript: panel.querySelector<HTMLOListElement>("[data-persona-transcript]")!,
+    welcome: panel.querySelector<HTMLElement>("[data-persona-welcome]")!,
+    followups: panel.querySelector<HTMLElement>("[data-persona-followups]")!,
+  };
   const sendButton = panel.querySelector<HTMLButtonElement>(
     "[data-persona-send]",
   )!;
@@ -81,9 +71,6 @@ function initPersona(panel: HTMLElement) {
   const enginePanel = panel.querySelector<HTMLElement>(
     "[data-persona-engine-panel]",
   );
-  const retryButton = panel.querySelector<HTMLButtonElement>(
-    "[data-persona-retry]",
-  );
   const loadProgress = panel.querySelector<HTMLProgressElement>(
     "[data-persona-load-progress]",
   );
@@ -93,6 +80,7 @@ function initPersona(panel: HTMLElement) {
   const engineStatus = panel.querySelector<HTMLElement>(
     "[data-persona-engine-status]",
   );
+  const unloadButton = panel.querySelector<HTMLButtonElement>("[data-persona-unload]")!;
   let context: PersonaContext = { recordIds: [] };
   let history: ChatMessage[] = [];
   let lastPageAnswer: PersonaAnswer | null = null;
@@ -100,7 +88,6 @@ function initPersona(panel: HTMLElement) {
   let activeRequest: AbortController | null = null;
   let revision = 0;
   let busy = false;
-  let preparationAttempted = false;
   let engineState: PersonaEngineSnapshot["state"] = "idle";
   const browserEngine = new PersonaBrowserEngine(renderEngine);
 
@@ -114,14 +101,19 @@ function initPersona(panel: HTMLElement) {
         ? Math.max(0, Math.min(1, snapshot.progress))
         : undefined;
     engineState = snapshot.state;
-    if (enginePanel) enginePanel.dataset.engineState = snapshot.state;
+    if (enginePanel) {
+      enginePanel.dataset.engineState = snapshot.state;
+      enginePanel.hidden = !standalone && !loading && !ready;
+    }
+    unloadButton.hidden = !ready;
+    for (const button of panel.querySelectorAll<HTMLButtonElement>(".persona-passage-button"))
+      button.textContent = passageButtonText(ready);
     mode.dataset.state = snapshot.state;
     modeLabel.textContent = ready
       ? "AI 준비됨"
       : loading
         ? `${snapshot.phase === "initializing" ? "AI 시작 중" : "AI 준비 중"}${progress === undefined ? "" : ` · ${Math.floor(progress * 100)}%`}`
         : failed || snapshot.state === "unsupported" ? "AI 사용 불가" : "AI 대기 중";
-    if (retryButton) retryButton.hidden = !failed;
     if (loadProgress) {
       loadProgress.hidden = !loading;
       if (progress === undefined) loadProgress.removeAttribute("value");
@@ -130,9 +122,9 @@ function initPersona(panel: HTMLElement) {
     if (loadDetail) {
       const detail =
         snapshot.state === "unsupported"
-          ? "일반 대화 모델을 실행하려면 WebGPU를 지원하는 Chrome이 필요해요."
+          ? "모델을 실행하려면 WebGPU를 지원하는 브라우저가 필요해요."
           : failed
-            ? "일반 대화 모델을 준비하지 못했어요. 다시 시도해 주세요."
+            ? "모델을 준비하지 못했어요. 다시 시도해 주세요."
             : "";
       loadDetail.hidden = !detail;
       if (loadDetail.textContent !== detail) loadDetail.textContent = detail;
@@ -150,16 +142,15 @@ function initPersona(panel: HTMLElement) {
     state: "idle",
     detail: "공개 기록으로 답변합니다.",
   });
-  function prepareAI(retry = false) {
-    if (preparationAttempted && !retry) return;
-    if (retry && engineState !== "error") return;
-    preparationAttempted = true;
-    void browserEngine.load();
-  }
-  retryButton?.addEventListener("click", () => {
-    prepareAI(true);
-    input.focus({ preventScroll: true });
+  unloadButton.addEventListener("click", () => {
+    cancelGeneration(false);
+    browserEngine.dispose();
+    status.textContent = "모델 메모리를 해제했어요.";
   });
+
+  function passageButtonText(ready: boolean) {
+    return ready ? "AI로 핵심 문장 보기" : "AI로 핵심 문장 보기 · 모델 1.11GB";
+  }
 
   function resizeInput() {
     if (!input.getClientRects().length) return;
@@ -199,7 +190,7 @@ function initPersona(panel: HTMLElement) {
     const heading = document.createElement("p");
     heading.className = "persona-message-label";
     heading.textContent =
-      role === "user" ? "YOUR QUESTION" : chatMode === "cv" ? "CV · 사이트" : "JINYONG · DIGITAL PERSONA";
+      role === "user" ? "YOUR QUESTION" : standalone ? "JINYONG · DIGITAL PERSONA" : "CV · 사이트";
     const label = document.createElement("small");
     if (role === "assistant") heading.append(label);
     const body = document.createElement("div");
@@ -261,6 +252,58 @@ function initPersona(panel: HTMLElement) {
     }) ?? core;
   }
 
+  function addPassageSelection(item: HTMLElement, question: string, answer: PersonaAnswer) {
+    const passages = [...new Set(answer.paragraphs.flatMap((paragraph) =>
+      paragraph.split(/(?<=[.!?。])\s+|\n+/u).map((line) => line.trim()).filter(Boolean),
+    ))].filter((line) => line.length >= 12).slice(0, 8);
+    if (passages.length < 2) return;
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "persona-passage-button";
+    button.textContent = passageButtonText(browserEngine.ready);
+    const output = document.createElement("p");
+    output.className = "persona-passage";
+    output.setAttribute("role", "status");
+    item.append(button, output);
+    button.addEventListener("click", async () => {
+      if (busy) return;
+      const controller = new AbortController();
+      activeRequest = controller;
+      const signal = controller.signal;
+      const currentRevision = ++revision;
+      let timeout: number | undefined;
+      setBusy(true);
+      button.disabled = true;
+      output.textContent = browserEngine.ready ? "핵심 문장을 고르고 있어요." : "1.7B 모델을 준비하고 있어요.";
+      try {
+        await browserEngine.load();
+        signal.throwIfAborted();
+        if (!browserEngine.ready) throw new Error("MODEL_NOT_READY");
+        timeout = window.setTimeout(() => controller.abort("timeout"), 60000);
+        const ids = passages.map((_, index) => String(index + 1));
+        const id = await browserEngine.generate([
+          {role: "system", content: "질문에 가장 직접적으로 답하는 문장 하나를 골라 번호만 답해."},
+          {role: "user", content: JSON.stringify({question, passages: passages.map((text, i) => ({id: ids[i], text}))})},
+        ], signal, () => {}, "root ::= " + ids.map((id) => JSON.stringify(id)).join(" | "));
+        signal.throwIfAborted();
+        const passage = passages[ids.indexOf(id.trim())];
+        if (!passage) throw new Error("INVALID_SELECTION");
+        output.textContent = "핵심 문장 · " + passage;
+        button.remove();
+      } catch {
+        output.textContent = signal.reason === "cancelled" ? "" : "핵심 문장을 고르지 못했어요. 위 답변과 출처에서 내용을 확인할 수 있어요.";
+      } finally {
+        clearTimeout(timeout);
+        button.disabled = false;
+        if (currentRevision === revision) {
+          activeRequest = null;
+          setBusy(false);
+        }
+      }
+    });
+  }
+
   async function submitQuestion(value: string, preferredRecordId?: string) {
     const question = value.trim().slice(0, 600);
     if (!question || busy) return;
@@ -271,7 +314,7 @@ function initPersona(panel: HTMLElement) {
     addMessage("user", question);
     const reply = addMessage("assistant", "");
     showMessage(reply.item);
-    if (chatMode === "cv") {
+    if (!standalone) {
       const answer = cvAnswer(question, preferredRecordId);
       reply.label.textContent = answer.kind === "page" ? "현재 페이지" : answer.sources.length ? "공개 기록" : "CV 안내";
       reply.body.replaceChildren(...answer.paragraphs.map((text) => {
@@ -280,6 +323,7 @@ function initPersona(panel: HTMLElement) {
         return paragraph;
       }));
       addSources(reply.item, answer.sources);
+      if (answer.sources.length) addPassageSelection(reply.item, question, answer);
       context = {recordIds: answer.recordIds};
       lastPageAnswer = answer.kind === "page" ? answer : null;
       showFollowups(answer);
@@ -306,15 +350,9 @@ function initPersona(panel: HTMLElement) {
       const relevantHistory = quick ? history : chatHistoryFor(question, history);
       let text = quick;
       if (!text) {
-        if (!browserEngine.ready && (engineState === "loading" || engineState === "checking" || engineState === "idle")) {
+        if (!browserEngine.ready) {
           reply.paragraph.textContent = "모델을 준비하는 대로 답할게요.";
-          let stop!: () => void;
-          try {
-            await Promise.race([browserEngine.load(), new Promise<void>((resolve) => {
-              stop = resolve;
-              signal.addEventListener("abort", stop, {once:true});
-            })]);
-          } finally { signal.removeEventListener("abort", stop); }
+          await browserEngine.load();
         }
         if (signal.aborted || currentRevision !== revision) return;
         if (!browserEngine.ready) throw new Error("MODEL_NOT_READY");
@@ -345,7 +383,7 @@ function initPersona(panel: HTMLElement) {
       if (signal.reason === "cancelled" || currentRevision !== revision) return;
       reply.label.textContent = "일반 대화 안내";
       reply.paragraph.textContent = !browserEngine.ready
-        ? "말투 모델이 준비되지 않았어요. WebGPU를 지원하는 Chrome에서 일반 대화를 사용할 수 있어요."
+        ? engineState === "unsupported" ? "이 브라우저에서 WebGPU를 사용할 수 없어요." : "모델을 불러오지 못했어요. 연결을 확인하고 메시지를 다시 보내 주세요."
         : "답변을 마치지 못했어. 한 번 더 말해 줄래?";
     } finally {
       clearTimeout(timeout);
@@ -362,6 +400,7 @@ function initPersona(panel: HTMLElement) {
     if (!busy) return;
     revision++;
     activeRequest?.abort("cancelled");
+    if (!browserEngine.ready) browserEngine.dispose();
     activeRequest = null;
     setBusy(false);
     status.textContent =
@@ -371,7 +410,6 @@ function initPersona(panel: HTMLElement) {
 
   function askPersona(detail: AskDetail) {
     setView("expanded");
-    if (detail.question || detail.topic) selectMode("cv");
     const topic = detail.topic
       ? (personaTopicAliases[detail.topic] ?? detail.topic)
       : undefined;
@@ -390,7 +428,7 @@ function initPersona(panel: HTMLElement) {
 
   function resetConversation() {
     cancelGeneration();
-    if (chatMode === "cv") {
+    if (!standalone) {
       context = { recordIds: [] };
       lastPageAnswer = null;
     } else history = [];
@@ -404,33 +442,6 @@ function initPersona(panel: HTMLElement) {
     resizeInput();
     input.focus({ preventScroll: true });
   }
-
-  function selectMode(next: ChatMode) {
-    if (next !== chatMode) {
-      cancelGeneration(false);
-      thread.draft = input.value;
-      thread.status = status.textContent ?? "";
-      thread.scrollTop = scrollArea.scrollTop;
-      thread.pane.hidden = true;
-      chatMode = next;
-      thread = threads[next];
-      thread.pane.hidden = false;
-      input.value = thread.draft;
-      status.textContent = thread.status;
-    }
-    const general = next === "general";
-    panel.dataset.chatMode = next;
-    for (const radio of switches) radio.checked = radio.value === next;
-    if (enginePanel) enginePanel.hidden = !general;
-    description.textContent = general ? "진용의 말투로 편하게 이야기해요." : "공개 CV와 현재 페이지에서 근거를 찾아 답해요.";
-    input.placeholder = general ? "메시지 보내기" : "이력이나 이 페이지에 대해 물어보세요";
-    resizeInput();
-    scrollArea.scrollTop = thread.scrollTop;
-    try { sessionStorage.setItem("persona-chat-mode", next); } catch { /* Optional tab preference. */ }
-  }
-  for (const radio of switches) radio.addEventListener("change", () => {
-    if (radio.checked) selectMode(radio.value === "general" ? "general" : "cv");
-  });
 
   function setView(view: "expanded" | "collapsed") {
     panel.dataset.view = view;
@@ -447,16 +458,16 @@ function initPersona(panel: HTMLElement) {
     if (personaEntryRequested(location.href)) {
       window.history.replaceState(window.history.state, "", personaClosedUrl(location.href));
     }
-    launcher.focus({ preventScroll: true });
+    launcher?.focus({ preventScroll: true });
   }
 
-  launcher.addEventListener("click", () => {
+  launcher?.addEventListener("click", () => {
     setView("expanded");
     panel.querySelector<HTMLElement>("#persona-title")?.focus({ preventScroll: true });
   });
   panel.querySelector("[data-persona-collapse]")?.addEventListener("click", collapse);
   panel.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !event.defaultPrevented && !event.isComposing) {
+    if (!standalone && event.key === "Escape" && !event.defaultPrevented && !event.isComposing) {
       event.preventDefault();
       collapse();
     }
@@ -531,7 +542,7 @@ function initPersona(panel: HTMLElement) {
     showCurrentPage();
     const nextPage = location.pathname + location.search;
     if (nextPage !== conversationPage) {
-      if (chatMode === "cv") cancelGeneration(false);
+      if (!standalone) cancelGeneration(false);
       if (context.recordIds.some((id) => id.startsWith("page:"))) {
         context = { recordIds: [] };
       }
@@ -549,10 +560,6 @@ function initPersona(panel: HTMLElement) {
   stopButton.addEventListener("click", () => cancelGeneration());
   window.addEventListener("pagehide", () => {
     cancelGeneration(false);
-    preparationAttempted = false;
-  });
-  window.addEventListener("pageshow", (event) => {
-    if (event.persisted) prepareAI();
   });
   panel
     .querySelector("[data-persona-reset]")
@@ -618,20 +625,18 @@ function initPersona(panel: HTMLElement) {
     );
   }
 
-  window.addEventListener("cv:ask", (event) =>
+  if (!standalone) window.addEventListener("cv:ask", (event) =>
     askPersona((event as CustomEvent<AskDetail>).detail ?? {}),
   );
   function focusFromUrl() {
-    if (!personaEntryRequested(location.href)) return;
+    if (standalone || !personaEntryRequested(location.href)) return;
     setView("expanded");
     input.focus({ preventScroll: true });
   }
   window.addEventListener("hashchange", focusFromUrl);
-  let firstMode: ChatMode = "cv";
-  try { if (sessionStorage.getItem("persona-chat-mode") === "general") firstMode = "general"; } catch { /* Start in CV. */ }
-  selectMode(firstMode);
+  input.disabled = false;
+  sendButton.disabled = false;
   showCurrentPage();
   resizeInput();
-  prepareAI();
   focusFromUrl();
 }

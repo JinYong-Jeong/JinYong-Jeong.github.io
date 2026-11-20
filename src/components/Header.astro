@@ -33,7 +33,7 @@ const currentState = (href: string) => {
     <nav class="masthead-nav" aria-label="주요 메뉴">
       {
         site.nav.map((item) => (
-          <a href={item.href} aria-current={currentState(item.href)}>
+          <a href={item.href} aria-current={currentState(item.href)} data-astro-reload={item.href === "/chat/" || pathname === "/chat"}>
             <span>{item.label}</span>
           </a>
         ))

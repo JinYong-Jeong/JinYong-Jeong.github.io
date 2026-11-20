@@ -19,7 +19,8 @@ export const site = {
   nav: [
     { label: "CV", href: "/" },
     { label: "Work", href: "/projects/" },
-    { label: "Writing", href: "/blog/" }
+    { label: "Writing", href: "/blog/" },
+    { label: "Chat", href: "/chat/" }
   ],
   categories: {
     llm: {
